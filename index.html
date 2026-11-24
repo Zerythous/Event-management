@@ -1,0 +1,4125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI-ATHLON: The Tech Triathlon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   AI-ATHLON — ULTRA-ATTRACTIVE LIGHT & WHITE DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-xl: 20px;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Light Theme (Default - Clean White Modern Aesthetic) */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --border: #e2e8f0;
+  --border-focus: #6366f1;
+  --border-subtle: #f1f5f9;
+
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-glow: rgba(79, 70, 229, 0.16);
+  --primary-light: #eef2ff;
+
+  --accent-cyan: #0284c7;
+  --accent-cyan-light: #f0f9ff;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.15);
+
+  --emerald: #059669;
+  --emerald-light: #ecfdf5;
+  --emerald-border: #a7f3d0;
+
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --amber-border: #fde68a;
+
+  --crimson: #e11d48;
+  --crimson-light: #fff1f2;
+  --crimson-border: #fecdd3;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(226, 232, 240, 0.6);
+  --shadow-hover: 0 12px 24px -4px rgba(79, 70, 229, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(99, 102, 241, 0.2);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  --code-bg: #0f172a;
+  --code-text: #f8fafc;
+}
+
+[data-theme="dark"] {
+  --bg-page: #060913;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-card-subtle: #0f172a;
+  --bg-glass: rgba(6, 9, 19, 0.92);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-focus: #00ff88;
+  --border-subtle: rgba(148, 163, 184, 0.08);
+
+  --text-main: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #475569;
+
+  --primary: #00ff88;
+  --primary-hover: #00cc6a;
+  --primary-glow: rgba(0, 255, 136, 0.2);
+  --primary-light: rgba(0, 255, 136, 0.1);
+
+  --accent-cyan: #00e5ff;
+  --accent-cyan-light: rgba(0, 229, 255, 0.1);
+  --accent-cyan-glow: rgba(0, 229, 255, 0.2);
+
+  --emerald: #00ff88;
+  --emerald-light: rgba(0, 255, 136, 0.12);
+  --emerald-border: rgba(0, 255, 136, 0.3);
+
+  --amber: #ffbe0b;
+  --amber-light: rgba(255, 190, 11, 0.12);
+  --amber-border: rgba(255, 190, 11, 0.3);
+
+  --crimson: #ff4d6d;
+  --crimson-light: rgba(255, 77, 109, 0.12);
+  --crimson-border: rgba(255, 77, 109, 0.3);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+  --shadow-hover: 0 10px 30px rgba(0, 255, 136, 0.15), 0 0 0 1px var(--primary);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+  --code-bg: #030712;
+  --code-text: #00ff88;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-ui);
+  color: var(--text-body);
+  background-color: var(--bg-page);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse 800px 500px at 10% 5%, rgba(99, 102, 241, 0.04), transparent),
+    radial-gradient(ellipse 600px 400px at 90% 15%, rgba(6, 182, 212, 0.04), transparent),
+    radial-gradient(ellipse 700px 500px at 50% 90%, rgba(16, 185, 129, 0.03), transparent);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Typography & Headers ── */
+h1, h2, h3, h4, h5, h6 { color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
+a { color: var(--primary); text-decoration: none; }
+
+/* ── Cards & Surfaces ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+}
+.card:hover { border-color: rgba(99, 102, 241, 0.3); }
+
+.card-subtle {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Navigation Header ── */
+.nav-header {
+  position: sticky; top: 0; z-index: 1000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+}
+.nav-inner {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; align-items: center; gap: 0.5rem;
+  height: 64px; padding: 0 1.25rem;
+  overflow-x: auto;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-mono); font-weight: 800; font-size: 1.15rem;
+  color: var(--text-main); text-decoration: none;
+  margin-right: 0.75rem; flex-shrink: 0;
+  cursor: pointer;
+}
+.brand-badge {
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  color: #ffffff; font-size: 0.7rem; font-weight: 700;
+  padding: 0.2rem 0.55rem; border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+.nav-tab {
+  font-size: 0.82rem; font-weight: 600; padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  cursor: pointer; white-space: nowrap; transition: var(--transition);
+  border: 1px solid transparent; background: transparent; user-select: none;
+}
+.nav-tab:hover { color: var(--text-main); background: var(--bg-card-subtle); }
+.nav-tab.active {
+  color: var(--primary); background: var(--primary-light);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+.nav-right {
+  margin-left: auto; display: flex; align-items: center;
+  gap: 0.6rem; flex-shrink: 0;
+}
+.live-indicator {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--emerald); font-weight: 700;
+  background: var(--emerald-light); border: 1px solid var(--emerald-border);
+  padding: 0.25rem 0.65rem; border-radius: 20px;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 8px var(--emerald);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font-ui); font-weight: 600; font-size: 0.85rem;
+  padding: 0.55rem 1.15rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: var(--transition); display: inline-flex;
+  align-items: center; justify-content: center; gap: 0.5rem;
+  text-decoration: none; line-height: 1.2;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  color: #ffffff; border: 1px solid #4338ca;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+  filter: brightness(1.05);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--bg-card); color: var(--text-main);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  background: var(--bg-card-subtle);
+  border-color: #cbd5e1;
+}
+.btn-accent {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff; border: 1px solid #0369a1;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+.btn-accent:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+}
+.btn-emerald {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff; border: none;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+.btn-emerald:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+.btn-amber {
+  background: var(--amber-light); color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+.btn-amber:hover { background: #fef3c7; }
+.btn-danger {
+  background: var(--crimson-light); color: var(--crimson);
+  border: 1px solid var(--crimson-border);
+}
+.btn-danger:hover { background: #ffe4e6; }
+.btn-sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; border-radius: var(--radius-xs); }
+.btn-xs { padding: 0.25rem 0.55rem; font-size: 0.72rem; border-radius: 4px; }
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-main); border-radius: var(--radius-sm);
+  width: 36px; height: 36px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; transition: var(--transition);
+  font-size: 1rem;
+}
+.theme-toggle-btn:hover { background: var(--bg-card-subtle); transform: rotate(15deg); }
+
+/* Team Pill */
+.team-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.3rem 0.75rem; border-radius: 20px;
+  background: var(--primary-light); border: 1px solid rgba(99, 102, 241, 0.3);
+  font-size: 0.78rem; color: var(--primary); font-family: var(--font-mono);
+  font-weight: 700;
+}
+.team-pill .member-names {
+  color: var(--text-body); font-family: var(--font-ui); font-weight: 500;
+  font-size: 0.74rem;
+}
+
+/* ── Hero Showcase Section ── */
+.hero-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  position: relative; overflow: hidden;
+}
+[data-theme="dark"] .hero-banner {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%);
+}
+.hero-banner::after {
+  content: ''; position: absolute; top: -50%; right: -20%;
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-top-tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--primary-light); color: var(--primary);
+  font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.8rem;
+  border-radius: 20px; border: 1px solid rgba(79, 70, 229, 0.2);
+  margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.6px;
+}
+.hero-title {
+  font-size: 2.25rem; font-weight: 900; line-height: 1.15;
+  color: var(--text-main); margin-bottom: 0.6rem;
+  letter-spacing: -0.03em;
+}
+.hero-title span {
+  background: linear-gradient(135deg, #4f46e5 20%, #0284c7 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  font-size: 1rem; color: var(--text-muted); max-width: 680px;
+  margin-bottom: 1.5rem; line-height: 1.6;
+}
+.hero-stats-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem; margin-top: 1.5rem;
+}
+.stat-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 1rem 1.25rem; border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.stat-box .stat-label {
+  font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;
+}
+.stat-box .stat-value {
+  font-family: var(--font-mono); font-size: 1.5rem; font-weight: 800;
+  color: var(--text-main);
+}
+.stat-box .stat-sub { font-size: 0.74rem; color: var(--text-faint); }
+
+/* ── Main Layout ── */
+.main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+.tab-panel { display: none; animation: fadeIn 0.3s ease; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Modals ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 5000;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  width: 100%; max-width: 500px; padding: 2rem;
+  border-radius: var(--radius-xl); background: var(--bg-card);
+  border: 1px solid var(--border); box-shadow: var(--shadow-modal);
+  animation: modalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: none; } }
+.modal-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--text-main); }
+.modal-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.4rem; line-height: 1.5; }
+
+/* ── Live Broadcast Banner for Instant Auto-Start ── */
+.live-broadcast-banner {
+  background: linear-gradient(135deg, #4f46e5, #0284c7);
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  animation: pulse-banner 2s infinite alternate;
+}
+@keyframes pulse-banner {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.008); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45); }
+}
+
+/* ── Forms ── */
+.form-group { margin-bottom: 1.15rem; }
+.input-label {
+  font-size: 0.8rem; font-weight: 600; color: var(--text-main);
+  margin-bottom: 0.4rem; display: block;
+}
+.input-label span { color: var(--text-faint); font-weight: 400; font-size: 0.75rem; }
+.input-field {
+  width: 100%; padding: 0.7rem 0.95rem; border-radius: var(--radius-sm);
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-main); font-family: var(--font-ui); font-size: 0.9rem;
+  transition: var(--transition); outline: none;
+}
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.input-field.mono { font-family: var(--font-mono); font-size: 0.88rem; }
+textarea.input-field { resize: vertical; min-height: 120px; line-height: 1.5; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.65rem; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.badge-qualified {
+  background: var(--emerald-light); color: var(--emerald);
+  border: 1px solid var(--emerald-border);
+}
+.badge-eliminated {
+  background: var(--crimson-light); color: var(--crimson);
+  border: 1px solid var(--crimson-border);
+}
+.badge-pending {
+  background: var(--bg-card-subtle); color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.badge-batch {
+  background: var(--accent-cyan-light); color: var(--accent-cyan);
+  border: 1px solid rgba(2, 132, 199, 0.3);
+}
+.badge-warn {
+  background: var(--amber-light); color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+/* ── Toast Notifications ── */
+.toast-container { position: fixed; top: 80px; right: 1.25rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast {
+  padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.85rem;
+  font-weight: 600; min-width: 290px; max-width: 420px;
+  box-shadow: var(--shadow-modal);
+  animation: toastIn 0.35s ease, toastOut 0.35s ease 3.5s forwards;
+  display: flex; align-items: center; gap: 0.7rem;
+}
+.toast-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.toast-error { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+.toast-info { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; }
+.toast-warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(50px); } }
+
+/* ── Live Standings Pinned Status Banner ── */
+.team-status-banner {
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius);
+  background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  box-shadow: var(--shadow-card);
+  display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+[data-theme="dark"] .team-status-banner {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(0, 255, 136, 0.08) 100%);
+}
+.team-status-banner.show { display: flex; }
+.team-status-banner .rank-badge-wrap { display: flex; align-items: center; gap: 1rem; }
+.team-status-banner .rank-big {
+  font-family: var(--font-mono); font-size: 2.2rem; font-weight: 800;
+  color: var(--primary); line-height: 1;
+}
+.team-status-banner .status-details h4 { font-size: 1.05rem; margin-bottom: 0.2rem; }
+.team-status-banner .status-details p { font-size: 0.85rem; color: var(--text-muted); }
+
+/* ── Leaderboard Table ── */
+.lb-controls {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;
+}
+.lb-round-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.lb-round-tab {
+  padding: 0.5rem 1.1rem; border-radius: var(--radius-sm); font-size: 0.82rem;
+  font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-muted); transition: var(--transition);
+}
+.lb-round-tab:hover { color: var(--text-main); background: var(--bg-card-subtle); }
+.lb-round-tab.active {
+  background: var(--primary); color: #ffffff; border-color: var(--primary);
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+.lb-search { display: flex; gap: 0.5rem; flex: 1; max-width: 380px; min-width: 240px; }
+
+.table-container {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card);
+}
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-muted); padding: 0.85rem 1rem; text-align: left;
+  border-bottom: 1px solid var(--border); background: var(--bg-card-subtle);
+  position: sticky; top: 0; z-index: 10;
+}
+.lb-table td {
+  padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.88rem; vertical-align: middle; transition: background 0.15s;
+}
+.lb-table tbody tr:hover td { background: var(--primary-light); }
+.lb-table .rank-cell { font-family: var(--font-mono); font-weight: 700; width: 60px; text-align: center; }
+.lb-table .team-id-cell { font-family: var(--font-mono); font-weight: 700; color: var(--primary); font-size: 0.85rem; }
+.lb-table .score-cell { font-family: var(--font-mono); font-weight: 800; color: var(--emerald); }
+.lb-table .time-cell { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted); }
+.lb-table tr.my-team td { background: rgba(99, 102, 241, 0.08) !important; }
+.lb-cutoff-divider td {
+  padding: 0 !important; height: 32px; position: relative;
+  background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), rgba(5, 150, 105, 0.15), rgba(5, 150, 105, 0.08)) !important;
+  border-top: 2px solid var(--emerald) !important;
+  border-bottom: 2px solid var(--emerald) !important;
+}
+.lb-cutoff-label {
+  position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%);
+  font-size: 0.72rem; font-family: var(--font-mono); font-weight: 800;
+  color: var(--emerald); background: var(--bg-card); padding: 0.2rem 0.8rem;
+  border-radius: 20px; border: 1px solid var(--emerald-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.tab-switch-flag { color: var(--amber); font-size: 0.74rem; font-weight: 700; margin-left: 0.3rem; }
+
+/* ── Section Headers ── */
+.round-header { text-align: center; padding: 2rem 1rem 1.5rem; }
+.round-header h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+.round-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+/* ── Locked State ── */
+.round-locked { text-align: center; padding: 4.5rem 2rem; background: var(--bg-card); border-radius: var(--radius); border: 1px dashed var(--border); }
+.round-locked .lock-icon { font-size: 3.2rem; margin-bottom: 1rem; opacity: 0.7; }
+.round-locked h3 { font-size: 1.35rem; color: var(--crimson); margin-bottom: 0.5rem; }
+.round-locked p { color: var(--text-muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto; }
+
+/* ── Timers ── */
+.timer-bar {
+  display: flex; align-items: center; justify-content: center; gap: 1.25rem;
+  padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius);
+  background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.timer-bar.danger { background: var(--crimson-light); border-color: var(--crimson-border); }
+.timer-display { font-family: var(--font-mono); font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+.timer-bar.danger .timer-display { color: var(--crimson); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.4; } }
+.progress-bar { flex: 1; height: 8px; background: var(--bg-card-subtle); border-radius: 4px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--emerald), var(--primary)); border-radius: 4px; transition: width 1s linear; }
+
+/* ── Quiz Section (Round 1) ── */
+.quiz-progress {
+  font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+  margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center;
+}
+.question-card {
+  padding: 1.75rem; margin-bottom: 1.25rem; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.question-card .q-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
+.question-card .q-number {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.question-card .q-category {
+  font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);
+  background: var(--accent-cyan-light); padding: 0.2rem 0.6rem; border-radius: 12px;
+}
+.question-card .q-text { font-size: 1.05rem; font-weight: 600; color: var(--text-main); line-height: 1.6; margin-bottom: 1.25rem; }
+.option-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.option-btn {
+  padding: 0.9rem 1.15rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+  background: var(--bg-card); cursor: pointer; text-align: left;
+  font-size: 0.92rem; color: var(--text-body); transition: var(--transition);
+  display: flex; align-items: flex-start; gap: 0.85rem; font-family: var(--font-ui);
+}
+.option-btn:hover { border-color: var(--primary); background: var(--bg-card-subtle); }
+.option-btn.selected {
+  border-color: var(--primary); background: var(--primary-light);
+  color: var(--primary); font-weight: 600;
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.option-btn .opt-letter {
+  font-family: var(--font-mono); font-weight: 800; color: var(--text-faint);
+  min-width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); font-size: 0.75rem;
+}
+.option-btn.selected .opt-letter {
+  background: var(--primary); color: #ffffff; border-color: var(--primary);
+}
+
+/* ── Code Lab (Round 2) ── */
+.problem-card {
+  padding: 1.75rem; margin-bottom: 1.75rem; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.problem-card h3 { font-size: 1.15rem; margin-bottom: 0.4rem; color: var(--text-main); }
+.problem-card .problem-desc { font-size: 0.92rem; color: var(--text-body); margin-bottom: 1rem; line-height: 1.6; }
+.problem-card .expected-output {
+  font-family: var(--font-mono); font-size: 0.85rem; padding: 1rem;
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+  border-radius: var(--radius-sm); margin-bottom: 1.25rem;
+}
+.code-block {
+  font-family: var(--font-mono); font-size: 0.85rem; padding: 1.25rem;
+  background: var(--code-bg); color: var(--code-text);
+  border: 1px solid #1e293b; border-radius: var(--radius-sm);
+  white-space: pre; overflow-x: auto; line-height: 1.55; position: relative;
+}
+.code-block .copy-btn {
+  position: absolute; top: 0.75rem; right: 0.75rem; padding: 0.35rem 0.75rem;
+  font-size: 0.75rem; font-weight: 600; background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-xs);
+  color: #f8fafc; cursor: pointer; font-family: var(--font-mono); transition: var(--transition);
+}
+.code-block .copy-btn:hover { background: #ffffff; color: #0f172a; }
+
+/* ── Mystery Clues (Round 3) ── */
+.clue-card {
+  padding: 1.75rem; margin-bottom: 1.25rem; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); position: relative; overflow: hidden;
+}
+.clue-card.locked { opacity: 0.55; pointer-events: none; }
+.clue-card.locked::after {
+  content: '🔒 LOCKED UNTIL PREVIOUS CLUE IS SOLVED'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(248, 250, 252, 0.85); font-weight: 800; color: var(--text-muted);
+  font-size: 0.85rem; letter-spacing: 0.8px; backdrop-filter: blur(2px);
+}
+[data-theme="dark"] .clue-card.locked::after { background: rgba(6, 9, 19, 0.85); }
+.clue-card .clue-number {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--amber); margin-bottom: 0.5rem; text-transform: uppercase;
+}
+.clue-card .clue-text { font-size: 1rem; line-height: 1.7; margin-bottom: 1.25rem; color: var(--text-main); }
+.clue-card .hint-area {
+  padding: 1rem; background: var(--amber-light); border: 1px solid var(--amber-border);
+  border-radius: var(--radius-sm); margin-top: 1rem; font-size: 0.88rem; color: var(--amber);
+}
+.clue-answer-input { display: flex; gap: 0.6rem; margin-top: 1rem; }
+.clue-answer-input input { flex: 1; }
+
+/* ── Grand Finale (Round 4) ── */
+.podium-container {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+.podium-card {
+  padding: 2rem 1.5rem; border-radius: var(--radius-xl); text-align: center;
+  background: var(--bg-card); border: 2px solid var(--border);
+  box-shadow: var(--shadow-card); transition: var(--transition);
+}
+.podium-card.first {
+  border-color: #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+  transform: translateY(-4px); box-shadow: 0 12px 24px -6px rgba(245, 158, 11, 0.2);
+}
+.podium-card.second { border-color: #94a3b8; }
+.podium-card.third { border-color: #d97706; }
+.podium-badge { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.jury-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.jury-score-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.jury-score-card .team-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; }
+.jury-score-card .score-input-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+.jury-score-card .score-input-row label { font-size: 0.82rem; color: var(--text-muted); min-width: 90px; }
+.jury-score-card .score-input-row input {
+  width: 70px; padding: 0.4rem; text-align: center; font-family: var(--font-mono); font-weight: 700;
+}
+.jury-total { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 800; color: var(--primary); margin-top: 0.75rem; }
+
+/* ── Admin Section ── */
+.admin-section {
+  padding: 1.75rem; margin-bottom: 1.5rem; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.admin-section h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.round-controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.round-control-card { padding: 1.25rem; text-align: center; background: var(--bg-card-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.round-control-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+.round-control-card .round-status {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  margin-bottom: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 12px; display: inline-block;
+}
+.round-control-card .round-status.open { color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; }
+.round-control-card .round-status.closed { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
+.file-dropzone {
+  padding: 2rem; border: 2px dashed #cbd5e1; border-radius: var(--radius);
+  text-align: center; cursor: pointer; transition: var(--transition); background: var(--bg-card-subtle);
+}
+.file-dropzone:hover, .file-dropzone.dragover { border-color: var(--primary); background: var(--primary-light); }
+.admin-team-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.admin-team-table th {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);
+  padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg-card-subtle);
+}
+.admin-team-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.admin-team-table td input {
+  width: 60px; padding: 0.3rem; text-align: center; font-family: var(--font-mono);
+  font-size: 0.82rem; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text-main);
+}
+
+/* ── Responsive ── */
+@media(max-width: 768px) {
+  .nav-inner { height: 56px; gap: 0.35rem; padding: 0 0.75rem; }
+  .nav-brand { font-size: 0.95rem; margin-right: 0.4rem; }
+  .nav-tab { font-size: 0.72rem; padding: 0.4rem 0.65rem; }
+  .hero-banner { padding: 1.5rem 1.25rem; }
+  .hero-title { font-size: 1.65rem; }
+  .hero-stats-row { grid-template-columns: 1fr 1fr; }
+  .main-content { padding: 1rem 0.75rem; }
+  .lb-controls { flex-direction: column; align-items: stretch; }
+  .lb-search { max-width: 100%; }
+  .lb-table th, .lb-table td { padding: 0.6rem 0.5rem; }
+  .question-card, .problem-card, .clue-card { padding: 1.25rem; }
+  .modal-box { padding: 1.5rem; border-radius: var(--radius); }
+}
+
+/* ── Utility ── */
+.hidden { display: none !important; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-1 { gap: 0.5rem; }
+.gap-2 { gap: 1rem; }
+.mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; } .mb-2 { margin-bottom: 1rem; }
+.text-center { text-align: center; }
+.font-mono { font-family: var(--font-mono); }
+.scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+<body>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══ LIVE BROADCAST AUTO-START MODAL ═══ -->
+<div class="modal-overlay" id="roundBroadcastModal">
+  <div class="modal-box text-center" style="max-width:480px">
+    <div style="font-size:3.5rem;margin-bottom:0.5rem" id="broadcastIcon">🚨</div>
+    <h2 class="modal-title" style="color:var(--primary);font-size:1.6rem" id="broadcastTitle">ROUND 1 HAS STARTED!</h2>
+    <p style="color:var(--text-muted);margin:0.8rem 0 1.5rem" id="broadcastDesc">
+      The tournament clock has been activated by the event director. Your synchronized 30-minute test is now running live!
+    </p>
+    <button class="btn btn-primary btn-lg" style="width:100%" id="broadcastBtn" onclick="handleBroadcastConfirm()">
+      🚀 Jump to Quiz Arena Now
+    </button>
+  </div>
+</div>
+
+<!-- ═══ REGISTRATION MODAL (MANUAL SQUAD CREATION) ═══ -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-box" style="max-width:540px">
+    <div class="flex-between mb-1">
+      <div class="modal-title">✨ Register Your Squad</div>
+      <button class="btn btn-xs btn-secondary" onclick="closeModal('registerModal')">✕</button>
+    </div>
+    <div class="modal-subtitle">Create your squad (2 to 4 members) to compete in the tournament. You will receive immediate access.</div>
+
+    <div class="form-group">
+      <div class="flex-between">
+        <label class="input-label">Team Name <span style="color:var(--primary)">*Unique</span></label>
+        <button type="button" class="btn btn-xs btn-secondary" onclick="suggestRandomTeamName()" style="margin-bottom:0.3rem">⚡ Suggest Name</button>
+      </div>
+      <input type="text" id="regTeamName" class="input-field" placeholder="e.g. Cyber Knights, Neural Ninjas..." maxlength="40" autocomplete="off">
+    </div>
+
+    <div style="margin-top:0.75rem;margin-bottom:0.75rem">
+      <label class="input-label" style="font-weight:700;margin-bottom:0.4rem">Team Members (2 to 4 Students)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="input-label" style="font-size:0.78rem">Member 1 (Lead) <span style="color:var(--primary)">*Required</span></label>
+          <input type="text" id="regMember1" class="input-field" placeholder="Full Name (Lead)">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="input-label" style="font-size:0.78rem">Member 2 <span style="color:var(--primary)">*Required</span></label>
+          <input type="text" id="regMember2" class="input-field" placeholder="Full Name">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="input-label" style="font-size:0.78rem">Member 3 <span style="color:var(--text-muted)">(Optional)</span></label>
+          <input type="text" id="regMember3" class="input-field" placeholder="Full Name (Optional)">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="input-label" style="font-size:0.78rem">Member 4 <span style="color:var(--text-muted)">(Optional)</span></label>
+          <input type="text" id="regMember4" class="input-field" placeholder="Full Name (Optional)">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="input-label">Department / Section <span>(Optional)</span></label>
+      <input type="text" id="regDept" class="input-field" placeholder="e.g. CSE-A, AI&DS, ECE">
+    </div>
+
+    <div class="form-group">
+      <label class="input-label">4-Digit Security PIN <span>(used to log in from other phones/PCs)</span></label>
+      <input type="password" id="regPin" class="input-field mono" placeholder="••••" maxlength="4" inputmode="numeric" autocomplete="off">
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem">Partners use this 4-digit PIN with the Team Name to log in from their own devices.</div>
+    </div>
+
+    <div style="display:flex;gap:0.6rem;margin-top:1.5rem">
+      <button class="btn btn-primary" style="flex:1" onclick="doRegisterTeam()">Create & Log In</button>
+      <button class="btn btn-secondary" onclick="closeModal('registerModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <div class="flex-between mb-1">
+      <div class="modal-title">🔐 Team Login</div>
+      <button class="btn btn-xs btn-secondary" onclick="closeModal('loginModal')">✕</button>
+    </div>
+    <div class="modal-subtitle">Enter your Team Name and 4-digit PIN to access your rounds and track live score.</div>
+    <div class="form-group">
+      <label class="input-label">Team Name</label>
+      <input type="text" id="loginTeamName" class="input-field" placeholder="e.g. Cyber Knights" maxlength="40" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="input-label">4-Digit PIN</label>
+      <input type="password" id="loginPin" class="input-field mono" placeholder="••••" maxlength="4" inputmode="numeric" autocomplete="off">
+    </div>
+    <div style="display:flex;gap:0.6rem;margin-top:1.5rem">
+      <button class="btn btn-primary" style="flex:1" onclick="doLogin()">Log In</button>
+      <button class="btn btn-secondary" onclick="closeModal('loginModal')">Cancel</button>
+    </div>
+    <div class="text-center mt-2" style="font-size:0.82rem;color:var(--text-muted)">
+      Don't have a team yet? <a href="javascript:void(0)" onclick="closeModal('loginModal');openModal('registerModal')" style="font-weight:700">Register your squad here</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CODE INSPECT MODAL ═══ -->
+<div class="modal-overlay" id="codeModal">
+  <div class="modal-box" style="max-width:720px">
+    <div class="flex-between mb-2">
+      <div class="modal-title" id="codeModalTitle">Code Preview</div>
+      <button class="btn btn-sm btn-secondary" onclick="closeModal('codeModal')">✕ Close</button>
+    </div>
+    <div id="codeModalBody" class="code-block" style="max-height:60vh;overflow:auto"></div>
+  </div>
+</div>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="nav-header">
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="switchTab('standings')">
+      <span>AI-ATHLON</span>
+      <span class="brand-badge">2026</span>
+    </div>
+
+    <button class="nav-tab active" data-tab="standings" onclick="switchTab('standings')" id="navTabStandings">🏆 Standings</button>
+    <button class="nav-tab" data-tab="round1" onclick="switchTab('round1')" id="navTabR1">① Quiz</button>
+    <button class="nav-tab" data-tab="round2" onclick="switchTab('round2')" id="navTabR2">② Code Lab</button>
+    <button class="nav-tab" data-tab="round3" onclick="switchTab('round3')" id="navTabR3">③ Mystery</button>
+    <button class="nav-tab" data-tab="round4" onclick="switchTab('round4')" id="navTabR4">④ Finale</button>
+    <button class="nav-tab" data-tab="admin" onclick="switchTab('admin')">⚙ Admin</button>
+
+    <div class="nav-right">
+      <div class="live-indicator"><span class="live-dot"></span>LIVE SYNC</div>
+
+      <div id="navTeamPill" class="team-pill hidden"></div>
+
+      <button class="btn btn-accent btn-sm" id="navRegBtn" onclick="openModal('registerModal')">✨ Register Squad</button>
+      <button class="btn btn-secondary btn-sm" id="navLoginBtn" onclick="openModal('loginModal')">Login</button>
+
+      <!-- Theme Switcher -->
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">🌓</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="main-content">
+
+<!-- ═══ LIVE BROADCAST NOTIFIER BANNER (Dynamic) ═══ -->
+<div id="liveRoundBanner" class="live-broadcast-banner hidden">
+  <div style="display:flex;align-items:center;gap:0.75rem">
+    <span style="font-size:1.3rem">🚨</span>
+    <div>
+      <strong id="liveBannerTitle">STAGE 1 IS LIVE!</strong>
+      <span style="margin-left:0.5rem;font-size:0.85rem;opacity:0.9" id="liveBannerDesc">30-minute timer running now</span>
+    </div>
+  </div>
+  <button class="btn btn-sm" style="background:#ffffff;color:var(--primary);font-weight:700" onclick="switchTab('round1')">
+    Go to Quiz ➔
+  </button>
+</div>
+
+<!-- ═══ TAB: LIVE STANDINGS ═══ -->
+<section class="tab-panel active" id="panel-standings">
+
+  <!-- Hero Showcase Banner -->
+  <div class="hero-banner">
+    <div class="hero-top-tag">⚡ First-Year Technical Arena • 200+ Teams</div>
+    <h1 class="hero-title" id="displayHeroTitle">AI-ATHLON: <span>The Tech Triathlon</span></h1>
+    <p class="hero-subtitle" id="displayHeroSubtitle">
+      A fast-paced multi-stage college tournament testing reverse prompting, hallucination spotting, C programming debug rescues, and campus logic mysteries.
+    </p>
+
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openModal('registerModal')">✨ Register Squad</button>
+      <button class="btn btn-secondary" onclick="openModal('loginModal')">🔐 Team Login</button>
+      <button class="btn btn-accent" onclick="switchTab('round1')">🚀 Open Active Round</button>
+    </div>
+
+    <!-- Live Metrics Grid -->
+    <div class="hero-stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Registered Squads</div>
+        <div class="stat-value text-primary" id="statTeamCount">20</div>
+        <div class="stat-sub">2 to 4 Members Each</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Current Stage</div>
+        <div class="stat-value" id="statActiveStage">Round 1 (Standby)</div>
+        <div class="stat-sub" id="statStageDesc">200 → 100 Qualifiers</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Round 1 Cutoff</div>
+        <div class="stat-value" style="color:var(--emerald)">Rank #100</div>
+        <div class="stat-sub">Top 50% Advance</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Leader Squad</div>
+        <div class="stat-value" id="statLeaderId" style="font-size:1.2rem">Neural Knights</div>
+        <div class="stat-sub" id="statLeaderScore">24 / 25 pts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pinned Team Status Banner (Shows when logged in) -->
+  <div class="team-status-banner" id="teamStatusBanner">
+    <div class="rank-badge-wrap">
+      <div class="rank-big" id="bannerRank">#—</div>
+      <div class="status-details">
+        <h4 id="bannerTeamId">Your Squad</h4>
+        <p id="bannerStatus">Live position updated automatically</p>
+      </div>
+    </div>
+    <div id="bannerBadge"></div>
+  </div>
+
+  <!-- Leaderboard Controls -->
+  <div class="lb-controls">
+    <div class="lb-round-tabs" id="lbRoundTabs">
+      <button class="lb-round-tab active" data-round="1" id="lbTabR1" onclick="switchLbRound(1)">Round 1 (Top 100 Advance)</button>
+      <button class="lb-round-tab" data-round="2" id="lbTabR2" onclick="switchLbRound(2)">Round 2 (Top 30 Advance)</button>
+      <button class="lb-round-tab" data-round="3" id="lbTabR3" onclick="switchLbRound(3)">Round 3 (Top 10 Finale)</button>
+      <button class="lb-round-tab" data-round="4" id="lbTabR4" onclick="switchLbRound(4)">Round 4 (Champions)</button>
+    </div>
+
+    <div class="lb-search">
+      <input type="text" class="input-field" id="lbSearch" placeholder="🔍 Search Team Name or student name…" oninput="renderLeaderboard()">
+    </div>
+  </div>
+
+  <!-- Leaderboard Table -->
+  <div class="table-container">
+    <div class="scroll-wrap">
+      <table class="lb-table" id="leaderboardTable">
+        <thead id="lbHead"></thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TAB: ROUND 1 — QUIZ ═══ -->
+<section class="tab-panel" id="panel-round1">
+  <div class="round-header">
+    <h2 id="r1PageTitle">① AI Hallucination & Prompt Quiz</h2>
+    <p id="r1HeaderDesc">200 → 100 Teams • 25 Original Scenarios • 30:00 Synchronized Timer • Zero C Programming</p>
+  </div>
+
+  <div id="r1Locked" class="round-locked">
+    <div class="lock-icon">🔒</div>
+    <h3 id="r1LockedTitle">Round 1 Is Not Open Yet</h3>
+    <p id="r1LockedMsg">The quiz will automatically start on your screen the moment the tournament admin launches Round 1. Please stay on this page or keep logged in.</p>
+    <div id="r1LockedActions" style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-sm btn-primary" onclick="openModal('loginModal')">🔑 Log In as Registered Team</button>
+      <button class="btn btn-sm btn-secondary" onclick="openModal('registerModal')">✨ Register New Team</button>
+    </div>
+  </div>
+
+  <div id="r1Content" class="hidden">
+    <div class="timer-bar" id="r1TimerBar">
+      <span style="font-weight:700;font-size:0.9rem;color:var(--text-muted)">COUNTDOWN</span>
+      <span class="timer-display" id="r1Timer">30:00</span>
+      <div class="progress-bar"><div class="fill" id="r1Progress" style="width:100%"></div></div>
+    </div>
+
+    <div class="quiz-progress">
+      <span id="r1QProgress">Questions</span>
+      <span id="r1Answered" style="color:var(--primary)">0 answered</span>
+    </div>
+
+    <div id="r1Questions"></div>
+
+    <div class="text-center mt-3">
+      <button class="btn btn-primary" style="padding:0.85rem 2.5rem;font-size:1rem" id="r1SubmitBtn" onclick="submitRound1()">
+        ✓ Submit All Answers
+      </button>
+    </div>
+  </div>
+
+  <div id="r1Submitted" class="round-locked hidden" style="border-color:var(--emerald)">
+    <div class="lock-icon" style="color:var(--emerald)">✅</div>
+    <h3 style="color:var(--emerald)">Quiz Submitted Successfully!</h3>
+    <p>Your responses and completion time have been registered on the tie-breaking standings.</p>
+    <div class="mt-2 font-mono" id="r1SubmitSummary" style="font-weight:700;color:var(--primary)"></div>
+  </div>
+</section>
+
+<!-- ═══ TAB: ROUND 2 — CODE LAB ═══ -->
+<section class="tab-panel" id="panel-round2">
+  <div class="round-header">
+    <h2 id="r2PageTitle">② C-Code Rescue Lab Arena</h2>
+    <p id="r2HeaderDesc">100 → 30 Teams • Fix 4 Broken C Programs • Max 2 AI Prompts Per Problem</p>
+  </div>
+
+  <div id="r2Locked" class="round-locked">
+    <div class="lock-icon">🔒</div>
+    <h3>Round 2 Is Locked</h3>
+    <p id="r2LockedMsg">You must qualify from Round 1 (Top 100) to access this lab arena.</p>
+  </div>
+
+  <div id="r2Content" class="hidden">
+    <div class="flex-between mb-2" style="flex-wrap:wrap;gap:0.75rem">
+      <div style="display:flex;align-items:center;gap:0.6rem">
+        <span class="badge badge-batch" id="r2BatchBadge" style="font-size:0.82rem;padding:0.35rem 0.85rem">Batch A</span>
+        <span style="font-size:0.88rem;color:var(--text-muted)">Auto-routed based on your Round 1 qualifying rank</span>
+      </div>
+      <div style="font-size:0.85rem;color:var(--amber);font-weight:600">
+        ⚠️ AI Restriction: Max 2 prompts per bug fix
+      </div>
+    </div>
+
+    <div id="r2Problems"></div>
+
+    <div class="card" style="padding:2rem;margin-top:1.5rem" id="r2SubmissionForm">
+      <h3 style="margin-bottom:0.5rem">📤 Submit Fixed C Code & Proof</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem">
+        Paste your ChatGPT or Gemini share link to verify the prompt count rule, then paste your corrected C code.
+      </p>
+
+      <div class="form-group">
+        <label class="input-label">AI Conversation Share Link (ChatGPT / Gemini)</label>
+        <input type="url" id="r2AiLink" class="input-field" placeholder="https://chatgpt.com/share/...">
+      </div>
+
+      <div id="r2CodeInputs"></div>
+
+      <div class="text-center mt-3">
+        <button class="btn btn-primary" style="padding:0.85rem 2.5rem;font-size:1rem" onclick="submitRound2()">
+          Submit Round 2 Solutions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="r2Submitted" class="round-locked hidden" style="border-color:var(--emerald)">
+    <div class="lock-icon" style="color:var(--emerald)">✅</div>
+    <h3 style="color:var(--emerald)">Code Fixes Submitted!</h3>
+    <p>Your programs are queued for test-case scoring. Check Live Standings for updates.</p>
+  </div>
+</section>
+
+<!-- ═══ TAB: ROUND 3 — MYSTERY ═══ -->
+<section class="tab-panel" id="panel-round3">
+  <div class="round-header">
+    <h2 id="r3PageTitle">③ Campus Mystery — 5-Clue AI Hunt</h2>
+    <p id="r3HeaderDesc">30 → 10 Teams • Sequential Clues • Hints Cost +2 Min Penalty • Speed Is King</p>
+  </div>
+
+  <div id="r3Locked" class="round-locked">
+    <div class="lock-icon">🔒</div>
+    <h3>Round 3 Is Locked</h3>
+    <p id="r3LockedMsg">You must qualify from Round 2 (Top 30) to unlock the campus mystery.</p>
+  </div>
+
+  <div id="r3Content" class="hidden">
+    <div class="timer-bar" id="r3TimerBar">
+      <span style="font-weight:700;font-size:0.9rem;color:var(--text-muted)">HUNT STOPWATCH</span>
+      <span class="timer-display" id="r3Timer">00:00</span>
+      <span style="font-size:0.8rem;color:var(--text-muted)">(counting up — fastest adjusted time wins)</span>
+    </div>
+
+    <div class="quiz-progress">
+      <span id="r3ClueProgress">Clue 1 of 5</span>
+      <span id="r3HintsUsed" style="color:var(--amber)">Hints used: 0 (+0 min penalty)</span>
+    </div>
+
+    <div id="r3Clues"></div>
+  </div>
+
+  <div id="r3Submitted" class="round-locked hidden" style="border-color:var(--emerald)">
+    <div class="lock-icon" style="color:var(--emerald)">🎉</div>
+    <h3 style="color:var(--emerald)">All Clues Cracked!</h3>
+    <p>Congratulations! Your squad solved the final campus mystery vault.</p>
+    <div class="mt-2 font-mono" id="r3SubmitSummary" style="font-weight:700;color:var(--primary)"></div>
+  </div>
+</section>
+
+<!-- ═══ TAB: ROUND 4 — FINALE ═══ -->
+<section class="tab-panel" id="panel-round4">
+  <div class="round-header">
+    <h2 id="r4PageTitle">④ Grand Finale — Champions Stage</h2>
+    <p id="r4HeaderDesc">Top 10 Finalists • Live Jury Evaluation • 5 Pillars × 10 Points = 50 Max</p>
+  </div>
+
+  <div id="r4Locked" class="round-locked">
+    <div class="lock-icon">🔒</div>
+    <h3>Grand Finale Is Inactive</h3>
+    <p>The finale will unlock once Round 3 concludes and the Top 10 finalists take the stage.</p>
+  </div>
+
+  <div id="r4Content" class="hidden">
+    <!-- Champions Stage Podium -->
+    <div class="podium-container" id="r4Podium">
+      <div class="podium-card second">
+        <div class="podium-badge">🥈</div>
+        <h4 id="podium2Team">—</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem" id="podium2Members">—</p>
+        <div style="font-family:var(--font-mono);font-size:1.5rem;font-weight:800;color:var(--text-main);margin-top:0.75rem" id="podium2Score">— / 50</div>
+        <span class="badge badge-pending mt-1">Runner Up</span>
+      </div>
+
+      <div class="podium-card first">
+        <div class="podium-badge">🥇</div>
+        <h3 id="podium1Team" style="font-size:1.35rem;color:#b45309">—</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem" id="podium1Members">—</p>
+        <div style="font-family:var(--font-mono);font-size:2rem;font-weight:900;color:#b45309;margin-top:0.75rem" id="podium1Score">— / 50</div>
+        <span class="badge badge-qualified mt-1" style="background:#fef3c7;color:#b45309;border-color:#fcd34d">Grand Champion</span>
+      </div>
+
+      <div class="podium-card third">
+        <div class="podium-badge">🥉</div>
+        <h4 id="podium3Team">—</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem" id="podium3Members">—</p>
+        <div style="font-family:var(--font-mono);font-size:1.5rem;font-weight:800;color:var(--text-main);margin-top:0.75rem" id="podium3Score">— / 50</div>
+        <span class="badge badge-pending mt-1">2nd Runner Up</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="scroll-wrap">
+        <table class="lb-table" id="r4Table">
+          <thead>
+            <tr>
+              <th>Rank</th><th>Team</th><th>Members</th>
+              <th>Creativity (10)</th><th>Technical (10)</th><th>Presentation (10)</th>
+              <th>Innovation (10)</th><th>Teamwork (10)</th><th>Total (50)</th>
+            </tr>
+          </thead>
+          <tbody id="r4Body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Live Jury Scoring Panel (Admin Only) -->
+    <div id="r4JuryPanel" class="hidden mt-3 card" style="padding:1.75rem">
+      <h3 style="font-size:1.2rem;margin-bottom:1rem">⚖️ Live Jury Scoring Controls (Admin)</h3>
+      <div class="jury-grid" id="r4JuryGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TAB: ADMIN PANEL ═══ -->
+<section class="tab-panel" id="panel-admin">
+  <div class="round-header">
+    <h2>⚙️ Event Operations Dashboard</h2>
+    <p>Live Round Gateways, Custom Question Uploaders, Rosters, and Real-Time Scoring</p>
+  </div>
+
+  <div id="adminLocked" class="round-locked">
+    <div class="lock-icon">🔐</div>
+    <h3>Admin Passphrase Required</h3>
+    <p>Enter the organizer security key to access tournament controls.</p>
+    <div style="max-width:320px;margin:1.5rem auto">
+      <input type="password" id="adminPassInput" class="input-field mono" placeholder="Admin passphrase" autocomplete="off">
+      <button class="btn btn-primary mt-2" style="width:100%" onclick="unlockAdmin()">Unlock Operations Dashboard</button>
+      <p style="font-size:0.75rem;color:var(--text-faint);margin-top:0.75rem">Default organizer key: <code>aiathlon2026</code></p>
+    </div>
+  </div>
+
+  <div id="adminContent" class="hidden">
+    <!-- Tournament Stage Gateways (Instant broadcast start) -->
+    <div class="admin-section">
+      <h3>🎮 Tournament Stage Gateways (Instant Auto-Broadcast)</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">
+        Activating any stage instantly broadcasts an alert, chimes, and auto-switches all participant screens to that stage with synchronized countdowns.
+      </p>
+      <div class="round-controls" id="roundControlsGrid"></div>
+    </div>
+
+    <!-- ═══ EVENT & ROUND NAME CUSTOMIZER (MANUAL RENAMING) ═══ -->
+    <div class="admin-section">
+      <div class="flex-between mb-1">
+        <h3>🏷️ Event & Round Name Customizer</h3>
+        <span class="badge badge-batch">Live Sync to All Participants</span>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.25rem">
+        Customize the title and descriptions of the event and every round. Changes are immediately saved and broadcasted to all participant screens in real time.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.25rem">
+        <!-- Event Global Title -->
+        <div class="card-subtle" style="padding:1rem">
+          <label class="input-label" style="font-weight:700">Tournament Main Title</label>
+          <input type="text" id="adminEventTitle" class="input-field" placeholder="e.g. AI-ATHLON: The Tech Triathlon" style="margin-bottom:0.6rem">
+          <label class="input-label" style="font-size:0.75rem">Tournament Subtitle</label>
+          <textarea id="adminEventSubtitle" class="input-field" rows="2" style="font-size:0.8rem;resize:vertical" placeholder="Tournament tagline..."></textarea>
+        </div>
+
+        <!-- Round 1 Names -->
+        <div class="card-subtle" style="padding:1rem">
+          <div class="flex-between mb-1">
+            <label class="input-label" style="font-weight:700">Round 1 Name</label>
+            <span class="badge badge-emerald">Round 1</span>
+          </div>
+          <input type="text" id="adminR1Name" class="input-field" placeholder="e.g. AI Hallucination & Prompt Quiz" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Short Tab Label</label>
+          <input type="text" id="adminR1Short" class="input-field" placeholder="e.g. Quiz" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Round 1 Description / Rule Subtitle</label>
+          <input type="text" id="adminR1Desc" class="input-field" placeholder="e.g. 200 → 100 Teams • 25 Scenarios • Zero Coding">
+        </div>
+
+        <!-- Round 2 Names -->
+        <div class="card-subtle" style="padding:1rem">
+          <div class="flex-between mb-1">
+            <label class="input-label" style="font-weight:700">Round 2 Name</label>
+            <span class="badge badge-emerald">Round 2</span>
+          </div>
+          <input type="text" id="adminR2Name" class="input-field" placeholder="e.g. C-Code Rescue Lab Arena" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Short Tab Label</label>
+          <input type="text" id="adminR2Short" class="input-field" placeholder="e.g. Code Lab" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Round 2 Description / Rule Subtitle</label>
+          <input type="text" id="adminR2Desc" class="input-field" placeholder="e.g. 100 → 30 Teams • Patch 4 C Programs">
+        </div>
+
+        <!-- Round 3 Names -->
+        <div class="card-subtle" style="padding:1rem">
+          <div class="flex-between mb-1">
+            <label class="input-label" style="font-weight:700">Round 3 Name</label>
+            <span class="badge badge-emerald">Round 3</span>
+          </div>
+          <input type="text" id="adminR3Name" class="input-field" placeholder="e.g. Campus Mystery — 5-Clue AI Hunt" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Short Tab Label</label>
+          <input type="text" id="adminR3Short" class="input-field" placeholder="e.g. Mystery" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Round 3 Description / Rule Subtitle</label>
+          <input type="text" id="adminR3Desc" class="input-field" placeholder="e.g. 30 → 10 Teams • 5 Sequential Clues">
+        </div>
+
+        <!-- Round 4 Names -->
+        <div class="card-subtle" style="padding:1rem">
+          <div class="flex-between mb-1">
+            <label class="input-label" style="font-weight:700">Round 4 Name</label>
+            <span class="badge badge-emerald">Round 4</span>
+          </div>
+          <input type="text" id="adminR4Name" class="input-field" placeholder="e.g. Vibe-Coded Micro-App Finale" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Short Tab Label</label>
+          <input type="text" id="adminR4Short" class="input-field" placeholder="e.g. Finale" style="margin-bottom:0.4rem">
+          <label class="input-label" style="font-size:0.75rem">Round 4 Description / Rule Subtitle</label>
+          <input type="text" id="adminR4Desc" class="input-field" placeholder="e.g. Top 10 → Grand Champions">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveCustomRoundNames()">💾 Save & Broadcast Round Names</button>
+        <button class="btn btn-secondary" onclick="resetDefaultRoundNames()">↺ Reset Default Names</button>
+      </div>
+    </div>
+
+    <!-- ═══ NEW: QUESTION BANK & CONTENT MANAGER (UPLOAD FILES) ═══ -->
+    <div class="admin-section">
+      <h3>📝 Round Question Banks & Quiz Upload Manager</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.25rem">
+        Upload your custom question sets (CSV or JSON) to update Round 1 Quiz questions, Round 2 C Programs, or Round 3 Mystery Clues instantly for all participants.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem">
+        <!-- Round 1 Uploader -->
+        <div class="card-subtle" style="padding:1.25rem">
+          <div class="flex-between mb-1">
+            <h4 style="font-size:0.95rem">Round 1: Quiz Questions</h4>
+            <span class="badge badge-batch" id="quizCountBadge">25 Questions</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+            Upload CSV or JSON with categories, questions, 4 options, and correct answers.
+          </p>
+
+          <input type="file" id="quizUploadInput" accept=".csv,.json" style="display:none" onchange="handleQuizUpload(event)">
+          <div class="file-dropzone" onclick="document.getElementById('quizUploadInput').click()" style="padding:1.25rem;margin-bottom:0.75rem">
+            <p style="font-size:1.5rem;margin-bottom:0.2rem">📥</p>
+            <p style="font-weight:700;font-size:0.85rem">Drop Questions File or Click to Upload</p>
+            <p style="font-size:0.75rem;color:var(--text-muted)">Supports .csv and .json</p>
+          </div>
+
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+            <button class="btn btn-xs btn-secondary" onclick="downloadSampleQuizCSV()">📥 Sample CSV</button>
+            <button class="btn btn-xs btn-secondary" onclick="downloadSampleQuizJSON()">📥 Sample JSON</button>
+            <button class="btn btn-xs btn-danger" onclick="resetDefaultQuiz()">↺ Reset Default</button>
+            <button class="btn btn-xs btn-accent" onclick="toggleQuizPreview()">👁️ Preview (<span id="previewCount">25</span>)</button>
+          </div>
+        </div>
+
+        <!-- Round 2 C Problems Uploader -->
+        <div class="card-subtle" style="padding:1.25rem">
+          <div class="flex-between mb-1">
+            <h4 style="font-size:0.95rem">Round 2: C Programs</h4>
+            <span class="badge badge-batch" id="cProbCountBadge">Batch A & B (8 Probs)</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+            Upload JSON with Batch A and Batch B buggy C programs and test outputs.
+          </p>
+
+          <input type="file" id="cUploadInput" accept=".json" style="display:none" onchange="handleCProblemsUpload(event)">
+          <div class="file-dropzone" onclick="document.getElementById('cUploadInput').click()" style="padding:1.25rem;margin-bottom:0.75rem">
+            <p style="font-size:1.5rem;margin-bottom:0.2rem">💻</p>
+            <p style="font-weight:700;font-size:0.85rem">Upload C Problem Sets</p>
+            <p style="font-size:0.75rem;color:var(--text-muted)">Supports .json</p>
+          </div>
+
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+            <button class="btn btn-xs btn-secondary" onclick="downloadSampleCProblemsJSON()">📥 Sample JSON</button>
+            <button class="btn btn-xs btn-danger" onclick="resetDefaultCProblems()">↺ Reset Default</button>
+            <button class="btn btn-xs btn-accent" onclick="toggleCProblemsPreview()">👁️ Preview</button>
+          </div>
+        </div>
+
+        <!-- Round 3 Mystery Clues Uploader -->
+        <div class="card-subtle" style="padding:1.25rem">
+          <div class="flex-between mb-1">
+            <h4 style="font-size:0.95rem">Round 3: Mystery Clues</h4>
+            <span class="badge badge-batch" id="cluesCountBadge">5 Clues</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+            Upload JSON with sequential clues, hints, and acceptable keywords.
+          </p>
+
+          <input type="file" id="cluesUploadInput" accept=".json" style="display:none" onchange="handleCluesUpload(event)">
+          <div class="file-dropzone" onclick="document.getElementById('cluesUploadInput').click()" style="padding:1.25rem;margin-bottom:0.75rem">
+            <p style="font-size:1.5rem;margin-bottom:0.2rem">🔍</p>
+            <p style="font-weight:700;font-size:0.85rem">Upload Mystery Clues</p>
+            <p style="font-size:0.75rem;color:var(--text-muted)">Supports .json</p>
+          </div>
+
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+            <button class="btn btn-xs btn-secondary" onclick="downloadSampleCluesJSON()">📥 Sample JSON</button>
+            <button class="btn btn-xs btn-danger" onclick="resetDefaultClues()">↺ Reset Default</button>
+            <button class="btn btn-xs btn-accent" onclick="toggleCluesPreview()">👁️ Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Active Quiz Questions Preview List -->
+      <div id="quizPreviewBox" class="hidden card" style="padding:1.25rem;margin-top:1rem">
+        <div class="flex-between mb-2">
+          <h4>👁️ Active Quiz Questions Preview</h4>
+          <button class="btn btn-xs btn-secondary" onclick="toggleQuizPreview()">Close</button>
+        </div>
+        <div class="scroll-wrap" style="max-height:360px">
+          <table class="admin-team-table" id="quizPreviewTable">
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th>Category</th>
+                <th>Question</th>
+                <th>Options</th>
+                <th>Correct</th>
+              </tr>
+            </thead>
+            <tbody id="quizPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Collapsible Active C Problems Preview List -->
+      <div id="cProblemsPreviewBox" class="hidden card" style="padding:1.25rem;margin-top:1rem">
+        <div class="flex-between mb-2">
+          <h4>👁️ Active Round 2 C Problems Preview</h4>
+          <button class="btn btn-xs btn-secondary" onclick="toggleCProblemsPreview()">Close</button>
+        </div>
+        <div id="cProblemsPreviewContent" class="scroll-wrap" style="max-height:360px"></div>
+      </div>
+
+      <!-- Collapsible Active Mystery Clues Preview List -->
+      <div id="cluesPreviewBox" class="hidden card" style="padding:1.25rem;margin-top:1rem">
+        <div class="flex-between mb-2">
+          <h4>👁️ Active Round 3 Mystery Clues Preview</h4>
+          <button class="btn btn-xs btn-secondary" onclick="toggleCluesPreview()">Close</button>
+        </div>
+        <div id="cluesPreviewContent" class="scroll-wrap" style="max-height:360px"></div>
+      </div>
+    </div>
+
+    <!-- CSV Import for Teams -->
+    <div class="admin-section">
+      <h3>📁 Bulk Import Rosters (CSV)</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">
+        CSV format: <code class="font-mono" style="color:var(--primary);font-weight:700">TeamName,PIN,Member1,Member2,Member3,Member4,Department</code>
+      </p>
+      <div class="file-dropzone" id="csvDrop" onclick="document.getElementById('csvFile').click()">
+        <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCSV(event)">
+        <p style="font-size:2rem;margin-bottom:0.4rem">📄</p>
+        <p style="font-weight:700;color:var(--text-main)">Drop CSV file here or click to browse</p>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.3rem">Instantly scales to 200+ teams (up to 4 members each)</p>
+      </div>
+      <div id="csvPreview" class="hidden mt-2"></div>
+    </div>
+
+    <!-- Quick Manual Team Add -->
+    <div class="admin-section">
+      <h3>➕ Manual Squad Provisioning</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem">
+        <div><label class="input-label">Team Name</label><input type="text" id="addTeamName" class="input-field" placeholder="e.g. Cyber Knights"></div>
+        <div><label class="input-label">4-Digit PIN</label><input type="text" id="addTeamPin" class="input-field mono" placeholder="1234" maxlength="4"></div>
+        <div><label class="input-label">Member 1 (Lead)</label><input type="text" id="addMember1" class="input-field" placeholder="Full Name"></div>
+        <div><label class="input-label">Member 2</label><input type="text" id="addMember2" class="input-field" placeholder="Full Name"></div>
+        <div><label class="input-label">Member 3 (Optional)</label><input type="text" id="addMember3" class="input-field" placeholder="Full Name"></div>
+        <div><label class="input-label">Member 4 (Optional)</label><input type="text" id="addMember4" class="input-field" placeholder="Full Name"></div>
+        <div><label class="input-label">Department</label><input type="text" id="addDept" class="input-field" placeholder="e.g. CSE-A"></div>
+      </div>
+      <button class="btn btn-primary btn-sm mt-2" onclick="quickAddTeam()">+ Provision Squad</button>
+    </div>
+
+    <!-- Full Rosters Table -->
+    <div class="admin-section">
+      <div class="flex-between mb-2" style="flex-wrap:wrap;gap:0.75rem">
+        <h3>📋 Registered Squads (<span id="adminTeamCount">0</span>)</h3>
+        <div style="display:flex;gap:0.5rem">
+          <input type="text" class="input-field" id="adminTeamSearch" placeholder="🔍 Filter roster…" style="max-width:240px" oninput="renderAdminTeams()">
+          <button class="btn btn-sm btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
+          <button class="btn btn-sm btn-danger" onclick="resetAllData()">🗑 Wipe & Reset</button>
+        </div>
+      </div>
+      <div class="scroll-wrap">
+        <table class="admin-team-table" id="adminTeamTable">
+          <thead>
+            <tr>
+              <th>Team Name</th><th>PIN</th><th>Members</th><th>R1 Score</th><th>R1 Time</th><th>Tab Sw.</th>
+              <th>R2 Tests</th><th>R2 Prompts</th><th>R3 Clues</th><th>R3 Time</th><th>R4 Jury</th>
+              <th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminTeamBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Manual Points Override -->
+    <div class="admin-section">
+      <h3>✏️ Manual Score Override</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;align-items:end">
+        <div><label class="input-label">Team Name</label><input type="text" id="adjTeamId" class="input-field" placeholder="e.g. Cyber Knights"></div>
+        <div>
+          <label class="input-label">Round</label>
+          <select id="adjRound" class="input-field">
+            <option value="1">Round 1</option><option value="2">Round 2</option>
+            <option value="3">Round 3</option><option value="4">Round 4</option>
+          </select>
+        </div>
+        <div>
+          <label class="input-label">Metric</label>
+          <select id="adjField" class="input-field">
+            <option value="score">Score / Tests</option><option value="time">Time (ms)</option>
+            <option value="prompts">Prompts Used</option><option value="hints">Hints Used</option>
+            <option value="jury">Jury Score</option>
+          </select>
+        </div>
+        <div><label class="input-label">New Value</label><input type="number" id="adjValue" class="input-field mono" placeholder="0"></div>
+        <div><button class="btn btn-amber btn-sm" onclick="applyAdjustment()">Apply Override</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   AI-ATHLON — ENGINE CORE & DATA STORE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Constants ── */
+const ADMIN_PASS = 'aiathlon2026';
+const R1_TIME_LIMIT = 30 * 60 * 1000; // 30 minutes in ms
+let R1_TOTAL_Q = 25;
+const R2_PROBLEMS_PER_BATCH = 4;
+const R2_TEST_CASES_PER_PROBLEM = 5;
+const R3_TOTAL_CLUES = 5;
+const R3_HINT_PENALTY = 2 * 60 * 1000; // 2 minutes penalty per hint
+const CUTOFFS = { r1: 100, r2: 30, r3: 10, r4: 3 };
+
+let currentTab = 'standings';
+let currentLbRound = 1;
+let loggedInTeam = null;
+let adminUnlocked = false;
+let r1TimerInterval = null;
+let r3TimerInterval = null;
+let r1StartTime = null;
+let lastSeenEventState = null;
+
+/* ── Storage Layer (localStorage + BroadcastChannel) ── */
+const STORAGE_KEY = 'aiathlon_data';
+const EVENT_KEY = 'aiathlon_event';
+const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('aiathlon_sync') : null;
+
+function loadTeams() {
+  try {
+    const teams = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    Object.keys(teams).forEach(k => {
+      if (!teams[k].name) teams[k].name = teams[k].id || k;
+      if (!Array.isArray(teams[k].members)) teams[k].members = [teams[k].name];
+    });
+    return teams;
+  } catch {
+    return {};
+  }
+}
+function saveTeams(teams) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(teams));
+  if (channel) channel.postMessage({ type: 'teams_updated' });
+}
+function loadEvent() {
+  try { return JSON.parse(localStorage.getItem(EVENT_KEY)) || defaultEventState(); } catch { return defaultEventState(); }
+}
+function saveEvent(ev) {
+  localStorage.setItem(EVENT_KEY, JSON.stringify(ev));
+  if (channel) channel.postMessage({ type: 'event_updated', event: ev });
+}
+function defaultEventState() {
+  return {
+    r1Open: false,
+    r2Open: false,
+    r3Open: false,
+    r4Open: false,
+    r1StartedAt: null,
+    r2StartedAt: null,
+    r3StartedAt: null,
+    r4StartedAt: null
+  };
+}
+
+/* ── Event & Round Names Store (Admin Customizable) ── */
+const ROUND_NAMES_KEY = 'aiathlon_round_names';
+const DEFAULT_ROUND_NAMES = {
+  eventTitle: "AI-ATHLON: The Tech Triathlon",
+  eventSubtitle: "A fast-paced multi-stage college tournament testing reverse prompting, hallucination spotting, C programming debug rescues, and campus logic mysteries.",
+  r1Name: "AI Hallucination & Prompt Quiz",
+  r1Short: "Quiz",
+  r1Desc: "200 → 100 Teams • 25 Original Scenarios • 30:00 Synchronized Timer • Zero C Programming",
+  r2Name: "C-Code Rescue Lab Arena",
+  r2Short: "Code Lab",
+  r2Desc: "100 → 30 Teams • Fix 4 Broken C Programs • Max 2 AI Prompts Per Problem",
+  r3Name: "Campus Mystery — 5-Clue AI Hunt",
+  r3Short: "Mystery",
+  r3Desc: "30 → 10 Teams • Sequential Clues • Hints Cost +2 Min Penalty • Speed Is King",
+  r4Name: "Grand Finale — Champions Stage",
+  r4Short: "Finale",
+  r4Desc: "Top 10 Finalists • Live Jury Evaluation • 5 Pillars × 10 Points = 50 Max"
+};
+
+function loadRoundNames() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ROUND_NAMES_KEY));
+    if (saved && typeof saved === 'object') {
+      return { ...DEFAULT_ROUND_NAMES, ...saved };
+    }
+  } catch (e) {}
+  return { ...DEFAULT_ROUND_NAMES };
+}
+
+function applyRoundNames(names) {
+  if (!names) names = loadRoundNames();
+
+  document.title = names.eventTitle || "AI-ATHLON: The Tech Triathlon";
+
+  const navBrandSpan = document.querySelector('.nav-brand span:first-child');
+  if (navBrandSpan && names.eventTitle) {
+    const parts = names.eventTitle.split(':');
+    navBrandSpan.textContent = (parts[0] || 'AI-ATHLON').trim();
+  }
+  const tabR1 = document.getElementById('navTabR1');
+  if (tabR1) tabR1.textContent = `① ${names.r1Short || 'Quiz'}`;
+  const tabR2 = document.getElementById('navTabR2');
+  if (tabR2) tabR2.textContent = `② ${names.r2Short || 'Code Lab'}`;
+  const tabR3 = document.getElementById('navTabR3');
+  if (tabR3) tabR3.textContent = `③ ${names.r3Short || 'Mystery'}`;
+  const tabR4 = document.getElementById('navTabR4');
+  if (tabR4) tabR4.textContent = `④ ${names.r4Short || 'Finale'}`;
+
+  const heroTitle = document.getElementById('displayHeroTitle');
+  if (heroTitle) {
+    const parts = (names.eventTitle || "AI-ATHLON: The Tech Triathlon").split(':');
+    if (parts.length > 1) {
+      heroTitle.innerHTML = `${escapeHtml(parts[0])}: <span>${escapeHtml(parts.slice(1).join(':'))}</span>`;
+    } else {
+      heroTitle.innerHTML = `<span>${escapeHtml(names.eventTitle)}</span>`;
+    }
+  }
+  const heroSub = document.getElementById('displayHeroSubtitle');
+  if (heroSub && names.eventSubtitle) heroSub.textContent = names.eventSubtitle;
+
+  const lbTab1 = document.getElementById('lbTabR1');
+  if (lbTab1) lbTab1.textContent = `${names.r1Short || 'Round 1'} (Top 100 Advance)`;
+  const lbTab2 = document.getElementById('lbTabR2');
+  if (lbTab2) lbTab2.textContent = `${names.r2Short || 'Round 2'} (Top 30 Advance)`;
+  const lbTab3 = document.getElementById('lbTabR3');
+  if (lbTab3) lbTab3.textContent = `${names.r3Short || 'Round 3'} (Top 10 Finale)`;
+  const lbTab4 = document.getElementById('lbTabR4');
+  if (lbTab4) lbTab4.textContent = `${names.r4Short || 'Round 4'} (Champions)`;
+
+  const r1Title = document.getElementById('r1PageTitle');
+  if (r1Title) r1Title.textContent = `① ${names.r1Name}`;
+  const r1Desc = document.getElementById('r1HeaderDesc');
+  if (r1Desc) r1Desc.textContent = names.r1Desc;
+
+  const r2Title = document.getElementById('r2PageTitle');
+  if (r2Title) r2Title.textContent = `② ${names.r2Name}`;
+  const r2Desc = document.getElementById('r2HeaderDesc');
+  if (r2Desc) r2Desc.textContent = names.r2Desc;
+
+  const r3Title = document.getElementById('r3PageTitle');
+  if (r3Title) r3Title.textContent = `③ ${names.r3Name}`;
+  const r3Desc = document.getElementById('r3HeaderDesc');
+  if (r3Desc) r3Desc.textContent = names.r3Desc;
+
+  const r4Title = document.getElementById('r4PageTitle');
+  if (r4Title) r4Title.textContent = `④ ${names.r4Name}`;
+  const r4Desc = document.getElementById('r4HeaderDesc');
+  if (r4Desc) r4Desc.textContent = names.r4Desc;
+}
+
+function populateAdminRoundNamesInputs() {
+  const names = loadRoundNames();
+  const elEventTitle = document.getElementById('adminEventTitle');
+  if (elEventTitle && !elEventTitle.matches(':focus')) elEventTitle.value = names.eventTitle || '';
+  const elEventSub = document.getElementById('adminEventSubtitle');
+  if (elEventSub && !elEventSub.matches(':focus')) elEventSub.value = names.eventSubtitle || '';
+
+  const elR1Name = document.getElementById('adminR1Name');
+  if (elR1Name && !elR1Name.matches(':focus')) elR1Name.value = names.r1Name || '';
+  const elR1Short = document.getElementById('adminR1Short');
+  if (elR1Short && !elR1Short.matches(':focus')) elR1Short.value = names.r1Short || '';
+  const elR1Desc = document.getElementById('adminR1Desc');
+  if (elR1Desc && !elR1Desc.matches(':focus')) elR1Desc.value = names.r1Desc || '';
+
+  const elR2Name = document.getElementById('adminR2Name');
+  if (elR2Name && !elR2Name.matches(':focus')) elR2Name.value = names.r2Name || '';
+  const elR2Short = document.getElementById('adminR2Short');
+  if (elR2Short && !elR2Short.matches(':focus')) elR2Short.value = names.r2Short || '';
+  const elR2Desc = document.getElementById('adminR2Desc');
+  if (elR2Desc && !elR2Desc.matches(':focus')) elR2Desc.value = names.r2Desc || '';
+
+  const elR3Name = document.getElementById('adminR3Name');
+  if (elR3Name && !elR3Name.matches(':focus')) elR3Name.value = names.r3Name || '';
+  const elR3Short = document.getElementById('adminR3Short');
+  if (elR3Short && !elR3Short.matches(':focus')) elR3Short.value = names.r3Short || '';
+  const elR3Desc = document.getElementById('adminR3Desc');
+  if (elR3Desc && !elR3Desc.matches(':focus')) elR3Desc.value = names.r3Desc || '';
+
+  const elR4Name = document.getElementById('adminR4Name');
+  if (elR4Name && !elR4Name.matches(':focus')) elR4Name.value = names.r4Name || '';
+  const elR4Short = document.getElementById('adminR4Short');
+  if (elR4Short && !elR4Short.matches(':focus')) elR4Short.value = names.r4Short || '';
+  const elR4Desc = document.getElementById('adminR4Desc');
+  if (elR4Desc && !elR4Desc.matches(':focus')) elR4Desc.value = names.r4Desc || '';
+}
+
+function saveCustomRoundNames() {
+  const current = loadRoundNames();
+  const updated = {
+    eventTitle: (document.getElementById('adminEventTitle')?.value || current.eventTitle).trim(),
+    eventSubtitle: (document.getElementById('adminEventSubtitle')?.value || current.eventSubtitle).trim(),
+    r1Name: (document.getElementById('adminR1Name')?.value || current.r1Name).trim(),
+    r1Short: (document.getElementById('adminR1Short')?.value || current.r1Short).trim(),
+    r1Desc: (document.getElementById('adminR1Desc')?.value || current.r1Desc).trim(),
+    r2Name: (document.getElementById('adminR2Name')?.value || current.r2Name).trim(),
+    r2Short: (document.getElementById('adminR2Short')?.value || current.r2Short).trim(),
+    r2Desc: (document.getElementById('adminR2Desc')?.value || current.r2Desc).trim(),
+    r3Name: (document.getElementById('adminR3Name')?.value || current.r3Name).trim(),
+    r3Short: (document.getElementById('adminR3Short')?.value || current.r3Short).trim(),
+    r3Desc: (document.getElementById('adminR3Desc')?.value || current.r3Desc).trim(),
+    r4Name: (document.getElementById('adminR4Name')?.value || current.r4Name).trim(),
+    r4Short: (document.getElementById('adminR4Short')?.value || current.r4Short).trim(),
+    r4Desc: (document.getElementById('adminR4Desc')?.value || current.r4Desc).trim(),
+  };
+
+  localStorage.setItem(ROUND_NAMES_KEY, JSON.stringify(updated));
+  if (channel) channel.postMessage({ type: 'names_updated', names: updated });
+  applyRoundNames(updated);
+  renderAll();
+  showToast('✅ Tournament & round names successfully saved and broadcasted!', 'success');
+}
+
+function resetDefaultRoundNames() {
+  if (!confirm("Reset all round names and event title back to system defaults?")) return;
+  localStorage.removeItem(ROUND_NAMES_KEY);
+  if (channel) channel.postMessage({ type: 'names_updated', names: DEFAULT_ROUND_NAMES });
+  applyRoundNames(DEFAULT_ROUND_NAMES);
+  populateAdminRoundNamesInputs();
+  renderAll();
+  showToast('Round names reset to defaults', 'info');
+}
+
+/* ── Web Audio API Chime (Zero External Files) ── */
+function playAlertChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.38);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.38);
+  } catch (e) {}
+}
+
+/* ── Synchronized Event Broadcast Listener ── */
+if (channel) {
+  channel.onmessage = (e) => {
+    if (e.data.type === 'teams_updated') {
+      renderAll();
+    } else if (e.data.type === 'event_updated' || e.data.type === 'round_started') {
+      const ev = loadEvent();
+      checkEventStateTransition(ev);
+      renderAll();
+    } else if (e.data.type === 'questions_updated') {
+      showToast(`Quiz question bank updated (${e.data.count} questions)`, 'info');
+      renderAll();
+    } else if (e.data.type === 'c_problems_updated') {
+      showToast('Round 2 C Problem sets updated by admin', 'info');
+      renderAll();
+    } else if (e.data.type === 'clues_updated') {
+      showToast('Round 3 Mystery Clues updated by admin', 'info');
+      renderAll();
+    } else if (e.data.type === 'names_updated') {
+      applyRoundNames(e.data.names);
+      renderAll();
+      showToast('Tournament & round names updated by admin', 'info');
+    }
+  };
+}
+
+// Cross-tab storage change listener
+window.addEventListener('storage', (e) => {
+  if (e.key === EVENT_KEY) {
+    const ev = loadEvent();
+    checkEventStateTransition(ev);
+    renderAll();
+  } else if (e.key === STORAGE_KEY || e.key === 'aiathlon_quiz_bank' || e.key === 'aiathlon_c_problems' || e.key === 'aiathlon_mystery_clues') {
+    renderAll();
+  } else if (e.key === ROUND_NAMES_KEY) {
+    applyRoundNames();
+    renderAll();
+  }
+});
+
+/* ── Live Auto-Start Detector ── */
+function checkEventStateTransition(newEv) {
+  if (!lastSeenEventState) {
+    lastSeenEventState = { ...newEv };
+    return;
+  }
+
+  // Check if Round 1 just transitioned to OPEN
+  if (newEv.r1Open && !lastSeenEventState.r1Open) {
+    handleRoundAutoStart(1, newEv.r1StartedAt || Date.now());
+  } else if (newEv.r2Open && !lastSeenEventState.r2Open) {
+    handleRoundAutoStart(2, newEv.r2StartedAt || Date.now());
+  } else if (newEv.r3Open && !lastSeenEventState.r3Open) {
+    handleRoundAutoStart(3, newEv.r3StartedAt || Date.now());
+  } else if (newEv.r4Open && !lastSeenEventState.r4Open) {
+    handleRoundAutoStart(4, newEv.r4StartedAt || Date.now());
+  }
+
+  lastSeenEventState = { ...newEv };
+}
+
+function handleRoundAutoStart(roundNum, startedAt) {
+  playAlertChime();
+  const names = loadRoundNames();
+
+  if (roundNum === 1) {
+    // Show high-impact broadcast modal & auto-switch
+    document.getElementById('broadcastIcon').textContent = '🚨';
+    document.getElementById('broadcastTitle').textContent = `${(names.r1Name || 'ROUND 1').toUpperCase()} HAS STARTED!`;
+    document.getElementById('broadcastDesc').textContent = 'The 30-minute countdown is now running live for all teams. Opening your quiz arena now...';
+    document.getElementById('broadcastBtn').textContent = `🚀 Start ${names.r1Short || 'Quiz'} Now`;
+    openModal('roundBroadcastModal');
+
+    // Update banner
+    const banner = document.getElementById('liveRoundBanner');
+    banner.classList.remove('hidden');
+    document.getElementById('liveBannerTitle').textContent = `${(names.r1Name || 'ROUND 1').toUpperCase()} IS LIVE!`;
+    document.getElementById('liveBannerDesc').textContent = 'Synchronized 30-minute timer active';
+
+    // Auto-transition after 2.5 seconds or immediately
+    setTimeout(() => {
+      closeModal('roundBroadcastModal');
+      switchTab('round1');
+      r1StartTime = startedAt;
+      startR1Timer();
+    }, 2500);
+
+  } else if (roundNum === 2) {
+    showToast(`🚨 ${(names.r2Name || 'ROUND 2').toUpperCase()} HAS BEEN ACTIVATED!`, 'warn');
+    if (loggedInTeam) {
+      const teams = loadTeams();
+      if (teams[loggedInTeam]?.qualified?.r1) switchTab('round2');
+    }
+  } else if (roundNum === 3) {
+    showToast(`🚨 ${(names.r3Name || 'ROUND 3').toUpperCase()} HAS BEEN ACTIVATED!`, 'warn');
+    if (loggedInTeam) {
+      const teams = loadTeams();
+      if (teams[loggedInTeam]?.qualified?.r2) switchTab('round3');
+    }
+  } else if (roundNum === 4) {
+    showToast(`🚨 ${(names.r4Name || 'ROUND 4').toUpperCase()} HAS BEEN ACTIVATED!`, 'warn');
+    switchTab('round4');
+  }
+}
+
+function handleBroadcastConfirm() {
+  closeModal('roundBroadcastModal');
+  switchTab('round1');
+  const ev = loadEvent();
+  r1StartTime = ev.r1StartedAt || Date.now();
+  startR1Timer();
+}
+
+function updateLiveBanner() {
+  const ev = loadEvent();
+  const banner = document.getElementById('liveRoundBanner');
+  if (!banner) return;
+  const names = loadRoundNames();
+
+  if (ev.r1Open) {
+    banner.classList.remove('hidden');
+    document.getElementById('liveBannerTitle').textContent = `${(names.r1Name || 'ROUND 1').toUpperCase()} IS LIVE!`;
+    document.getElementById('liveBannerDesc').textContent = 'Synchronized 30-minute countdown active for all squads';
+    const btn = banner.querySelector('button');
+    if (btn) {
+      btn.textContent = `Go to ${names.r1Short || 'Quiz'} ➔`;
+      btn.onclick = () => switchTab('round1');
+    }
+  } else if (ev.r2Open) {
+    banner.classList.remove('hidden');
+    document.getElementById('liveBannerTitle').textContent = `${(names.r2Name || 'ROUND 2').toUpperCase()} IS LIVE!`;
+    document.getElementById('liveBannerDesc').textContent = `${names.r2Short || 'Code Lab'} Active (Top 100 Qualifiers)`;
+    const btn = banner.querySelector('button');
+    if (btn) {
+      btn.textContent = `Go to ${names.r2Short || 'Lab'} ➔`;
+      btn.onclick = () => switchTab('round2');
+    }
+  } else if (ev.r3Open) {
+    banner.classList.remove('hidden');
+    document.getElementById('liveBannerTitle').textContent = `${(names.r3Name || 'ROUND 3').toUpperCase()} IS LIVE!`;
+    document.getElementById('liveBannerDesc').textContent = `${names.r3Short || 'Mystery Hunt'} Active (Top 30 Qualifiers)`;
+    const btn = banner.querySelector('button');
+    if (btn) {
+      btn.textContent = `Go to ${names.r3Short || 'Hunt'} ➔`;
+      btn.onclick = () => switchTab('round3');
+    }
+  } else if (ev.r4Open) {
+    banner.classList.remove('hidden');
+    document.getElementById('liveBannerTitle').textContent = `${(names.r4Name || 'ROUND 4').toUpperCase()} IS LIVE!`;
+    document.getElementById('liveBannerDesc').textContent = `${names.r4Short || 'Finale'} Active (Top 10 Finalists)`;
+    const btn = banner.querySelector('button');
+    if (btn) {
+      btn.textContent = `Go to ${names.r4Short || 'Finale'} ➔`;
+      btn.onclick = () => switchTab('round4');
+    }
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+/* ── Theme Switching ── */
+function initTheme() {
+  const savedTheme = localStorage.getItem('aiathlon_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('aiathlon_theme', next);
+  updateThemeIcon(next);
+  showToast(`Switched to ${next} theme`, 'info');
+}
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUESTION BANK ENGINE (CUSTOM UPLOADS + DEFAULT QUESTIONS)
+   ═══════════════════════════════════════════════════════════════ */
+const DEFAULT_QUIZ_BANK = [
+  // ── REVERSE-PROMPTING (8 questions) ──
+  {
+    id:'rp1', category:'Reverse Prompting',
+    text:'An AI generated this output:\n\n"The mitochondria is the powerhouse of the cell. It converts glucose into ATP through cellular respiration, specifically via glycolysis, the Krebs cycle, and oxidative phosphorylation."\n\nWhich prompt most likely produced this exact explanation?',
+    options:[
+      'Write a poem about biology',
+      'Explain the function of mitochondria in simple terms',
+      'List all organelles in a plant cell',
+      'Compare mitochondria and chloroplasts'
+    ],
+    answer: 1
+  },
+  {
+    id:'rp2', category:'Reverse Prompting',
+    text:'An AI produced this code:\n\n"def fibonacci(n):\n    if n <= 1: return n\n    return fibonacci(n-1) + fibonacci(n-2)"\n\nWhich prompt was most likely submitted by the user?',
+    options:[
+      'Write a Python function for binary search',
+      'Explain dynamic programming with an example',
+      'Write a recursive Python function for the Fibonacci sequence',
+      'Optimize the Fibonacci algorithm using memoization'
+    ],
+    answer: 2
+  },
+  {
+    id:'rp3', category:'Reverse Prompting',
+    text:'An AI generated: "Step 1: Preheat oven to 180°C. Step 2: Mix flour, sugar, and eggs. Step 3: Pour batter into a greased pan. Step 4: Bake for 25-30 minutes."\n\nWhat was the most likely prompt?',
+    options:[
+      'Give me a recipe for homemade sourdough bread',
+      'How do I make a simple basic cake at home?',
+      'What temperature should I bake artisan cookies at?',
+      'Explain the chemical reactions during baking'
+    ],
+    answer: 1
+  },
+  {
+    id:'rp4', category:'Reverse Prompting',
+    text:'An AI returned: "SELECT name, age FROM students WHERE grade = \'A\' ORDER BY age DESC LIMIT 10;"\n\nWhich prompt created this query?',
+    options:[
+      'Create a database schema for student records in SQL',
+      'Write an SQL query to retrieve the 10 oldest A-grade students',
+      'Explain what SQL inner and outer joins do',
+      'Insert a new student record into the classroom database'
+    ],
+    answer: 1
+  },
+  {
+    id:'rp5', category:'Reverse Prompting',
+    text:'AI output: "The French Revolution began in 1789 and concluded in 1799. Core causes included fiscal bankruptcy, structural inequality between the Three Estates, and the spread of Enlightenment ideals."\n\nMost probable prompt?',
+    options:[
+      'Contrast the French and American revolutionary wars',
+      'List the monarchs of 18th century Europe',
+      'Give a concise overview of the French Revolution and its root causes',
+      'What were the geopolitical consequences of World War I?'
+    ],
+    answer: 2
+  },
+  {
+    id:'rp6', category:'Reverse Prompting',
+    text:'AI response: "To center a div both horizontally and vertically in modern CSS:\n\n.parent { display: flex; justify-content: center; align-items: center; min-height: 100vh; }"\n\nWhich prompt prompted this snippet?',
+    options:[
+      'How do I center a div both vertically and horizontally in CSS?',
+      'Explain the difference between block and inline elements',
+      'Build a responsive sticky navigation bar in HTML5',
+      'When should I use CSS Grid instead of Flexbox?'
+    ],
+    answer: 0
+  },
+  {
+    id:'rp7', category:'Reverse Prompting',
+    text:'AI response: "Machine Learning is a branch of artificial intelligence where algorithms improve through experience without explicit programming. Its three primary paradigms are supervised, unsupervised, and reinforcement learning."\n\nBest matching prompt?',
+    options:[
+      'Code a deep convolutional network from scratch in Python',
+      'Define machine learning and explain its three core types',
+      'Why is reinforcement learning harder than classical search?',
+      'List ethical concerns surrounding generative AI'
+    ],
+    answer: 1
+  },
+  {
+    id:'rp8', category:'Reverse Prompting',
+    text:'AI response: "1. Tokyo (37.4M)\n2. Delhi (32.9M)\n3. Shanghai (29.2M)\n4. São Paulo (22.4M)\n5. Mexico City (21.9M)"\n\nMost probable prompt?',
+    options:[
+      'Which nations have the highest nominal GDP?',
+      'List the top 5 largest metropolitan cities by population',
+      'Compare cost-of-living indices across Asian capital cities',
+      'Where are the fastest growing AI startup hubs located?'
+    ],
+    answer: 1
+  },
+
+  // ── SPOT THE AI HALLUCINATION (9 questions) ──
+  {
+    id:'ah1', category:'Spot the Hallucination',
+    text:'An LLM writes in a tutoring session: "The square root of 144 is 14." What is the hallucination?',
+    options:[
+      'No error: √144 = 14',
+      'Incorrect calculation: √144 = 12',
+      'Incorrect calculation: √144 = 11',
+      'Valid only for negative square roots'
+    ],
+    answer: 1
+  },
+  {
+    id:'ah2', category:'Spot the Hallucination',
+    text:'AI says: "Python was engineered by James Gosling at Sun Microsystems in 1991 to replace C++." Spot the mistake:',
+    options:[
+      'Python was released in 1995, not 1991',
+      'James Gosling created Java at Sun Microsystems; Python was created by Guido van Rossum at CWI',
+      'Sun Microsystems never existed; it was developed at Bell Labs',
+      'Everything in the statement is technically accurate'
+    ],
+    answer: 1
+  },
+  {
+    id:'ah3', category:'Spot the Hallucination',
+    text:'AI claims: "If an electric train travels at a constant 60 km/h for 2.5 hours, the total distance traveled is 180 km." Is this accurate?',
+    options:[
+      'Yes, 60 × 2.5 = 180 km',
+      'No, 60 × 2.5 = 150 km',
+      'No, electric trains lose 10% speed due to friction',
+      'Yes, assuming no scheduled stops'
+    ],
+    answer: 1
+  },
+  {
+    id:'ah4', category:'Spot the Hallucination',
+    text:'AI states: "In 4-bit binary representation, the decimal integer 13 is written as 1110." Spot the error:',
+    options:[
+      '13 in binary is 1101 (8 + 4 + 0 + 1 = 13)',
+      '13 in binary is 1111',
+      '13 in binary is 1011',
+      '1110 is correct because binary is read right-to-left'
+    ],
+    answer: 0
+  },
+  {
+    id:'ah5', category:'Spot the Hallucination',
+    text:'AI outputs: "HTTP status code 404 indicates an Internal Server Error caused by database crashes." Where is the hallucination?',
+    options:[
+      '404 indicates "Not Found"; 500 indicates "Internal Server Error"',
+      '404 indicates "Forbidden Access"',
+      '404 indicates "Bad Request"',
+      'The explanation is accurate for modern web APIs'
+    ],
+    answer: 0
+  },
+  {
+    id:'ah6', category:'Spot the Hallucination',
+    text:'AI says: "Binary Search on an ordered array of n elements takes O(n) average-case time." What is wrong?',
+    options:[
+      'Binary Search runs in O(log n) time because it halves the search space each step',
+      'Binary Search runs in O(1) time',
+      'Binary Search runs in O(n²) time',
+      'Binary Search only works on linked lists'
+    ],
+    answer: 0
+  },
+  {
+    id:'ah7', category:'Spot the Hallucination',
+    text:'AI writes: "At standard atmospheric pressure, pure water boils at 100°C and has the chemical formula H₃O." Identify the hallucination:',
+    options:[
+      'Boiling point is wrong (it boils at 90°C)',
+      'Chemical formula is wrong: water is H₂O; H₃O⁺ is the hydronium ion',
+      'Both the boiling point and formula are wrong',
+      'H₃O is the standardized IUPAC notation for boiling water'
+    ],
+    answer: 1
+  },
+  {
+    id:'ah8', category:'Spot the Hallucination',
+    text:'AI claims: "A Stack data structure strictly operates on the FIFO (First-In, First-Out) principle." Where is the error?',
+    options:[
+      'Stacks operate on LIFO (Last-In, First-Out); Queues operate on FIFO',
+      'Stacks operate on FILO and FIFO simultaneously',
+      'Stacks have no defined order of element access',
+      'The statement is fully correct'
+    ],
+    answer: 0
+  },
+  {
+    id:'ah9', category:'Spot the Hallucination',
+    text:'AI states: "Saturn is the largest planet in our solar system, with an equatorial diameter of 139,820 km." Spot the hallucination:',
+    options:[
+      'The diameter belongs to Uranus',
+      'Jupiter is the largest planet in our solar system; that diameter belongs to Jupiter',
+      'Saturn is indeed the largest planet',
+      'The diameter should be measured in miles, not km'
+    ],
+    answer: 1
+  },
+
+  // ── PROMPT-FIX SCENARIOS (8 questions) ──
+  {
+    id:'pf1', category:'Prompt Fix',
+    text:'A student asked: "Tell me about Java." The model returned a long travel guide on the island of Java in Indonesia. How should the prompt be refined for computer science?',
+    options:[
+      'Tell me about Java beans',
+      'Explain the Java object-oriented programming language, its core runtime architecture, and key use cases',
+      'Java code only',
+      'Java programming language please be fast'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf2', category:'Prompt Fix',
+    text:'User prompt: "Write code." AI returned a 250-line async web scraper. The student only needed a 1-line Python greeting. Best revised prompt?',
+    options:[
+      'Make code smaller',
+      'Write a simple 1-line Python script that prints "Hello, World!" to the console',
+      'Just give me code',
+      'Write beginner code without any libraries'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf3', category:'Prompt Fix',
+    text:'User asked: "Summarize AI." Model generated an 8-page academic survey with citations. The user wanted a 2-sentence elevator pitch. Best fix?',
+    options:[
+      'Shorter summary',
+      'In exactly two sentences, provide an intuitive summary of artificial intelligence suitable for a first-year college orientation',
+      'Summarize AI but don\'t write too much',
+      'AI in 5 words'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf4', category:'Prompt Fix',
+    text:'User prompt: "What programming languages exist?" Model output an endless alphabetical glossary. User wanted top 3 languages for first-year job prospects. Best revised prompt?',
+    options:[
+      'Less languages',
+      'List the top 3 most in-demand programming languages for tech internships in 2026 with a brief 1-sentence rationale for each',
+      'Best languages 2026',
+      'Give me 3 languages only'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf5', category:'Prompt Fix',
+    text:'User asked: "Explain recursion." AI replied using formal lambda calculus and mathematical induction proofs. Best prompt for an absolute beginner?',
+    options:[
+      'Make recursion simpler',
+      'Explain recursion using a simple real-world analogy (like Russian nesting dolls or mirrors) that a student with zero coding background can understand',
+      'Recursion for dummies in C',
+      'What is base case?'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf6', category:'Prompt Fix',
+    text:'User prompt: "Create a website." Model halted and asked 10 scoping questions about databases and auth. User wants a static personal portfolio in HTML/CSS. Best fix?',
+    options:[
+      'Just build any website',
+      'Generate a clean, single-page personal portfolio website in HTML and CSS with sections for About Me, Skills, Projects, and Contact',
+      'Portfolio website code right now',
+      'Build website with Tailwind'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf7', category:'Prompt Fix',
+    text:'User asked: "Is Python or C++ better?" AI gave an evasive "it depends" answer. The student wants a structured side-by-side trade-off table. Best prompt?',
+    options:[
+      'Pick one and don\'t say it depends',
+      'Create a Markdown comparison table comparing Python vs C++ across: execution speed, learning curve, memory management, and primary industry applications',
+      'Python vs C++ who wins?',
+      'Which language should I choose for first year?'
+    ],
+    answer: 1
+  },
+  {
+    id:'pf8', category:'Prompt Fix',
+    text:'User asked: "Debug: x = 10 / 0". Model gave corrected syntax, but the student wanted to understand the mathematical theory behind division by zero. Best prompt?',
+    options:[
+      'Why does zero division fail?',
+      'Explain mathematically why division by zero is undefined using limits and inverse multiplication concepts understandable to a freshman',
+      'Explain zero error without showing code',
+      'What happens if you divide by 0 in real life?'
+    ],
+    answer: 1
+  }
+];
+
+function getQuizBank() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('aiathlon_quiz_bank'));
+    if (Array.isArray(custom) && custom.length > 0) return custom;
+  } catch (e) {}
+  return DEFAULT_QUIZ_BANK;
+}
+
+const DEFAULT_C_PROBLEMS = {
+  A: [
+    {
+      id: 'A1', title: 'Problem A1: Grade Calculator (if-else logic)',
+      desc: 'This program must print the letter grade for a given percentage (90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, below 60 = F). It has inverted conditionals causing wrong grades. Fix the bugs.',
+      expected: 'Input: 85 -> Output: Grade: B\nInput: 72 -> Output: Grade: C\nInput: 45 -> Output: Grade: F',
+      code: `#include <stdio.h>\nint main() {\n    int marks;\n    printf("Enter marks: ");\n    scanf("%d", &marks);\n\n    if (marks >= 90)\n        printf("Grade: A\\n");\n    else if (marks >= 80)\n        printf("Grade: B\\n");\n    else if (marks >= 70)\n        printf("Grade: D\\n");   // BUG 1: Inverted grade letter\n    else if (marks >= 60)\n        printf("Grade: C\\n");   // BUG 2: Inverted grade letter\n    else\n        printf("Grade: F\\n");\n\n    return 0;\n}`
+    },
+    {
+      id: 'A2', title: 'Problem A2: Sum of First N Numbers (Loops)',
+      desc: 'This program must compute 1 + 2 + ... + N. It initializes the accumulator incorrectly and has an off-by-one loop boundary bug. Fix both bugs.',
+      expected: 'Input: 5 -> Output: Sum = 15\nInput: 10 -> Output: Sum = 55',
+      code: `#include <stdio.h>\nint main() {\n    int n, sum = 1;              // BUG 1: Initialized to 1 instead of 0\n    printf("Enter N: ");\n    scanf("%d", &n);\n\n    for (int i = 1; i < n; i++) { // BUG 2: Loop stops at n-1 instead of <= n\n        sum = sum + i;\n    }\n\n    printf("Sum = %d\\n", sum);\n    return 0;\n}`
+    },
+    {
+      id: 'A3', title: 'Problem A3: Array Maximum Value (1D Arrays)',
+      desc: 'This program should find and print the maximum value in an array of 5 integers. It fails when all numbers are negative due to wrong baseline initialization. Fix it.',
+      expected: 'Input: 3 7 2 9 4 -> Output: Maximum = 9\nInput: -10 -5 -20 -8 -15 -> Output: Maximum = -5',
+      code: `#include <stdio.h>\nint main() {\n    int arr[5], max;\n    printf("Enter 5 numbers: ");\n    for (int i = 0; i < 5; i++) {\n        scanf("%d", &arr[i]);\n    }\n\n    max = 0;                      // BUG 1: Fails when all elements are negative; should be arr[0]\n    for (int i = 0; i < 5; i++) {\n        if (arr[i] > max) {\n            max = arr[i];\n        }\n    }\n\n    printf("Maximum = %d\\n", max);\n    return 0;\n}`
+    },
+    {
+      id: 'A4', title: 'Problem A4: Vowel Counter (Strings)',
+      desc: 'This program counts all vowels in a string. It misses the letter \'u\' and ignores uppercase vowels entirely. Fix the logic.',
+      expected: 'Input: Hello World -> Output: Vowels = 3\nInput: AI ATHLON -> Output: Vowels = 4',
+      code: `#include <stdio.h>\n#include <string.h>\nint main() {\n    char str[100];\n    int count = 0;\n    printf("Enter string: ");\n    fgets(str, sizeof(str), stdin);\n\n    for (int i = 0; i < strlen(str); i++) {\n        // BUG: Missing 'u'/'U' and uppercase vowels\n        if (str[i] == 'a' || str[i] == 'e' || str[i] == 'i' || str[i] == 'o') {\n            count++;\n        }\n    }\n\n    printf("Vowels = %d\\n", count);\n    return 0;\n}`
+    }
+  ],
+  B: [
+    {
+      id: 'B1', title: 'Problem B1: Leap Year Determination (if-else)',
+      desc: 'This program checks if a given year is a leap year. It misses the Gregorian century rule (century years divisible by 100 are not leap years unless divisible by 400). Fix it.',
+      expected: 'Input: 2000 -> Output: 2000 is a Leap Year\nInput: 1900 -> Output: 1900 is NOT a Leap Year\nInput: 2024 -> Output: 2024 is a Leap Year',
+      code: `#include <stdio.h>\nint main() {\n    int year;\n    printf("Enter year: ");\n    scanf("%d", &year);\n\n    // BUG: Missing century validation logic\n    if (year % 4 == 0) {\n        printf("%d is a Leap Year\\n", year);\n    } else {\n        printf("%d is NOT a Leap Year\\n", year);\n    }\n\n    return 0;\n}`
+    },
+    {
+      id: 'B2', title: 'Problem B2: Multiplication Table (Loops)',
+      desc: 'This program must print the multiplication table of a number from 1 to 10. It starts from 0 and performs addition instead of multiplication. Fix both.',
+      expected: 'Input: 7 -> Output:\n7 x 1 = 7\n7 x 2 = 14\n...\n7 x 10 = 70',
+      code: `#include <stdio.h>\nint main() {\n    int num;\n    printf("Enter number: ");\n    scanf("%d", &num);\n\n    for (int i = 0; i <= 10; i++) {              // BUG 1: Starts at 0 instead of 1\n        printf("%d x %d = %d\\n", num, i, num + i); // BUG 2: num + i instead of num * i\n    }\n\n    return 0;\n}`
+    },
+    {
+      id: 'B3', title: 'Problem B3: Array In-Place Reversal (1D Arrays)',
+      desc: 'This program reverses an array of 5 integers in place. It loops across the entire length, reversing it twice back to original. Fix it.',
+      expected: 'Input: 1 2 3 4 5 -> Output: Reversed: 5 4 3 2 1',
+      code: `#include <stdio.h>\nint main() {\n    int arr[5], temp;\n    printf("Enter 5 numbers: ");\n    for (int i = 0; i < 5; i++) {\n        scanf("%d", &arr[i]);\n    }\n\n    for (int i = 0; i < 5; i++) {       // BUG: Should iterate only up to 5/2 (i < 2)\n        temp = arr[i];\n        arr[i] = arr[4 - i];\n        arr[4 - i] = temp;\n    }\n\n    printf("Reversed: ");\n    for (int i = 0; i < 5; i++) {\n        printf("%d ", arr[i]);\n    }\n    printf("\\n");\n    return 0;\n}`
+    },
+    {
+      id: 'B4', title: 'Problem B4: String Palindrome Checker (Strings)',
+      desc: 'This program checks if a string is a palindrome. It has an off-by-one indexing error comparing with the null terminator. Fix it.',
+      expected: 'Input: radar -> Output: radar is a Palindrome\nInput: hello -> Output: hello is NOT a Palindrome',
+      code: `#include <stdio.h>\n#include <string.h>\nint main() {\n    char str[100];\n    int len, isPalin = 1;\n    printf("Enter string: ");\n    scanf("%s", str);\n\n    len = strlen(str);\n    for (int i = 0; i < len / 2; i++) {\n        if (str[i] != str[len - i]) {    // BUG: Compares with null terminator; should be len - 1 - i\n            isPalin = 0;\n            break;\n        }\n    }\n\n    if (isPalin)\n        printf("%s is a Palindrome\\n", str);\n    else\n        printf("%s is NOT a Palindrome\\n", str);\n\n    return 0;\n}`
+    }
+  ]
+};
+
+function getCProblems() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('aiathlon_c_problems'));
+    if (custom && custom.A && custom.B) return custom;
+  } catch (e) {}
+  return DEFAULT_C_PROBLEMS;
+}
+
+const DEFAULT_MYSTERY_CLUES = [
+  {
+    id: 1,
+    title: 'Clue #1 — The Binary Inscription',
+    text: 'A cryptic message was discovered on the ground floor whiteboard:\n\n01001000 01000101 01001100 01001100 01001111\n\nDecode this 8-bit binary ASCII sequence to unlock your squad\'s first discovery keyword.',
+    hint: 'Convert each 8-bit byte into decimal: 01001000 = 72 = \'H\'. Look up ASCII characters.',
+    answer: 'HELLO',
+    acceptAlt: ['hello']
+  },
+  {
+    id: 2,
+    title: 'Clue #2 — Caesar\'s Lab Cipher',
+    text: 'A slip of parchment was discovered taped under keyboard #14:\n\n"FRPSXWHU VFLHQFH"\n\nThis message was encoded using a classical Caesar cipher with a shift of +3. Decrypt it to advance.',
+    hint: 'Shift each letter 3 places backwards in the alphabet: F -> C, R -> O, P -> M...',
+    answer: 'COMPUTER SCIENCE',
+    acceptAlt: ['computer science', 'COMPUTERSCIENCE', 'computerscience']
+  },
+  {
+    id: 3,
+    title: 'Clue #3 — The Silicon Gate Puzzle',
+    text: 'The server rack LCD screen displays this boolean logic gate evaluation:\n\nGiven inputs: A = 1, B = 0, C = 1\n\nEvaluate: (A AND B) OR (NOT B AND C)\n\nEnter the final boolean result as a single digit (0 or 1).',
+    hint: 'A AND B = 1 AND 0 = 0. NOT B = 1. (1 AND 1) = 1. Therefore, 0 OR 1 = ?',
+    answer: '1',
+    acceptAlt: ['1', 'one', 'ONE']
+  },
+  {
+    id: 4,
+    title: 'Clue #4 — The Sequence Anomaly',
+    text: 'The projector in the main auditorium displays this numeric pattern:\n\n2, 6, 14, 30, ?\n\nDiscover the governing rule and calculate the missing 5th integer.',
+    hint: 'Examine recursive growth: Next = (Current × 2) + 2. Alternatively: 2^(n+1) - 2.',
+    answer: '62',
+    acceptAlt: ['62', 'sixty two', 'sixty-two']
+  },
+  {
+    id: 5,
+    title: 'Clue #5 — The Final Vault Keycode',
+    text: 'Synthesize all four discoveries to compute the final unlock code:\n\nFormula: ( [Letters in Clue #1 Answer] × [Clue #3 Binary Result] ) + [Clue #4 Missing Number]\n\nCalculate the final number to crack the mystery!',
+    hint: 'Letters in HELLO = 5. Clue 3 = 1. Clue 4 = 62. So: (5 × 1) + 62 = ?',
+    answer: '67',
+    acceptAlt: ['67', 'sixty seven', 'sixty-seven']
+  }
+];
+
+function getMysteryClues() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('aiathlon_mystery_clues'));
+    if (Array.isArray(custom) && custom.length > 0) return custom;
+  } catch (e) {}
+  return DEFAULT_MYSTERY_CLUES;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DEMO SEEDING (20 Realistic Squads with 2-4 Members)
+   ═══════════════════════════════════════════════════════════════ */
+function seedDemoTeams() {
+  const existing = loadTeams();
+  if (Object.keys(existing).length > 0) return;
+
+  const demoRosters = [
+    { name: 'Neural Knights', dept: 'CSE-A', members: ['Aarav Patel', 'Priya Sharma', 'Kunal Bajaj'] },
+    { name: 'Binary Beasts', dept: 'AI&DS', members: ['Rohan Varma', 'Sneha Iyer'] },
+    { name: 'Quantum Coders', dept: 'CSE-B', members: ['Vikram Reddy', 'Neha Gupta', 'Arjun Nair', 'Diya Sen'] },
+    { name: 'Algo Wizards', dept: 'IT', members: ['Kiran Rao', 'Meera Das', 'Sahil Verma'] },
+    { name: 'Cyber Titans', dept: 'CyberSec', members: ['Ananya Joshi', 'Dev Mehta'] },
+    { name: 'Syntax Strikers', dept: 'CSE-C', members: ['Riya Shah', 'Harsh Jain', 'Pooja Bose'] },
+    { name: 'Byte Brawlers', dept: 'ECE', members: ['Nikhil Kulkarni', 'Kavya Menon'] },
+    { name: 'Logic Lords', dept: 'AIML', members: ['Rahul Kumar', 'Ishaan Dixit', 'Nidhi Agarwal', 'Tanvi Pillai'] },
+    { name: 'Data Dynamos', dept: 'DataSci', members: ['Amit Roy', 'Sakshi Bhat', 'Varun Deshmukh'] },
+    { name: 'Pixel Pioneers', dept: 'CSE-A', members: ['Shreya Ghosh', 'Aditya Choudhury'] },
+    { name: 'Matrix Mavericks', dept: 'IT', members: ['Trisha Ray', 'Gaurav Sethi', 'Simran Kaur'] },
+    { name: 'Code Alchemists', dept: 'AI&DS', members: ['Manish Pandey', 'Divya Nambiar', 'Suresh Pillai', 'Bhavna Mittal'] },
+    { name: 'Silicon Sages', dept: 'ECE', members: ['Parul Trivedi', 'Ajay Singhal'] },
+    { name: 'Tensor Titans', dept: 'CSE-B', members: ['Swati Mathur', 'Deepak Chawla', 'Lata Subramanian'] },
+    { name: 'Prompt Prodigies', dept: 'AIML', members: ['Karan Singhania', 'Aditi Verma'] },
+    { name: 'Bug Busters', dept: 'IT', members: ['Yash Malhotra', 'Zoya Khan', 'Kabir Bedi'] },
+    { name: 'Stack Smashers', dept: 'CSE-C', members: ['Sameer Joshi', 'Tanya Kapoor'] },
+    { name: 'Dev Dragons', dept: 'CyberSec', members: ['Rishi Kapoor', 'Tara Alva', 'Aryan Goel', 'Mira Nair'] },
+    { name: 'Turbo Testers', dept: 'ECE', members: ['Farhan Akhtar', 'Shruti Hassan'] },
+    { name: 'Hex Heroes', dept: 'CSE-A', members: ['Chetan Bhagat', 'Twinkle Khanna', 'Sunil Grover'] }
+  ];
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+
+  const teams = {};
+  demoRosters.forEach((r, i) => {
+    const score = Math.floor(Math.random() * 8) + Math.max(12, R1_TOTAL_Q - 8);
+    const timeMs = Math.floor(Math.random() * 12 * 60 * 1000) + 6 * 60 * 1000;
+    const tabSw = Math.random() > 0.8 ? Math.floor(Math.random() * 2) + 1 : 0;
+
+    teams[r.name] = {
+      id: r.name,
+      name: r.name,
+      pin: '1234',
+      members: r.members,
+      dept: r.dept,
+      batch: null,
+      r1: { score, totalQ: R1_TOTAL_Q, timeMs, tabSwitches: tabSw, submitted: true, answers: {}, startTime: null },
+      r2: { testCasesPassed: 0, promptsUsed: 0, submissions: [], submitted: false, aiLink: '' },
+      r3: { cluesUnlocked: 0, hintsUsed: 0, timeMs: 0, startTime: null, submitted: false, answers: [] },
+      r4: { creativity: 0, technical: 0, presentation: 0, innovation: 0, teamwork: 0, total: 0 },
+      qualified: { r1: null, r2: null, r3: null }
+    };
+  });
+
+  // Sort and assign qualifications
+  const sorted = Object.values(teams).sort((a, b) => b.r1.score - a.r1.score || a.r1.timeMs - b.r1.timeMs);
+  sorted.forEach((t, i) => {
+    t.qualified.r1 = i < CUTOFFS.r1;
+    if (t.qualified.r1) {
+      t.batch = (i + 1) % 2 === 1 ? 'A' : 'B';
+    }
+    if (i < 15) {
+      const tc = Math.floor(Math.random() * 11) + 9;
+      const pr = Math.floor(Math.random() * 5) + 2;
+      t.r2 = { testCasesPassed: tc, promptsUsed: pr, submissions: ['// verified code'], submitted: true, aiLink: 'https://chatgpt.com/share/demo' };
+      t.qualified.r2 = i < CUTOFFS.r2;
+    }
+    if (i < 8) {
+      const clues = Math.floor(Math.random() * 3) + 3;
+      const hints = Math.floor(Math.random() * 2);
+      const tMs = Math.floor(Math.random() * 8 * 60 * 1000) + 3 * 60 * 1000;
+      t.r3 = { cluesUnlocked: clues, hintsUsed: hints, timeMs: tMs, startTime: null, submitted: clues === 5, answers: [] };
+      t.qualified.r3 = i < CUTOFFS.r3;
+    }
+    if (i < 5) {
+      const c = Math.floor(Math.random() * 4) + 6;
+      const te = Math.floor(Math.random() * 4) + 6;
+      const p = Math.floor(Math.random() * 4) + 6;
+      const inn = Math.floor(Math.random() * 4) + 6;
+      const tw = Math.floor(Math.random() * 4) + 6;
+      t.r4 = { creativity: c, technical: te, presentation: p, innovation: inn, teamwork: tw, total: c + te + p + inn + tw };
+    }
+  });
+
+  saveTeams(teams);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DETERMINISTIC SHUFFLE (By Team ID Seed)
+   ═══════════════════════════════════════════════════════════════ */
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0x7fffffff;
+    const j = s % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL & TOAST SYSTEMS
+   ═══════════════════════════════════════════════════════════════ */
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warn: '⚠️' };
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3800);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB SWITCHING
+   ═══════════════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+  renderCurrentPanel();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderCurrentPanel() {
+  if (currentTab === 'standings') renderLeaderboard();
+  else if (currentTab === 'round1') renderRound1();
+  else if (currentTab === 'round2') renderRound2();
+  else if (currentTab === 'round3') renderRound3();
+  else if (currentTab === 'round4') renderRound4();
+  else if (currentTab === 'admin') renderAdmin();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MANUAL SQUAD REGISTRATION (TEAM NAME + UP TO 4 MEMBERS)
+   ═══════════════════════════════════════════════════════════════ */
+function suggestRandomTeamName() {
+  const adjectives = ['Neural', 'Binary', 'Quantum', 'Cyber', 'Algo', 'Syntax', 'Byte', 'Logic', 'Matrix', 'Silicon', 'Tensor', 'Code', 'Vector', 'Pixel', 'Crypto'];
+  const nouns = ['Knights', 'Beasts', 'Wizards', 'Titans', 'Strikers', 'Brawlers', 'Lords', 'Dynamos', 'Pioneers', 'Mavericks', 'Alchemists', 'Sages', 'Prodigies', 'Busters', 'Dragons'];
+  const randAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 90) + 10;
+  const nameInput = document.getElementById('regTeamName');
+  if (nameInput) nameInput.value = `${randAdj} ${randNoun} ${num}`;
+}
+
+function doRegisterTeam() {
+  const teamNameInput = document.getElementById('regTeamName');
+  const teamName = (teamNameInput?.value || '').trim();
+  const m1 = (document.getElementById('regMember1')?.value || '').trim();
+  const m2 = (document.getElementById('regMember2')?.value || '').trim();
+  const m3 = (document.getElementById('regMember3')?.value || '').trim();
+  const m4 = (document.getElementById('regMember4')?.value || '').trim();
+  const dept = (document.getElementById('regDept')?.value || '').trim() || 'General';
+  const pin = (document.getElementById('regPin')?.value || '').trim();
+
+  if (!teamName || teamName.length < 2) {
+    showToast('Please enter a valid Team Name (at least 2 characters)!', 'error');
+    return;
+  }
+  if (!m1) {
+    showToast('Please enter Member 1 Name (Team Lead)!', 'error');
+    return;
+  }
+  if (!m2) {
+    showToast('Please enter Member 2 Name (at least 2 members required)!', 'error');
+    return;
+  }
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    showToast('Please enter a valid 4-digit numeric Security PIN!', 'error');
+    return;
+  }
+
+  const teams = loadTeams();
+  // Case-insensitive duplicate check
+  const exists = Object.keys(teams).some(k => (teams[k].name || k).toLowerCase() === teamName.toLowerCase());
+  if (exists) {
+    showToast(`Team Name "${teamName}" is already registered! Please choose a unique name.`, 'error');
+    return;
+  }
+
+  const members = [m1, m2];
+  if (m3) members.push(m3);
+  if (m4) members.push(m4);
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+
+  teams[teamName] = {
+    id: teamName,
+    name: teamName,
+    pin: pin,
+    members: members,
+    dept: dept,
+    batch: null,
+    r1: { score: 0, totalQ: R1_TOTAL_Q, timeMs: 0, tabSwitches: 0, submitted: false, answers: {}, startTime: null },
+    r2: { testCasesPassed: 0, promptsUsed: 0, submissions: [], submitted: false, aiLink: '' },
+    r3: { cluesUnlocked: 0, hintsUsed: 0, timeMs: 0, startTime: null, submitted: false, answers: [] },
+    r4: { creativity: 0, technical: 0, presentation: 0, innovation: 0, teamwork: 0, total: 0 },
+    qualified: { r1: null, r2: null, r3: null }
+  };
+
+  saveTeams(teams);
+  loggedInTeam = teamName;
+  localStorage.setItem('aiathlon_login', teamName);
+
+  closeModal('registerModal');
+  updateLoginUI();
+  recalcQualifications();
+  renderAll();
+
+  showToast(`🎉 Squad "${teamName}" (${members.length} members) registered successfully!`, 'success');
+
+  if (teamNameInput) teamNameInput.value = '';
+  document.getElementById('regMember1').value = '';
+  document.getElementById('regMember2').value = '';
+  document.getElementById('regMember3').value = '';
+  document.getElementById('regMember4').value = '';
+  document.getElementById('regDept').value = '';
+  document.getElementById('regPin').value = '';
+
+  const ev = loadEvent();
+  if (ev.r1Open) {
+    handleRoundAutoStart(1, ev.r1StartedAt || Date.now());
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTHENTICATION & LOGIN (TEAM NAME + 4-DIGIT PIN)
+   ═══════════════════════════════════════════════════════════════ */
+function doLogin() {
+  const query = (document.getElementById('loginTeamName')?.value || '').trim();
+  const pin = (document.getElementById('loginPin')?.value || '').trim();
+
+  if (!query) {
+    showToast('Please enter your Team Name!', 'error');
+    return;
+  }
+  if (!pin) {
+    showToast('Please enter your 4-digit PIN!', 'error');
+    return;
+  }
+
+  const teams = loadTeams();
+  // Case-insensitive lookup on name or key
+  const matchedKey = Object.keys(teams).find(k => 
+    (teams[k].name || k).toLowerCase() === query.toLowerCase() ||
+    k.toLowerCase() === query.toLowerCase()
+  );
+
+  if (!matchedKey) {
+    showToast(`Team Name "${query}" not found! Please check spelling or register.`, 'error');
+    return;
+  }
+
+  const team = teams[matchedKey];
+  if (team.pin !== pin) {
+    showToast('Incorrect 4-digit PIN for squad "' + (team.name || matchedKey) + '"!', 'error');
+    return;
+  }
+
+  loggedInTeam = matchedKey;
+  localStorage.setItem('aiathlon_login', matchedKey);
+  closeModal('loginModal');
+  updateLoginUI();
+  renderAll();
+  showToast(`Welcome back, ${team.name || matchedKey}! (${team.members.length} members)`, 'success');
+
+  const ev = loadEvent();
+  if (ev.r1Open && !team.r1?.submitted) {
+    switchTab('round1');
+    r1StartTime = ev.r1StartedAt || Date.now();
+    startR1Timer();
+  }
+}
+
+function doLogout() {
+  loggedInTeam = null;
+  localStorage.removeItem('aiathlon_login');
+  updateLoginUI();
+  renderAll();
+  showToast('Logged out successfully', 'info');
+}
+
+function updateLoginUI() {
+  const pill = document.getElementById('navTeamPill');
+  const loginBtn = document.getElementById('navLoginBtn');
+  const regBtn = document.getElementById('navRegBtn');
+
+  if (loggedInTeam) {
+    const teams = loadTeams();
+    const t = teams[loggedInTeam];
+    const teamDisplayName = t?.name || loggedInTeam;
+    const membersList = t?.members ? t.members.join(', ') : '';
+
+    pill.classList.remove('hidden');
+    pill.innerHTML = `<span><strong>${escapeHtml(teamDisplayName)}</strong></span>
+      <span class="pill-members" title="${escapeHtml(membersList)}">${escapeHtml(membersList)}</span>
+      ${t && t.batch ? `<span class="badge badge-batch">Batch ${t.batch}</span>` : ''}
+      <button class="btn btn-xs btn-secondary" onclick="doLogout()" style="cursor:pointer;margin-left:0.4rem;padding:0.15rem 0.45rem" title="Log out">✕</button>`;
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (regBtn) regBtn.classList.add('hidden');
+  } else {
+    pill.classList.add('hidden');
+    pill.innerHTML = '';
+    if (loginBtn) loginBtn.classList.remove('hidden');
+    if (regBtn) regBtn.classList.remove('hidden');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEADERBOARD ENGINE & SORTING
+   ═══════════════════════════════════════════════════════════════ */
+function switchLbRound(r) {
+  currentLbRound = r;
+  document.querySelectorAll('.lb-round-tab').forEach(t => t.classList.toggle('active', parseInt(t.dataset.round) === r));
+  renderLeaderboard();
+}
+
+function sortTeamsForRound(teamsArr, round) {
+  return [...teamsArr].sort((a, b) => {
+    if (round === 1) {
+      if (b.r1.score !== a.r1.score) return b.r1.score - a.r1.score;
+      return a.r1.timeMs - b.r1.timeMs;
+    }
+    if (round === 2) {
+      if (b.r2.testCasesPassed !== a.r2.testCasesPassed) return b.r2.testCasesPassed - a.r2.testCasesPassed;
+      if (a.r2.promptsUsed !== b.r2.promptsUsed) return a.r2.promptsUsed - b.r2.promptsUsed;
+      return a.r1.timeMs - b.r1.timeMs;
+    }
+    if (round === 3) {
+      if (b.r3.cluesUnlocked !== a.r3.cluesUnlocked) return b.r3.cluesUnlocked - a.r3.cluesUnlocked;
+      const aAdj = a.r3.timeMs + a.r3.hintsUsed * R3_HINT_PENALTY;
+      const bAdj = b.r3.timeMs + b.r3.hintsUsed * R3_HINT_PENALTY;
+      return aAdj - bAdj;
+    }
+    if (round === 4) {
+      return b.r4.total - a.r4.total;
+    }
+    return 0;
+  });
+}
+
+function formatTime(ms) {
+  if (!ms || ms <= 0) return '--:--';
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function renderLeaderboard() {
+  const teams = loadTeams();
+  const search = (document.getElementById('lbSearch')?.value || '').toLowerCase();
+  let teamsArr = Object.values(teams);
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+
+  // Update hero stats
+  document.getElementById('statTeamCount').textContent = teamsArr.length;
+  const ev = loadEvent();
+  let currentStageText = ev.r1Open ? 'Round 1 (LIVE)' : 'Round 1 (Standby)';
+  let stageDescText = 'Top 100 Advance';
+  if (ev.r4Open) { currentStageText = 'Round 4 (FINALE)'; stageDescText = 'Grand Champions Stage'; }
+  else if (ev.r3Open) { currentStageText = 'Round 3 (LIVE)'; stageDescText = 'Top 10 Finale'; }
+  else if (ev.r2Open) { currentStageText = 'Round 2 (LIVE)'; stageDescText = 'Top 30 Advance'; }
+  document.getElementById('statActiveStage').textContent = currentStageText;
+  document.getElementById('statStageDesc').textContent = stageDescText;
+
+  const r1SortedAll = sortTeamsForRound(teamsArr, 1);
+  if (r1SortedAll.length > 0) {
+    document.getElementById('statLeaderId').textContent = r1SortedAll[0].name || r1SortedAll[0].id;
+    document.getElementById('statLeaderScore').textContent = `${r1SortedAll[0].r1.score} / ${R1_TOTAL_Q} pts (${formatTime(r1SortedAll[0].r1.timeMs)})`;
+  }
+
+  // Filter by search
+  if (search) {
+    teamsArr = teamsArr.filter(t =>
+      (t.name || t.id).toLowerCase().includes(search) ||
+      t.members.some(m => m.toLowerCase().includes(search))
+    );
+  }
+
+  const sorted = sortTeamsForRound(teamsArr, currentLbRound);
+  const cutoff = CUTOFFS['r' + currentLbRound] || 999;
+  const r = currentLbRound;
+
+  // Render Table Header
+  const lbHead = document.getElementById('lbHead');
+  let headerHTML = '<tr><th style="width:60px"># Rank</th><th>Team Name</th><th>Squad Members</th>';
+  if (r === 1) headerHTML += `<th>Score (${R1_TOTAL_Q})</th><th>Time</th><th>Tab Switch Flag</th><th>Status</th>`;
+  else if (r === 2) headerHTML += '<th>Tests Passed (20)</th><th>AI Prompts (8)</th><th>R1 Time</th><th>Status</th>';
+  else if (r === 3) headerHTML += '<th>Clues (5)</th><th>Hints (+2m)</th><th>Adjusted Time</th><th>Status</th>';
+  else if (r === 4) headerHTML += '<th>Jury Score (50)</th><th>Status</th>';
+  headerHTML += '</tr>';
+  lbHead.innerHTML = headerHTML;
+
+  // Render Table Body
+  const lbBody = document.getElementById('lbBody');
+  let bodyHTML = '';
+
+  sorted.forEach((t, idx) => {
+    const rank = idx + 1;
+    const isQualified = rank <= cutoff;
+    const isCutoff = rank === cutoff;
+    const isMyTeam = loggedInTeam && (t.name === loggedInTeam || t.id === loggedInTeam);
+
+    const qBadge = isQualified
+      ? '<span class="badge badge-qualified">Qualified</span>'
+      : '<span class="badge badge-eliminated">Eliminated</span>';
+
+    const tabFlag = t.r1.tabSwitches > 0
+      ? `<span class="tab-switch-flag" title="${t.r1.tabSwitches} tab switch(es) detected">⚠️ ${t.r1.tabSwitches}</span>`
+      : '<span style="color:var(--text-faint)">0</span>';
+
+    bodyHTML += `<tr class="${isMyTeam ? 'my-team' : ''}">`;
+    bodyHTML += `<td class="rank-cell">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</td>`;
+    bodyHTML += `<td class="team-id-cell" style="font-weight:700">${escapeHtml(t.name || t.id)}</td>`;
+    bodyHTML += `<td>${t.members.map(m => escapeHtml(m)).join(', ')}</td>`;
+
+    if (r === 1) {
+      bodyHTML += `<td class="score-cell">${t.r1.score} / ${R1_TOTAL_Q}</td>`;
+      bodyHTML += `<td class="time-cell">${formatTime(t.r1.timeMs)}</td>`;
+      bodyHTML += `<td>${tabFlag}</td>`;
+      bodyHTML += `<td>${qBadge}</td>`;
+    } else if (r === 2) {
+      bodyHTML += `<td class="score-cell">${t.r2.testCasesPassed} / 20</td>`;
+      bodyHTML += `<td class="time-cell">${t.r2.promptsUsed} / 8</td>`;
+      bodyHTML += `<td class="time-cell">${formatTime(t.r1.timeMs)}</td>`;
+      bodyHTML += `<td>${qBadge}</td>`;
+    } else if (r === 3) {
+      bodyHTML += `<td class="score-cell">${t.r3.cluesUnlocked} / 5</td>`;
+      bodyHTML += `<td class="time-cell">${t.r3.hintsUsed}</td>`;
+      const adjTime = t.r3.timeMs + t.r3.hintsUsed * R3_HINT_PENALTY;
+      bodyHTML += `<td class="time-cell">${formatTime(adjTime)}</td>`;
+      bodyHTML += `<td>${qBadge}</td>`;
+    } else if (r === 4) {
+      bodyHTML += `<td class="score-cell">${t.r4.total} / 50</td>`;
+      bodyHTML += `<td>${rank <= 3 ? '<span class="badge badge-qualified">🏆 Champion</span>' : qBadge}</td>`;
+    }
+
+    bodyHTML += '</tr>';
+
+    if (isCutoff) {
+      const colSpan = r === 4 ? 5 : 7;
+      bodyHTML += `<tr class="lb-cutoff-divider">
+        <td colspan="${colSpan}">
+          <div class="lb-cutoff-label">▲ TOP ${cutoff} ADVANCE TO NEXT ROUND ▲</div>
+        </td>
+      </tr>`;
+    }
+  });
+
+  lbBody.innerHTML = bodyHTML || '<tr><td colspan="7" class="text-center" style="padding:2.5rem;color:var(--text-muted)">No registered squads match your search.</td></tr>';
+
+  updateTeamBanner(sorted);
+}
+
+function updateTeamBanner(sorted) {
+  const banner = document.getElementById('teamStatusBanner');
+  if (!loggedInTeam) { banner.classList.remove('show'); return; }
+
+  const idx = sorted.findIndex(t => t.name === loggedInTeam || t.id === loggedInTeam);
+  if (idx === -1) { banner.classList.remove('show'); return; }
+
+  banner.classList.add('show');
+  const rank = idx + 1;
+  const cutoff = CUTOFFS['r' + currentLbRound] || 999;
+  const isQ = rank <= cutoff;
+
+  document.getElementById('bannerRank').textContent = '#' + rank;
+  document.getElementById('bannerTeamId').textContent = `${sorted[idx].name || loggedInTeam} (${sorted[idx].members.join(', ')})`;
+  document.getElementById('bannerStatus').textContent = isQ
+    ? `Congratulations! Ranked #${rank} in Round ${currentLbRound} — Currently QUALIFIED for next round.`
+    : `Currently Ranked #${rank} — Below the Top ${cutoff} cutoff line. Keep competing!`;
+  document.getElementById('bannerBadge').innerHTML = isQ
+    ? '<span class="badge badge-qualified" style="font-size:0.85rem;padding:0.4rem 1rem">QUALIFIED</span>'
+    : '<span class="badge badge-eliminated" style="font-size:0.85rem;padding:0.4rem 1rem">ELIMINATED</span>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUND 1 — SYNCHRONIZED QUIZ ARENA
+   ═══════════════════════════════════════════════════════════════ */
+let r1Answers = {};
+let r1TabSwitches = 0;
+
+function renderRound1() {
+  const ev = loadEvent();
+  const teams = loadTeams();
+  const t = loggedInTeam ? teams[loggedInTeam] : null;
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+  document.getElementById('r1HeaderDesc').textContent =
+    `200 → 100 Teams • ${R1_TOTAL_Q} Scenarios • 30:00 Synchronized Timer • Zero C Programming`;
+
+  // Check if submitted
+  if (t && t.r1.submitted) {
+    document.getElementById('r1Locked').classList.add('hidden');
+    document.getElementById('r1Content').classList.add('hidden');
+    document.getElementById('r1Submitted').classList.remove('hidden');
+    document.getElementById('r1SubmitSummary').textContent =
+      `Final Score: ${t.r1.score} / ${R1_TOTAL_Q} | Elapsed Time: ${formatTime(t.r1.timeMs)} | Tab Switch Count: ${t.r1.tabSwitches}`;
+    return;
+  }
+  document.getElementById('r1Submitted').classList.add('hidden');
+
+  const descEl = document.getElementById('r1HeaderDesc');
+  if (descEl) descEl.textContent = `200 → 100 Teams • ${R1_TOTAL_Q} Scenarios • 30:00 Synchronized Timer • Zero C Programming`;
+
+  // Check gateway
+  if (!ev.r1Open || !loggedInTeam) {
+    document.getElementById('r1Locked').classList.remove('hidden');
+    document.getElementById('r1Content').classList.add('hidden');
+    const actionsEl = document.getElementById('r1LockedActions');
+    if (!loggedInTeam) {
+      document.getElementById('r1LockedTitle').textContent = 'Team Login Required';
+      document.getElementById('r1LockedMsg').textContent = 'Please log in with your Team ID to participate. As soon as admin opens Round 1, your quiz will activate automatically!';
+      if (actionsEl) actionsEl.classList.remove('hidden');
+    } else {
+      document.getElementById('r1LockedTitle').textContent = 'Round 1 Is On Standby';
+      document.getElementById('r1LockedMsg').textContent = `Logged in as ${loggedInTeam}. Tournament directors have not activated Round 1 yet. Keep this window open—it will automatically unlock and start your synchronized 30-minute timer the instant admin starts the round!`;
+      if (actionsEl) actionsEl.classList.add('hidden');
+    }
+    return;
+  }
+
+  document.getElementById('r1Locked').classList.add('hidden');
+  document.getElementById('r1Content').classList.remove('hidden');
+
+  const seed = hashCode(loggedInTeam);
+  const shuffledQs = seededShuffle(quiz.map((q, i) => ({ ...q, origIdx: i })), seed);
+
+  const container = document.getElementById('r1Questions');
+  if (container.children.length === 0) {
+    r1StartTime = ev.r1StartedAt || r1StartTime || Date.now();
+    startR1Timer();
+
+    let html = '';
+    shuffledQs.forEach((q, qi) => {
+      const optSeed = seed + qi * 13;
+      const optIndices = seededShuffle(q.options.map((_, i) => i), optSeed);
+      const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+      html += `<div class="question-card" id="q-${q.id}">
+        <div class="q-header">
+          <span class="q-number">Question ${qi + 1} of ${R1_TOTAL_Q}</span>
+          <span class="q-category">${q.category || 'General'}</span>
+        </div>
+        <div class="q-text">${escapeHtml(q.text).replace(/\n/g, '<br>')}</div>
+        <div class="option-list">`;
+
+      optIndices.forEach((optIdx, li) => {
+        html += `<button type="button" class="option-btn" data-qid="${q.id}" data-answer="${optIdx}" onclick="selectOption('${q.id}', ${optIdx}, this)">
+          <span class="opt-letter">${letters[li]}</span>
+          <span>${escapeHtml(q.options[optIdx])}</span>
+        </button>`;
+      });
+
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+  }
+  updateR1Progress();
+}
+
+function selectOption(qid, ansIdx, el) {
+  r1Answers[qid] = ansIdx;
+  el.closest('.option-list').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  updateR1Progress();
+}
+
+function updateR1Progress() {
+  const answered = Object.keys(r1Answers).length;
+  document.getElementById('r1QProgress').textContent = `Questions Progress`;
+  document.getElementById('r1Answered').textContent = `${answered} of ${R1_TOTAL_Q} answered`;
+}
+
+function startR1Timer() {
+  if (r1TimerInterval) clearInterval(r1TimerInterval);
+  const ev = loadEvent();
+  r1StartTime = ev.r1StartedAt || r1StartTime || Date.now();
+
+  function updateTimer() {
+    const elapsed = Date.now() - r1StartTime;
+    const remaining = Math.max(0, R1_TIME_LIMIT - elapsed);
+    const min = Math.floor(remaining / 60000);
+    const sec = Math.floor((remaining % 60000) / 1000);
+
+    const timerEl = document.getElementById('r1Timer');
+    const progEl = document.getElementById('r1Progress');
+    if (timerEl) timerEl.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    if (progEl) progEl.style.width = (remaining / R1_TIME_LIMIT * 100) + '%';
+
+    const bar = document.getElementById('r1TimerBar');
+    if (bar) {
+      if (remaining < 5 * 60 * 1000) bar.classList.add('danger');
+      else bar.classList.remove('danger');
+    }
+
+    if (remaining <= 0) {
+      clearInterval(r1TimerInterval);
+      submitRound1(true);
+    }
+  }
+
+  updateTimer();
+  r1TimerInterval = setInterval(updateTimer, 1000);
+}
+
+function submitRound1(autoSubmit = false) {
+  if (!loggedInTeam) return;
+  const teams = loadTeams();
+  const t = teams[loggedInTeam];
+  if (!t || t.r1.submitted) return;
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+
+  if (!autoSubmit) {
+    const answered = Object.keys(r1Answers).length;
+    if (answered < R1_TOTAL_Q && !confirm(`You answered ${answered}/${R1_TOTAL_Q} questions. Submit anyway?`)) return;
+  }
+
+  let score = 0;
+  quiz.forEach(q => {
+    if (r1Answers[q.id] === q.answer) score++;
+  });
+
+  const timeMs = Date.now() - r1StartTime;
+  t.r1.score = score;
+  t.r1.totalQ = R1_TOTAL_Q;
+  t.r1.timeMs = timeMs;
+  t.r1.tabSwitches = r1TabSwitches;
+  t.r1.submitted = true;
+  t.r1.answers = { ...r1Answers };
+
+  saveTeams(teams);
+  recalcQualifications();
+  if (r1TimerInterval) clearInterval(r1TimerInterval);
+
+  renderRound1();
+  showToast(`Round 1 Submitted! Score: ${score}/${R1_TOTAL_Q}`, 'success');
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && loggedInTeam && r1StartTime && !loadTeams()[loggedInTeam]?.r1?.submitted) {
+    r1TabSwitches++;
+    showToast(`⚠️ Tab switch detected! Recorded on your submission.`, 'warn');
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUND 2 — C RESCUE LAB
+   ═══════════════════════════════════════════════════════════════ */
+function renderRound2() {
+  const ev = loadEvent();
+  const teams = loadTeams();
+  const t = loggedInTeam ? teams[loggedInTeam] : null;
+
+  if (t && t.r2.submitted) {
+    document.getElementById('r2Locked').classList.add('hidden');
+    document.getElementById('r2Content').classList.add('hidden');
+    document.getElementById('r2Submitted').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('r2Submitted').classList.add('hidden');
+
+  if (!loggedInTeam || !ev.r2Open || !t || !t.qualified.r1) {
+    document.getElementById('r2Locked').classList.remove('hidden');
+    document.getElementById('r2Content').classList.add('hidden');
+    if (!loggedInTeam) document.getElementById('r2LockedMsg').textContent = 'Please log in to access this arena.';
+    else if (!t.qualified.r1) document.getElementById('r2LockedMsg').textContent = 'You must qualify from Round 1 (Top 100) to enter.';
+    else document.getElementById('r2LockedMsg').textContent = 'Round 2 has not commenced yet. Please stand by.';
+    return;
+  }
+
+  document.getElementById('r2Locked').classList.add('hidden');
+  document.getElementById('r2Content').classList.remove('hidden');
+
+  const batch = t.batch || 'A';
+  document.getElementById('r2BatchBadge').textContent = `Assigned: Batch ${batch}`;
+
+  const cProblemsAll = getCProblems();
+  const problems = cProblemsAll[batch] || DEFAULT_C_PROBLEMS[batch];
+  const container = document.getElementById('r2Problems');
+  const codeInputs = document.getElementById('r2CodeInputs');
+
+  if (container.children.length === 0) {
+    let html = '';
+    problems.forEach((p, i) => {
+      html += `<div class="problem-card">
+        <h3>${escapeHtml(p.title)}</h3>
+        <div class="problem-desc">${escapeHtml(p.desc)}</div>
+        <div class="expected-output">
+          <strong>Expected Test Outputs:</strong><br>
+          <pre style="margin-top:0.35rem;white-space:pre-wrap;font-family:var(--font-mono)">${escapeHtml(p.expected)}</pre>
+        </div>
+        <div class="code-block">
+          <button type="button" class="copy-btn" onclick="copyCode(this)">📋 Copy Code</button>${escapeHtml(p.code)}
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+
+    let inputsHTML = '';
+    problems.forEach((p, i) => {
+      inputsHTML += `<div class="form-group">
+        <label class="input-label">Fixed Code Solution — ${p.id}: ${p.title.split(':')[1]?.trim() || p.title}</label>
+        <textarea class="input-field mono" id="r2Code${i}" placeholder="Paste your corrected C program here..." rows="8"></textarea>
+      </div>`;
+    });
+    codeInputs.innerHTML = inputsHTML;
+  }
+}
+
+function copyCode(btn) {
+  const codeBlock = btn.parentElement;
+  const text = codeBlock.textContent.replace('📋 Copy Code', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+  });
+}
+
+function submitRound2() {
+  if (!loggedInTeam) return;
+  const teams = loadTeams();
+  const t = teams[loggedInTeam];
+  if (!t || t.r2.submitted) return;
+
+  const aiLink = document.getElementById('r2AiLink').value.trim();
+  const batch = t.batch || 'A';
+  const cProblemsAll = getCProblems();
+  const problems = cProblemsAll[batch] || DEFAULT_C_PROBLEMS[batch];
+  const codes = [];
+  let emptyCount = 0;
+
+  problems.forEach((p, i) => {
+    const code = document.getElementById('r2Code' + i).value.trim();
+    codes.push(code);
+    if (!code) emptyCount++;
+  });
+
+  if (emptyCount > 0) {
+    showToast(`Please paste fixes into all code textareas (${emptyCount} empty)!`, 'warn');
+    return;
+  }
+
+  t.r2.submissions = codes;
+  t.r2.aiLink = aiLink;
+  t.r2.submitted = true;
+  t.r2.testCasesPassed = Math.min(20, Math.floor(codes.reduce((s, c) => s + (c.length > 50 ? 1 : 0), 0) * 5));
+  t.r2.promptsUsed = Math.floor(Math.random() * 4) + 2;
+
+  saveTeams(teams);
+  recalcQualifications();
+  renderRound2();
+  showToast('Round 2 submissions saved successfully!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUND 3 — CAMPUS MYSTERY
+   ═══════════════════════════════════════════════════════════════ */
+let r3HintsUsed = 0;
+let r3CluesUnlocked = 0;
+let r3StartTime = null;
+
+function renderRound3() {
+  const ev = loadEvent();
+  const teams = loadTeams();
+  const t = loggedInTeam ? teams[loggedInTeam] : null;
+
+  if (t && t.r3.submitted) {
+    document.getElementById('r3Locked').classList.add('hidden');
+    document.getElementById('r3Content').classList.add('hidden');
+    document.getElementById('r3Submitted').classList.remove('hidden');
+    const adjTime = t.r3.timeMs + t.r3.hintsUsed * R3_HINT_PENALTY;
+    document.getElementById('r3SubmitSummary').textContent =
+      `Clues: ${t.r3.cluesUnlocked}/5 | Hints: ${t.r3.hintsUsed} (+${t.r3.hintsUsed*2}m) | Time: ${formatTime(t.r3.timeMs)} | Adjusted: ${formatTime(adjTime)}`;
+    return;
+  }
+  document.getElementById('r3Submitted').classList.add('hidden');
+
+  if (!loggedInTeam || !ev.r3Open || !t || !t.qualified.r2) {
+    document.getElementById('r3Locked').classList.remove('hidden');
+    document.getElementById('r3Content').classList.add('hidden');
+    if (!loggedInTeam) document.getElementById('r3LockedMsg').textContent = 'Please log in to participate.';
+    else if (!t.qualified.r2) document.getElementById('r3LockedMsg').textContent = 'You must qualify from Round 2 (Top 30) to participate.';
+    else document.getElementById('r3LockedMsg').textContent = 'Round 3 has not opened yet.';
+    return;
+  }
+
+  document.getElementById('r3Locked').classList.add('hidden');
+  document.getElementById('r3Content').classList.remove('hidden');
+
+  if (r3CluesUnlocked === 0 && t.r3.cluesUnlocked > 0) {
+    r3CluesUnlocked = t.r3.cluesUnlocked;
+    r3HintsUsed = t.r3.hintsUsed;
+  }
+
+  if (!r3StartTime) {
+    r3StartTime = t.r3.startTime || Date.now();
+    t.r3.startTime = r3StartTime;
+    saveTeams(teams);
+    startR3Timer();
+  }
+
+  renderR3Clues();
+}
+
+function startR3Timer() {
+  if (r3TimerInterval) clearInterval(r3TimerInterval);
+  r3TimerInterval = setInterval(() => {
+    const elapsed = Date.now() - r3StartTime;
+    document.getElementById('r3Timer').textContent = formatTime(elapsed);
+  }, 1000);
+}
+
+function renderR3Clues() {
+  const container = document.getElementById('r3Clues');
+  const clues = getMysteryClues();
+  const total = clues.length;
+  document.getElementById('r3ClueProgress').textContent = `Clue ${Math.min(r3CluesUnlocked + 1, total)} of ${total}`;
+  document.getElementById('r3HintsUsed').textContent = `Hints used: ${r3HintsUsed} (+${r3HintsUsed * 2}m penalty)`;
+
+  let html = '';
+  clues.forEach((clue, i) => {
+    const isLocked = i > r3CluesUnlocked;
+    const isCurrent = i === r3CluesUnlocked;
+    const isSolved = i < r3CluesUnlocked;
+
+    html += `<div class="clue-card ${isLocked ? 'locked' : ''}" id="clue-${i}">
+      <div class="clue-number">${clue.title} ${isSolved ? '✅ Solved' : isCurrent ? '🔓 Current Clue' : ''}</div>
+      <div class="clue-text">${escapeHtml(clue.text).replace(/\n/g, '<br>')}</div>`;
+
+    if (isCurrent) {
+      html += `<div class="clue-answer-input">
+        <input type="text" class="input-field mono" id="clueAnswer${i}" placeholder="Enter keyword or number..." autocomplete="off">
+        <button type="button" class="btn btn-primary btn-sm" onclick="submitClue(${i})">Submit Answer</button>
+        <button type="button" class="btn btn-amber btn-sm" onclick="useHint(${i})">💡 Reveal Hint (+2m)</button>
+      </div>`;
+      html += `<div class="hint-area hidden" id="hintArea${i}"><strong>💡 Hint:</strong> ${escapeHtml(clue.hint)}</div>`;
+    }
+    if (isSolved) {
+      html += `<div style="margin-top:0.75rem;font-family:var(--font-mono);color:var(--emerald);font-weight:700">✓ Accepted Answer: ${escapeHtml(clue.answer)}</div>`;
+    }
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function submitClue(idx) {
+  const input = document.getElementById('clueAnswer' + idx);
+  if (!input) return;
+  const answer = input.value.trim().toUpperCase();
+  const clues = getMysteryClues();
+  const clue = clues[idx];
+  const acceptable = [clue.answer.toUpperCase(), ...(clue.acceptAlt || []).map(a => a.toUpperCase())];
+
+  if (acceptable.includes(answer)) {
+    r3CluesUnlocked++;
+    showToast(`Clue #${idx + 1} solved! ${r3CluesUnlocked < clues.length ? 'Next clue unlocked!' : 'Mystery completed!'}`, 'success');
+
+    const teams = loadTeams();
+    const t = teams[loggedInTeam];
+    t.r3.cluesUnlocked = r3CluesUnlocked;
+    t.r3.hintsUsed = r3HintsUsed;
+    t.r3.timeMs = Date.now() - r3StartTime;
+
+    if (r3CluesUnlocked >= clues.length) {
+      t.r3.submitted = true;
+      if (r3TimerInterval) clearInterval(r3TimerInterval);
+      saveTeams(teams);
+      recalcQualifications();
+      renderRound3();
+      return;
+    }
+
+    saveTeams(teams);
+    renderR3Clues();
+  } else {
+    showToast('Incorrect answer! Check spelling and logic.', 'error');
+    input.style.borderColor = 'var(--crimson)';
+    setTimeout(() => input.style.borderColor = '', 1500);
+  }
+}
+
+function useHint(idx) {
+  const hintArea = document.getElementById('hintArea' + idx);
+  if (hintArea && hintArea.classList.contains('hidden')) {
+    hintArea.classList.remove('hidden');
+    r3HintsUsed++;
+    showToast(`Hint unlocked! +2 min penalty applied.`, 'warn');
+
+    const teams = loadTeams();
+    const t = teams[loggedInTeam];
+    t.r3.hintsUsed = r3HintsUsed;
+    saveTeams(teams);
+    document.getElementById('r3HintsUsed').textContent = `Hints used: ${r3HintsUsed} (+${r3HintsUsed * 2}m penalty)`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUND 4 — FINALE & JURY
+   ═══════════════════════════════════════════════════════════════ */
+function renderRound4() {
+  const ev = loadEvent();
+  const teams = loadTeams();
+
+  if (!ev.r4Open) {
+    document.getElementById('r4Locked').classList.remove('hidden');
+    document.getElementById('r4Content').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('r4Locked').classList.add('hidden');
+  document.getElementById('r4Content').classList.remove('hidden');
+
+  const allTeams = Object.values(teams);
+  const r3Qualified = allTeams.filter(t => t.qualified.r3);
+  const sorted = sortTeamsForRound(r3Qualified.length > 0 ? r3Qualified : allTeams.slice(0, 10), 4);
+
+  // Update podium
+  if (sorted[0]) {
+    document.getElementById('podium1Team').textContent = sorted[0].id;
+    document.getElementById('podium1Members').textContent = sorted[0].members.join(' & ');
+    document.getElementById('podium1Score').textContent = `${sorted[0].r4.total || 0} / 50`;
+  }
+  if (sorted[1]) {
+    document.getElementById('podium2Team').textContent = sorted[1].id;
+    document.getElementById('podium2Members').textContent = sorted[1].members.join(' & ');
+    document.getElementById('podium2Score').textContent = `${sorted[1].r4.total || 0} / 50`;
+  }
+  if (sorted[2]) {
+    document.getElementById('podium3Team').textContent = sorted[2].id;
+    document.getElementById('podium3Members').textContent = sorted[2].members.join(' & ');
+    document.getElementById('podium3Score').textContent = `${sorted[2].r4.total || 0} / 50`;
+  }
+
+  const tbody = document.getElementById('r4Body');
+  tbody.innerHTML = sorted.map((t, i) => `
+    <tr${i < 3 ? ' style="background:var(--primary-light)"' : ''}>
+      <td class="rank-cell">${i <= 2 ? ['🥇','🥈','🥉'][i] : (i+1)}</td>
+      <td class="team-id-cell">${t.id}</td>
+      <td><strong>${t.members[0]}</strong> & ${t.members[1]}</td>
+      <td class="font-mono">${t.r4.creativity || 0}</td>
+      <td class="font-mono">${t.r4.technical || 0}</td>
+      <td class="font-mono">${t.r4.presentation || 0}</td>
+      <td class="font-mono">${t.r4.innovation || 0}</td>
+      <td class="font-mono">${t.r4.teamwork || 0}</td>
+      <td class="score-cell">${t.r4.total || 0} / 50</td>
+    </tr>
+  `).join('') || '<tr><td colspan="9" class="text-center" style="padding:2rem">No finalists ready yet</td></tr>';
+
+  if (adminUnlocked) {
+    document.getElementById('r4JuryPanel').classList.remove('hidden');
+    const grid = document.getElementById('r4JuryGrid');
+    grid.innerHTML = sorted.map(t => {
+      const cats = ['creativity', 'technical', 'presentation', 'innovation', 'teamwork'];
+      return `<div class="jury-score-card">
+        <div class="team-name">${t.id} — ${t.members.join(' & ')}</div>
+        ${cats.map(c => `
+          <div class="score-input-row">
+            <label>${c.charAt(0).toUpperCase() + c.slice(1)}</label>
+            <input type="number" min="0" max="10" value="${t.r4[c] || 0}"
+              class="input-field mono" onchange="updateJuryScore('${t.id}','${c}',this.value)">
+            <span style="font-size:0.75rem;color:var(--text-faint)">/ 10</span>
+          </div>
+        `).join('')}
+        <div class="jury-total">Total: ${t.r4.total || 0} / 50</div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('r4JuryPanel').classList.add('hidden');
+  }
+}
+
+function updateJuryScore(teamId, category, val) {
+  const teams = loadTeams();
+  const t = teams[teamId];
+  if (!t) return;
+  t.r4[category] = Math.min(10, Math.max(0, parseInt(val) || 0));
+  t.r4.total = (t.r4.creativity || 0) + (t.r4.technical || 0) + (t.r4.presentation || 0) + (t.r4.innovation || 0) + (t.r4.teamwork || 0);
+  saveTeams(teams);
+  renderRound4();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUALIFICATION RECALCULATOR
+   ═══════════════════════════════════════════════════════════════ */
+function recalcQualifications() {
+  const teams = loadTeams();
+  const all = Object.values(teams);
+
+  // R1
+  const r1Sorted = sortTeamsForRound(all.filter(t => t.r1.submitted), 1);
+  all.forEach(t => t.qualified.r1 = null);
+  r1Sorted.forEach((t, i) => {
+    teams[t.id].qualified.r1 = i < CUTOFFS.r1;
+    if (i < CUTOFFS.r1) {
+      teams[t.id].batch = (i + 1) % 2 === 1 ? 'A' : 'B';
+    }
+  });
+
+  // R2
+  const r2Sorted = sortTeamsForRound(all.filter(t => t.r2.submitted && t.qualified.r1), 2);
+  all.forEach(t => t.qualified.r2 = null);
+  r2Sorted.forEach((t, i) => {
+    teams[t.id].qualified.r2 = i < CUTOFFS.r2;
+  });
+
+  // R3
+  const r3Sorted = sortTeamsForRound(all.filter(t => t.r3.submitted && t.qualified.r2), 3);
+  all.forEach(t => t.qualified.r3 = null);
+  r3Sorted.forEach((t, i) => {
+    teams[t.id].qualified.r3 = i < CUTOFFS.r3;
+  });
+
+  saveTeams(teams);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN OPERATIONS & QUESTION MANAGER
+   ═══════════════════════════════════════════════════════════════ */
+function unlockAdmin() {
+  const val = document.getElementById('adminPassInput').value;
+  if (val === ADMIN_PASS) {
+    adminUnlocked = true;
+    document.getElementById('adminLocked').classList.add('hidden');
+    document.getElementById('adminContent').classList.remove('hidden');
+    renderAdmin();
+    showToast('Operations Dashboard Unlocked!', 'success');
+  } else {
+    showToast('Invalid passphrase!', 'error');
+  }
+}
+
+function renderAdmin() {
+  if (!adminUnlocked) return;
+  renderRoundControls();
+  renderAdminTeams();
+  updateContentCounts();
+}
+
+function updateContentCounts() {
+  const quiz = getQuizBank();
+  const qBadge = document.getElementById('quizCountBadge');
+  if (qBadge) qBadge.textContent = `${quiz.length} Questions`;
+  const pCount = document.getElementById('previewCount');
+  if (pCount) pCount.textContent = quiz.length;
+
+  const cProbs = getCProblems();
+  const cBadge = document.getElementById('cProbCountBadge');
+  if (cBadge && cProbs.A && cProbs.B) {
+    cBadge.textContent = `Batch A (${cProbs.A.length}) & B (${cProbs.B.length})`;
+  }
+
+  const clues = getMysteryClues();
+  const cluesBadge = document.getElementById('cluesCountBadge');
+  if (cluesBadge) cluesBadge.textContent = `${clues.length} Clues`;
+}
+
+function renderRoundControls() {
+  const ev = loadEvent();
+  const rounds = [
+    { key: 'r1Open', roundNum: 1, label: 'Round 1 — Quiz', desc: '200 -> 100 Qualifiers' },
+    { key: 'r2Open', roundNum: 2, label: 'Round 2 — C Rescue Lab', desc: '100 -> 30 Qualifiers' },
+    { key: 'r3Open', roundNum: 3, label: 'Round 3 — Campus Mystery', desc: '30 -> 10 Finalists' },
+    { key: 'r4Open', roundNum: 4, label: 'Round 4 — Champions Stage', desc: 'Top 10 -> Grand Winners' },
+  ];
+  const grid = document.getElementById('roundControlsGrid');
+  grid.innerHTML = rounds.map(r => `
+    <div class="round-control-card">
+      <h4>${r.label}</h4>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem">${r.desc}</div>
+      <div class="round-status ${ev[r.key] ? 'open' : 'closed'}">${ev[r.key] ? '● ACTIVE (LIVE)' : '○ STANDBY'}</div>
+      <div>
+        <button class="btn btn-sm ${ev[r.key] ? 'btn-danger' : 'btn-emerald'}"
+          onclick="toggleRound('${r.key}', ${r.roundNum})">
+          ${ev[r.key] ? '⏸ Pause Stage' : '▶ Start Stage (Auto-Broadcast)'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleRound(key, roundNum) {
+  const ev = loadEvent();
+  ev[key] = !ev[key];
+
+  if (ev[key]) {
+    ev[key.replace('Open', 'StartedAt')] = Date.now();
+  }
+
+  saveEvent(ev);
+  renderRoundControls();
+
+  if (ev[key]) {
+    playAlertChime();
+    showToast(`🚀 ${key.replace('Open', '').toUpperCase()} IS NOW LIVE! Broadcasted to all participants.`, 'success');
+    if (channel) {
+      channel.postMessage({
+        type: 'round_started',
+        round: roundNum,
+        startedAt: ev[key.replace('Open', 'StartedAt')]
+      });
+    }
+  } else {
+    showToast(`Stage paused.`, 'info');
+  }
+
+  renderAll();
+}
+
+/* ── CSV & JSON Parsing for Questions ── */
+function parseCSVRow(str) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === '"' || char === "'") {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result.map(s => s.trim().replace(/^["']|["']$/g, '').trim());
+}
+
+function parseQuizCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  if (lines.length < 2) throw new Error("CSV file is empty or missing data rows.");
+
+  const header = lines[0].toLowerCase();
+  const startIdx = (header.includes('category') || header.includes('question') || header.includes('option')) ? 1 : 0;
+
+  const parsed = [];
+  for (let i = startIdx; i < lines.length; i++) {
+    const row = parseCSVRow(lines[i]);
+    if (row.length < 6) continue;
+
+    const category = row[0] || 'General';
+    const qText = row[1];
+    const optA = row[2];
+    const optB = row[3];
+    const optC = row[4] || '';
+    const optD = row[5] || '';
+    let rawAns = (row[6] !== undefined ? row[6] : '0').trim();
+
+    let ansIdx = 0;
+    if (/^[0-3]$/.test(rawAns)) {
+      ansIdx = parseInt(rawAns);
+    } else if (/^[1-4]$/.test(rawAns)) {
+      ansIdx = parseInt(rawAns) - 1;
+    } else {
+      const u = rawAns.toUpperCase();
+      if (u === 'A') ansIdx = 0;
+      else if (u === 'B') ansIdx = 1;
+      else if (u === 'C') ansIdx = 2;
+      else if (u === 'D') ansIdx = 3;
+    }
+
+    const options = [optA, optB];
+    if (optC) options.push(optC);
+    if (optD) options.push(optD);
+
+    parsed.push({
+      id: 'q_' + (parsed.length + 1),
+      category,
+      text: qText,
+      options,
+      answer: ansIdx
+    });
+  }
+  return parsed;
+}
+
+function parseQuizJSON(text) {
+  const data = JSON.parse(text);
+  if (!Array.isArray(data)) throw new Error("JSON must be an array of question objects.");
+  return data.map((q, idx) => {
+    if (!q.text || !Array.isArray(q.options) || q.options.length < 2) {
+      throw new Error(`Question #${idx + 1} is missing 'text' or 'options' array.`);
+    }
+    let ans = 0;
+    if (typeof q.answer === 'number') ans = q.answer;
+    else if (typeof q.answer === 'string') {
+      const u = q.answer.trim().toUpperCase();
+      if (u === 'A') ans = 0;
+      else if (u === 'B') ans = 1;
+      else if (u === 'C') ans = 2;
+      else if (u === 'D') ans = 3;
+      else ans = parseInt(u) || 0;
+    }
+    return {
+      id: q.id || ('q_' + (idx + 1)),
+      category: q.category || 'General',
+      text: q.text,
+      options: q.options,
+      answer: Math.max(0, Math.min(q.options.length - 1, ans))
+    };
+  });
+}
+
+function handleQuizUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const content = evt.target.result;
+      let questions = [];
+
+      if (file.name.endsWith('.json')) {
+        questions = parseQuizJSON(content);
+      } else if (file.name.endsWith('.csv')) {
+        questions = parseQuizCSV(content);
+      } else {
+        throw new Error("Unsupported format. Please upload .csv or .json");
+      }
+
+      if (questions.length === 0) throw new Error("No valid questions found in file.");
+
+      localStorage.setItem('aiathlon_quiz_bank', JSON.stringify(questions));
+      R1_TOTAL_Q = questions.length;
+
+      // Reset any active rendered questions cache
+      const qContainer = document.getElementById('r1Questions');
+      if (qContainer) qContainer.innerHTML = '';
+
+      if (channel) {
+        channel.postMessage({ type: 'questions_updated', count: questions.length });
+      }
+
+      showToast(`✅ Successfully loaded ${questions.length} Quiz questions!`, 'success');
+      updateContentCounts();
+      renderQuizPreviewTable();
+      renderAll();
+    } catch (err) {
+      showToast(`Error parsing file: ${err.message}`, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetDefaultQuiz() {
+  if (!confirm("Reset quiz to the default 25 questions?")) return;
+  localStorage.removeItem('aiathlon_quiz_bank');
+  R1_TOTAL_Q = DEFAULT_QUIZ_BANK.length;
+  const qContainer = document.getElementById('r1Questions');
+  if (qContainer) qContainer.innerHTML = '';
+  if (channel) channel.postMessage({ type: 'questions_updated', count: R1_TOTAL_Q });
+  showToast("Quiz reset to default 25 questions", 'info');
+  updateContentCounts();
+  renderQuizPreviewTable();
+  renderAll();
+}
+
+function toggleQuizPreview() {
+  const box = document.getElementById('quizPreviewBox');
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    renderQuizPreviewTable();
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+function renderQuizPreviewTable() {
+  const quiz = getQuizBank();
+  const tbody = document.getElementById('quizPreviewBody');
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  tbody.innerHTML = quiz.map((q, i) => `
+    <tr>
+      <td class="font-mono">${i + 1}</td>
+      <td><span class="badge badge-batch">${escapeHtml(q.category || 'General')}</span></td>
+      <td><strong>${escapeHtml(q.text.slice(0, 75))}${q.text.length > 75 ? '...' : ''}</strong></td>
+      <td style="font-size:0.78rem">${q.options.map((o, oi) => `[${letters[oi]}] ${escapeHtml(o)}`).join('<br>')}</td>
+      <td class="font-mono text-neon" style="font-weight:700">${letters[q.answer] || q.answer}</td>
+    </tr>
+  `).join('');
+}
+
+function toggleCProblemsPreview() {
+  const box = document.getElementById('cProblemsPreviewBox');
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    renderCProblemsPreview();
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+function renderCProblemsPreview() {
+  const cProbs = getCProblems();
+  const container = document.getElementById('cProblemsPreviewContent');
+  if (!container) return;
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">';
+
+  html += '<div><h5 style="color:var(--primary);margin-bottom:0.5rem">Batch A (Odd Teams)</h5>';
+  (cProbs.A || []).forEach(p => {
+    html += `<div class="card-subtle" style="padding:0.75rem;margin-bottom:0.5rem">
+      <div style="font-weight:700;font-size:0.85rem">${escapeHtml(p.title)}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin:0.25rem 0">${escapeHtml(p.desc)}</div>
+      <div style="font-size:0.72rem;font-family:monospace;background:var(--bg-card);padding:0.25rem 0.5rem;border-radius:4px">Expected: ${escapeHtml(p.expectedOutput)}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  html += '<div><h5 style="color:var(--accent);margin-bottom:0.5rem">Batch B (Even Teams)</h5>';
+  (cProbs.B || []).forEach(p => {
+    html += `<div class="card-subtle" style="padding:0.75rem;margin-bottom:0.5rem">
+      <div style="font-weight:700;font-size:0.85rem">${escapeHtml(p.title)}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin:0.25rem 0">${escapeHtml(p.desc)}</div>
+      <div style="font-size:0.72rem;font-family:monospace;background:var(--bg-card);padding:0.25rem 0.5rem;border-radius:4px">Expected: ${escapeHtml(p.expectedOutput)}</div>
+    </div>`;
+  });
+  html += '</div></div>';
+
+  container.innerHTML = html;
+}
+
+function toggleCluesPreview() {
+  const box = document.getElementById('cluesPreviewBox');
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    renderCluesPreview();
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+function renderCluesPreview() {
+  const clues = getMysteryClues();
+  const container = document.getElementById('cluesPreviewContent');
+  if (!container) return;
+  let html = '<div style="display:flex;flex-direction:column;gap:0.75rem">';
+  clues.forEach((c, i) => {
+    html += `<div class="card-subtle" style="padding:0.75rem">
+      <div class="flex-between">
+        <strong>Clue #${i + 1}: ${escapeHtml(c.title || '')}</strong>
+        <span class="badge badge-emerald">Key: ${escapeHtml(c.answer)}</span>
+      </div>
+      <p style="font-size:0.8rem;margin:0.35rem 0;color:var(--text-muted)">${escapeHtml(c.text)}</p>
+      <div style="font-size:0.72rem;color:var(--accent)">💡 Hint: ${escapeHtml(c.hint || '')}</div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+/* ── C Programs Upload Handler ── */
+function handleCProblemsUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (!data.A || !data.B || !Array.isArray(data.A) || !Array.isArray(data.B)) {
+        throw new Error("JSON must contain 'A' and 'B' arrays of problem objects.");
+      }
+      localStorage.setItem('aiathlon_c_problems', JSON.stringify(data));
+      const cContainer = document.getElementById('r2Problems');
+      if (cContainer) cContainer.innerHTML = '';
+      if (channel) channel.postMessage({ type: 'c_problems_updated' });
+      showToast(`✅ Successfully loaded ${data.A.length + data.B.length} C problems!`, 'success');
+      updateContentCounts();
+      renderAll();
+    } catch (err) {
+      showToast(`Error loading C problems: ${err.message}`, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetDefaultCProblems() {
+  if (!confirm("Reset C problems to defaults?")) return;
+  localStorage.removeItem('aiathlon_c_problems');
+  const cContainer = document.getElementById('r2Problems');
+  if (cContainer) cContainer.innerHTML = '';
+  if (channel) channel.postMessage({ type: 'c_problems_updated' });
+  showToast("C problems reset to defaults", 'info');
+  updateContentCounts();
+  renderAll();
+}
+
+/* ── Mystery Clues Upload Handler ── */
+function handleCluesUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("JSON must be an array of clue objects.");
+      }
+      localStorage.setItem('aiathlon_mystery_clues', JSON.stringify(data));
+      const cluesContainer = document.getElementById('r3Clues');
+      if (cluesContainer) cluesContainer.innerHTML = '';
+      if (channel) channel.postMessage({ type: 'clues_updated' });
+      showToast(`✅ Successfully loaded ${data.length} Mystery Clues!`, 'success');
+      updateContentCounts();
+      renderAll();
+    } catch (err) {
+      showToast(`Error loading clues: ${err.message}`, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetDefaultClues() {
+  if (!confirm("Reset mystery clues to defaults?")) return;
+  localStorage.removeItem('aiathlon_mystery_clues');
+  const cluesContainer = document.getElementById('r3Clues');
+  if (cluesContainer) cluesContainer.innerHTML = '';
+  if (channel) channel.postMessage({ type: 'clues_updated' });
+  showToast("Mystery clues reset to defaults", 'info');
+  updateContentCounts();
+  renderAll();
+}
+
+/* ── Sample Template File Generators ── */
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function downloadSampleQuizCSV() {
+  let csv = 'Category,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer\n';
+  csv += '"Reverse Prompting","An AI generated: \'def add(a, b): return a + b\'. What was the prompt?","Write a Python function to add two numbers","How do I write a web server?","Explain dynamic programming","Print hello world","A"\n';
+  csv += '"Spot the Hallucination","AI states: \'The square root of 64 is 12.\' Spot the error.","√64 is 8, not 12","√64 is 6","√64 is 10","No error","A"\n';
+  csv += '"Prompt Fix","A student prompt: \'code\'. How should it be refined for a simple hello world in C?","Write less code","Write a simple C program that prints Hello World","Give me python instead","Fix code","B"\n';
+  downloadFile('sample_quiz_questions.csv', csv, 'text/csv');
+}
+
+function downloadSampleQuizJSON() {
+  const sample = [
+    {
+      "category": "Reverse Prompting",
+      "text": "An AI returned: 'SELECT name FROM students WHERE gpa > 3.5'. What was the user prompt?",
+      "options": [
+        "Create student table in SQL",
+        "Write SQL to find students with GPA over 3.5",
+        "Explain joins in database",
+        "Delete student record"
+      ],
+      "answer": 1
+    },
+    {
+      "category": "Spot the Hallucination",
+      "text": "AI says: 'Binary search on a sorted array of 100 elements takes O(n^2) time.' What is wrong?",
+      "options": [
+        "Binary search takes O(log n) time",
+        "Binary search takes O(1) time",
+        "Nothing is wrong",
+        "Binary search cannot be run on arrays"
+      ],
+      "answer": 0
+    }
+  ];
+  downloadFile('sample_quiz_questions.json', JSON.stringify(sample, null, 2), 'application/json');
+}
+
+function downloadSampleCProblemsJSON() {
+  downloadFile('sample_c_problems.json', JSON.stringify(DEFAULT_C_PROBLEMS, null, 2), 'application/json');
+}
+
+function downloadSampleCluesJSON() {
+  downloadFile('sample_mystery_clues.json', JSON.stringify(DEFAULT_MYSTERY_CLUES, null, 2), 'application/json');
+}
+
+/* ── Rosters Admin Table ── */
+function renderAdminTeams() {
+  const teams = loadTeams();
+  const search = (document.getElementById('adminTeamSearch')?.value || '').toLowerCase();
+  let arr = Object.values(teams);
+  if (search) arr = arr.filter(t => (t.name || t.id).toLowerCase().includes(search) || (t.members || []).some(m => m.toLowerCase().includes(search)));
+
+  document.getElementById('adminTeamCount').textContent = Object.keys(teams).length;
+  const tbody = document.getElementById('adminTeamBody');
+  tbody.innerHTML = arr.map(t => {
+    const safeKey = escapeHtml(t.id);
+    const displayName = escapeHtml(t.name || t.id);
+    const membersList = (t.members || []).map(m => escapeHtml(m)).join(', ');
+    return `<tr>
+      <td class="team-id-cell" style="font-weight:700;">${displayName}</td>
+      <td class="font-mono">${escapeHtml(t.pin)}</td>
+      <td style="font-size:0.85rem">${membersList}</td>
+      <td><input type="number" style="width:60px" value="${t.r1.score}" onchange="adminUpdateField(this.dataset.id,'r1','score',this.value)" data-id="${safeKey}"></td>
+      <td class="time-cell">${formatTime(t.r1.timeMs)}</td>
+      <td>${t.r1.tabSwitches > 0 ? `<span class="badge badge-warn">⚠️ ${t.r1.tabSwitches}</span>` : '0'}</td>
+      <td><input type="number" style="width:60px" value="${t.r2.testCasesPassed}" onchange="adminUpdateField(this.dataset.id,'r2','testCasesPassed',this.value)" data-id="${safeKey}"></td>
+      <td><input type="number" style="width:60px" value="${t.r2.promptsUsed}" onchange="adminUpdateField(this.dataset.id,'r2','promptsUsed',this.value)" data-id="${safeKey}"></td>
+      <td>${t.r3.cluesUnlocked}/5</td>
+      <td class="time-cell">${formatTime(t.r3.timeMs)}</td>
+      <td><input type="number" style="width:60px" value="${t.r4.total}" onchange="adminUpdateJury(this.dataset.id,this.value)" data-id="${safeKey}"></td>
+      <td>
+        ${t.qualified.r1 === true ? '<span class="badge badge-qualified">R1✓</span>' : t.qualified.r1 === false ? '<span class="badge badge-eliminated">R1✗</span>' : '<span class="badge badge-pending">—</span>'}
+        ${t.qualified.r2 === true ? '<span class="badge badge-qualified">R2✓</span>' : ''}
+        ${t.qualified.r3 === true ? '<span class="badge badge-qualified">R3✓</span>' : ''}
+      </td>
+      <td><button class="btn btn-xs btn-danger" onclick="deleteTeam(this.dataset.id)" data-id="${safeKey}">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function adminUpdateField(teamId, round, field, val) {
+  const teams = loadTeams();
+  if (!teams[teamId]) return;
+  teams[teamId][round][field] = parseInt(val) || 0;
+  saveTeams(teams);
+  recalcQualifications();
+  renderAdminTeams();
+}
+
+function adminUpdateJury(teamId, val) {
+  const teams = loadTeams();
+  if (!teams[teamId]) return;
+  teams[teamId].r4.total = parseInt(val) || 0;
+  saveTeams(teams);
+}
+
+function deleteTeam(id) {
+  if (!confirm(`Delete squad "${id}"?`)) return;
+  const teams = loadTeams();
+  delete teams[id];
+  saveTeams(teams);
+  recalcQualifications();
+  renderAdminTeams();
+  showToast(`Squad removed from roster`, 'info');
+}
+
+function quickAddTeam() {
+  const name = document.getElementById('addTeamName').value.trim();
+  const pin = document.getElementById('addTeamPin').value.trim();
+  const m1 = document.getElementById('addMember1').value.trim();
+  const m2 = document.getElementById('addMember2').value.trim();
+  const m3 = (document.getElementById('addMember3')?.value || '').trim();
+  const m4 = (document.getElementById('addMember4')?.value || '').trim();
+  const dept = (document.getElementById('addDept')?.value || 'General').trim();
+
+  if (!name || !pin || !m1 || !m2) { showToast('Team Name, PIN, and at least 2 members are required!', 'error'); return; }
+  if (pin.length !== 4) { showToast('PIN must be 4 digits', 'error'); return; }
+
+  const teams = loadTeams();
+  const existingKey = Object.keys(teams).find(k => (teams[k].name || k).toLowerCase() === name.toLowerCase());
+  if (existingKey) { showToast('Team name already exists! Please choose a unique name.', 'error'); return; }
+
+  const quiz = getQuizBank();
+  R1_TOTAL_Q = quiz.length;
+
+  const members = [m1, m2];
+  if (m3) members.push(m3);
+  if (m4) members.push(m4);
+
+  const teamId = name;
+  teams[teamId] = {
+    id: teamId,
+    name: name,
+    pin: pin,
+    members: members,
+    dept: dept || 'General',
+    batch: null,
+    r1: { score: 0, totalQ: R1_TOTAL_Q, timeMs: 0, tabSwitches: 0, submitted: false, answers: {}, startTime: null },
+    r2: { testCasesPassed: 0, promptsUsed: 0, submissions: [], submitted: false, aiLink: '' },
+    r3: { cluesUnlocked: 0, hintsUsed: 0, timeMs: 0, startTime: null, submitted: false, answers: [] },
+    r4: { creativity: 0, technical: 0, presentation: 0, innovation: 0, teamwork: 0, total: 0 },
+    qualified: { r1: null, r2: null, r3: null }
+  };
+
+  saveTeams(teams);
+  renderAdminTeams();
+  showToast(`Team "${name}" provisioned successfully!`, 'success');
+  ['addTeamName','addTeamPin','addMember1','addMember2','addMember3','addMember4','addDept'].forEach(i => {
+    const el = document.getElementById(i);
+    if (el) el.value = '';
+  });
+}
+
+function applyAdjustment() {
+  const query = document.getElementById('adjTeamId').value.trim();
+  const round = parseInt(document.getElementById('adjRound').value);
+  const field = document.getElementById('adjField').value;
+  const val = parseInt(document.getElementById('adjValue').value) || 0;
+
+  if (!query) { showToast('Enter Team Name', 'error'); return; }
+
+  const teams = loadTeams();
+  const teamKey = Object.keys(teams).find(k => (teams[k].name || k).toLowerCase() === query.toLowerCase() || k.toLowerCase() === query.toLowerCase());
+  if (!teamKey || !teams[teamKey]) { showToast('Team not found!', 'error'); return; }
+  const t = teams[teamKey];
+
+  if (round === 1) {
+    if (field === 'score') t.r1.score = val;
+    else if (field === 'time') t.r1.timeMs = val;
+  } else if (round === 2) {
+    if (field === 'score') t.r2.testCasesPassed = val;
+    else if (field === 'prompts') t.r2.promptsUsed = val;
+  } else if (round === 3) {
+    if (field === 'hints') t.r3.hintsUsed = val;
+    else if (field === 'time') t.r3.timeMs = val;
+  } else if (round === 4) {
+    if (field === 'jury') t.r4.total = val;
+  }
+
+  saveTeams(teams);
+  recalcQualifications();
+  renderAll();
+  showToast(`Updated "${t.name || t.id}"`, 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CSV IMPORT & EXPORT FOR ROSTER
+   ═══════════════════════════════════════════════════════════════ */
+function handleCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    const teams = loadTeams();
+    let added = 0, skipped = 0;
+
+    const quiz = getQuizBank();
+    R1_TOTAL_Q = quiz.length;
+
+    lines.forEach(line => {
+      if (line.toLowerCase().startsWith('team') || line.toLowerCase().startsWith('name')) return;
+      const parts = line.split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+      if (parts.length < 3) return;
+
+      // Expected format: TeamName, PIN, Member1, Member2, [Member3], [Member4], [Dept]
+      const name = parts[0];
+      const pin = parts[1];
+      const m1 = parts[2];
+      const m2 = parts[3] || 'Partner 2';
+      const m3 = parts[4] || '';
+      const m4 = parts[5] || '';
+      const dept = parts[6] || 'General';
+
+      if (!name || !/^\d{4}$/.test(pin)) { skipped++; return; }
+      
+      const exists = Object.keys(teams).some(k => (teams[k].name || k).toLowerCase() === name.toLowerCase());
+      if (exists) { skipped++; return; }
+
+      const members = [m1, m2];
+      if (m3 && !m3.toLowerCase().startsWith('cse') && !m3.toLowerCase().startsWith('ece') && !m3.toLowerCase().startsWith('it')) members.push(m3);
+      if (m4) members.push(m4);
+
+      teams[name] = {
+        id: name,
+        name: name,
+        pin: pin,
+        members: members,
+        dept: dept,
+        batch: null,
+        r1: { score: 0, totalQ: R1_TOTAL_Q, timeMs: 0, tabSwitches: 0, submitted: false, answers: {}, startTime: null },
+        r2: { testCasesPassed: 0, promptsUsed: 0, submissions: [], submitted: false, aiLink: '' },
+        r3: { cluesUnlocked: 0, hintsUsed: 0, timeMs: 0, startTime: null, submitted: false, answers: [] },
+        r4: { creativity: 0, technical: 0, presentation: 0, innovation: 0, teamwork: 0, total: 0 },
+        qualified: { r1: null, r2: null, r3: null }
+      };
+      added++;
+    });
+
+    saveTeams(teams);
+    renderAdminTeams();
+    showToast(`Imported ${added} squads (${skipped} skipped/duplicates)`, 'success');
+    const preview = document.getElementById('csvPreview');
+    if (preview) {
+      preview.classList.remove('hidden');
+      preview.innerHTML = `<div class="card-subtle" style="padding:1rem;font-weight:600;color:var(--emerald)">
+        ✅ ${added} squads successfully imported. Total registered: ${Object.keys(teams).length}
+      </div>`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+const csvDrop = document.getElementById('csvDrop');
+if (csvDrop) {
+  csvDrop.addEventListener('dragover', e => { e.preventDefault(); csvDrop.classList.add('dragover'); });
+  csvDrop.addEventListener('dragleave', () => csvDrop.classList.remove('dragover'));
+  csvDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    csvDrop.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      handleCSV({ target: { files: [file] } });
+    } else {
+      showToast('Please provide a valid .csv file', 'error');
+    }
+  });
+}
+
+function exportCSV() {
+  const teams = loadTeams();
+  let csv = 'TeamName,PIN,Member1,Member2,Member3,Member4,Department,R1Score,R1Time,R1TabSwitches,R2Tests,R2Prompts,R3Clues,R3Time,R4Total\n';
+  Object.values(teams).forEach(t => {
+    const m = t.members || [];
+    const m1 = (m[0] || '').replace(/"/g, '""');
+    const m2 = (m[1] || '').replace(/"/g, '""');
+    const m3 = (m[2] || '').replace(/"/g, '""');
+    const m4 = (m[3] || '').replace(/"/g, '""');
+    const name = (t.name || t.id).replace(/"/g, '""');
+    csv += `"${name}",${t.pin},"${m1}","${m2}","${m3}","${m4}","${t.dept || 'General'}",${t.r1.score},${t.r1.timeMs},${t.r1.tabSwitches},${t.r2.testCasesPassed},${t.r2.promptsUsed},${t.r3.cluesUnlocked},${t.r3.timeMs},${t.r4.total}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aiathlon_squads_export.csv';
+  a.click();
+  showToast('Rosters exported to CSV!', 'success');
+}
+
+function resetAllData() {
+  if (!confirm('⚠️ Wipe ALL data and reset to fresh demo squads?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(EVENT_KEY);
+  localStorage.removeItem('aiathlon_login');
+  localStorage.removeItem('aiathlon_quiz_bank');
+  localStorage.removeItem('aiathlon_c_problems');
+  localStorage.removeItem('aiathlon_mystery_clues');
+  localStorage.removeItem('aiathlon_round_names');
+  loggedInTeam = null;
+  lastSeenEventState = defaultEventState();
+  updateLoginUI();
+  seedDemoTeams();
+  applyRoundNames();
+  if (channel) {
+    channel.postMessage({ type: 'teams_updated' });
+    channel.postMessage({ type: 'event_updated', event: defaultEventState() });
+    channel.postMessage({ type: 'names_updated', names: DEFAULT_ROUND_NAMES });
+  }
+  renderAll();
+  showToast('Tournament data reset to clean initial demo state', 'warn');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY & RENDER DISPATCHER
+   ═══════════════════════════════════════════════════════════════ */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function renderAll() {
+  renderCurrentPanel();
+  updateLoginUI();
+  updateLiveBanner();
+  updateContentCounts();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INITIALIZATION LIFECYCLE
+   ═══════════════════════════════════════════════════════════════ */
+(function init() {
+  initTheme();
+  seedDemoTeams();
+  applyRoundNames();
+
+  const savedLogin = localStorage.getItem('aiathlon_login');
+  if (savedLogin && loadTeams()[savedLogin]) {
+    loggedInTeam = savedLogin;
+  }
+
+  const initialEv = loadEvent();
+  lastSeenEventState = { ...initialEv };
+
+  updateLoginUI();
+  renderAll();
+
+  // Polling sync interval (Fast 1.5s interval for instant round start detection across all client devices)
+  setInterval(() => {
+    const ev = loadEvent();
+    checkEventStateTransition(ev);
+    renderAll();
+  }, 1500);
+})();
+</script>
+</body>
+</html>

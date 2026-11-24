@@ -1,0 +1,13 @@
+{
+  "name": "ai-athlon",
+  "version": "1.0.0",
+  "description": "AI-ATHLON: The Tech Triathlon - College 1st Year Flagship Event",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": ["ai-athlon", "tech-triathlon"],
+  "author": "",
+  "license": "ISC"
+}

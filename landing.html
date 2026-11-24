@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI-ATHLON: The Tech Triathlon — 1st Year Flagship Event</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   AI-ATHLON LANDING — ULTRA-CLEAN WHITE & LIGHT MODERN DESIGN
+   ═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  /* Light Theme (Default - Clean White Modern Aesthetic) */
+  --bg-deep: #ffffff;
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --border: #e2e8f0;
+  --border-focus: #4f46e5;
+  --border-subtle: #f1f5f9;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-glow: rgba(79, 70, 229, 0.16);
+  --primary-light: #eef2ff;
+
+  --cyan: #0284c7;
+  --cyan-light: #f0f9ff;
+  --cyan-border: #bae6fd;
+
+  --neon: #059669;
+  --neon-light: #ecfdf5;
+  --neon-border: #a7f3d0;
+
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --amber-border: #fde68a;
+
+  --crimson: #e11d48;
+  --crimson-light: #fff1f2;
+  --crimson-border: #fecdd3;
+
+  --indigo: #6366f1;
+
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-xl: 20px;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  --shadow-hover: 0 14px 28px -4px rgba(79, 70, 229, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] {
+  --bg-deep: #060913;
+  --bg-page: #060913;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-card-subtle: #0f172a;
+  --bg-glass: rgba(6, 9, 19, 0.92);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-focus: #00ff88;
+  --border-subtle: rgba(148, 163, 184, 0.08);
+
+  --primary: #00ff88;
+  --primary-hover: #00cc6a;
+  --primary-glow: rgba(0, 255, 136, 0.2);
+  --primary-light: rgba(0, 255, 136, 0.1);
+
+  --cyan: #00e5ff;
+  --cyan-light: rgba(0, 229, 255, 0.1);
+  --cyan-border: rgba(0, 229, 255, 0.3);
+
+  --neon: #00ff88;
+  --neon-light: rgba(0, 255, 136, 0.12);
+  --neon-border: rgba(0, 255, 136, 0.3);
+
+  --amber: #ffbe0b;
+  --amber-light: rgba(255, 190, 11, 0.12);
+  --amber-border: rgba(255, 190, 11, 0.3);
+
+  --crimson: #ff4d6d;
+  --crimson-light: rgba(255, 77, 109, 0.12);
+  --crimson-border: rgba(255, 77, 109, 0.3);
+
+  --indigo: #818cf8;
+
+  --text-main: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #475569;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+  --shadow-hover: 0 12px 30px rgba(0, 255, 136, 0.15), 0 0 0 1px var(--primary);
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  background-color: var(--bg-page);
+  color: var(--text-body);
+}
+
+body {
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  background-color: var(--bg-page);
+  background-image:
+    radial-gradient(ellipse 900px 600px at 15% 10%, rgba(99, 102, 241, 0.05), transparent),
+    radial-gradient(ellipse 800px 600px at 85% 20%, rgba(2, 132, 199, 0.05), transparent),
+    radial-gradient(ellipse 700px 700px at 50% 75%, rgba(5, 150, 105, 0.04), transparent);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+
+/* Subtle Perspective Grid Overlay */
+.cyber-grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, black 40%, transparent 100%);
+  z-index: 0;
+}
+[data-theme="dark"] .cyber-grid-overlay {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+}
+
+/* ── Typography & Display ── */
+h1, h2, h3, h4 { color: var(--text-main); font-weight: 800; letter-spacing: -0.025em; }
+.font-mono { font-family: var(--font-mono); }
+.text-neon { color: var(--neon); }
+.text-cyan { color: var(--cyan); }
+.text-amber { color: var(--amber); }
+
+/* ── Glass Cards & Surfaces ── */
+.glass {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+}
+.glass:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: var(--shadow-hover);
+}
+.glass-sm {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Sticky Navigation Bar ── */
+.nav-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+}
+.nav-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  padding: 0 1.5rem;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+.brand-pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--neon);
+  box-shadow: 0 0 10px var(--neon);
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.85); opacity: 0.4; }
+}
+.brand-title {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #4f46e5, #0284c7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme="dark"] .brand-title {
+  background: linear-gradient(135deg, var(--neon), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding-left: 0.35rem;
+  border-left: 1px solid var(--border);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-link {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition);
+}
+.nav-link:hover {
+  color: var(--primary);
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 0.58rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  color: #ffffff;
+  border: 1px solid #4338ca;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+  filter: brightness(1.05);
+}
+.btn-ghost {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--bg-card-subtle);
+  border-color: #cbd5e1;
+  color: var(--primary);
+}
+.btn-cyan {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border: 1px solid #0369a1;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+.btn-cyan:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+}
+.btn-lg {
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  border-radius: var(--radius);
+}
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-xs);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1.05rem;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-card-subtle);
+  transform: rotate(15deg);
+}
+
+/* ── Container Layout ── */
+.container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Hero Section ── */
+.hero-section {
+  padding: 4.5rem 0 3rem;
+  text-align: center;
+  position: relative;
+}
+.event-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.95rem;
+  background: var(--neon-light);
+  border: 1px solid var(--neon-border);
+  border-radius: 30px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--neon);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 1.5rem;
+}
+.hero-headline {
+  font-size: 3.75rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin-bottom: 1.25rem;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-headline .gradient-text {
+  background: linear-gradient(135deg, #0f172a 20%, #4f46e5 60%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme="dark"] .hero-headline .gradient-text {
+  background: linear-gradient(135deg, #ffffff 10%, var(--cyan) 60%, var(--neon) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-subtitle {
+  font-size: 1.18rem;
+  color: var(--text-body);
+  max-width: 780px;
+  margin: 0 auto 2.25rem;
+  line-height: 1.65;
+}
+.hero-subtitle strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+.hero-cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+/* Inline Team Quick-Launch Input */
+.quick-launch-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.35rem 0.35rem 1.15rem;
+  border-radius: var(--radius);
+  max-width: 480px;
+  margin: 0 auto 3.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  transition: var(--transition);
+}
+.quick-launch-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.quick-launch-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 600;
+  outline: none;
+  flex: 1;
+}
+.quick-launch-input::placeholder {
+  color: var(--text-faint);
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+
+/* 4-Metric Telemetry Strip */
+.telemetry-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+.telemetry-card {
+  padding: 1.5rem;
+  text-align: left;
+  border-left: 4px solid var(--cyan);
+  position: relative;
+  overflow: hidden;
+}
+.telemetry-card.card-neon { border-left-color: var(--neon); }
+.telemetry-card.card-amber { border-left-color: var(--amber); }
+.telemetry-card.card-indigo { border-left-color: var(--indigo); }
+.telemetry-num {
+  font-family: var(--font-mono);
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+.telemetry-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+}
+.telemetry-sub {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* ── Section Titles ── */
+.section-header {
+  text-align: center;
+  padding: 4.5rem 0 2.5rem;
+}
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  background: var(--primary-light);
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+}
+.section-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+.section-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+/* ── Elimination Funnel Visual Bar ── */
+.funnel-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.5rem auto 3rem;
+  flex-wrap: wrap;
+}
+.funnel-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+}
+.funnel-step.step-active {
+  border-color: var(--neon);
+  background: var(--neon-light);
+  color: var(--neon);
+}
+.funnel-arrow {
+  color: var(--cyan);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* ── Interactive 4-Round Roadmap Grid ── */
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+.round-card {
+  padding: 2.25rem 2rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.round-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.round-badge-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.badge-no-coding {
+  background: var(--cyan-light);
+  color: var(--cyan);
+  border: 1px solid var(--cyan-border);
+}
+.badge-basic-c {
+  background: var(--neon-light);
+  color: var(--neon);
+  border: 1px solid var(--neon-border);
+}
+.badge-finale {
+  background: var(--amber-light);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+.round-title-group h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+  color: var(--text-main);
+}
+.round-metrics {
+  display: flex;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.round-metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.round-desc {
+  font-size: 0.95rem;
+  color: var(--text-body);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+.round-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.round-tag {
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+}
+
+/* Expandable Duo Strategy Drawer */
+.duo-strategy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition);
+}
+.duo-strategy-toggle:hover {
+  color: var(--primary-hover);
+}
+.duo-strategy-drawer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.3s ease;
+  opacity: 0;
+  margin-top: 0;
+}
+.duo-strategy-drawer.open {
+  max-height: 250px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+.duo-roles-box {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+  font-size: 0.86rem;
+}
+.role-row {
+  display: flex;
+  gap: 0.65rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+.role-row:last-child { margin-bottom: 0; }
+.role-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 85px;
+}
+.role-tag.role-b { color: var(--cyan); }
+
+/* ── Fair-Play & Rules Grid ── */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+.rule-card {
+  padding: 2.25rem 2rem;
+  border-top: 4px solid var(--neon);
+}
+.rule-card.card-cyan { border-top-color: var(--cyan); }
+.rule-card.card-amber { border-top-color: var(--amber); }
+.rule-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.rule-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.6rem;
+  color: var(--text-main);
+}
+.rule-card p {
+  font-size: 0.92rem;
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+/* ── FAQ Accordion ── */
+.faq-wrap {
+  max-width: 860px;
+  margin: 0 auto 5rem;
+}
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.faq-question {
+  padding: 1.35rem 1.6rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+.faq-question:hover {
+  color: var(--primary);
+}
+.faq-chevron {
+  font-size: 0.85rem;
+  transition: transform 0.3s ease;
+  color: var(--text-muted);
+}
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.3s ease;
+  padding: 0 1.6rem;
+  font-size: 0.94rem;
+  color: var(--text-body);
+  line-height: 1.65;
+}
+.faq-item.open .faq-answer {
+  max-height: 220px;
+  padding: 0 1.6rem 1.4rem;
+}
+
+/* ── Ready To Compete Banner ── */
+.cta-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 3.75rem 2rem;
+  text-align: center;
+  box-shadow: 0 12px 36px -10px rgba(79, 70, 229, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  margin-bottom: 5rem;
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="dark"] .cta-banner {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(6, 9, 19, 0.95) 100%);
+  border-color: rgba(0, 255, 136, 0.25);
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(79, 70, 229, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Footer ── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 2.75rem 0;
+  background: var(--bg-card);
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+/* ── Responsive Mobile Optimization ── */
+@media (max-width: 992px) {
+  .hero-headline { font-size: 2.85rem; }
+  .telemetry-strip { grid-template-columns: repeat(2, 1fr); }
+  .roadmap-grid { grid-template-columns: 1fr; }
+  .rules-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .hero-headline { font-size: 2.2rem; }
+  .hero-subtitle { font-size: 1.02rem; }
+  .telemetry-strip { grid-template-columns: 1fr; }
+  .cta-banner { padding: 2.5rem 1.25rem; }
+  .funnel-flow { flex-direction: column; gap: 0.4rem; }
+  .funnel-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- Subtle Ambient Perspective Grid Overlay -->
+<div class="cyber-grid-overlay"></div>
+
+<!-- ═══ MINIMAL TOP NAVIGATION ═══ -->
+<nav class="nav-header">
+  <div class="nav-inner">
+    <a href="landing.html" class="nav-brand">
+      <span class="brand-pulse-dot"></span>
+      <span class="brand-title">AI-ATHLON</span>
+      <span class="brand-sub">TECH TRIATHLON 2026</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#roadmap" class="nav-link">The 4 Rounds</a>
+      <a href="#funnel" class="nav-link">Elimination Funnel</a>
+      <a href="#fairplay" class="nav-link">Tie-Breaking & Rules</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="index.html#panel-standings" class="btn btn-ghost">🏆 Live Standings</a>
+      <a href="index.html" class="btn btn-primary">Enter Portal</a>
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">🌓</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO SECTION ═══ -->
+<header class="hero-section">
+  <div class="container">
+    <div class="event-live-pill">
+      <span class="brand-pulse-dot" style="width:7px;height:7px"></span>
+      1st Year Flagship Event • 200+ Teams • Up to 4 Members Each
+    </div>
+
+    <h1 class="hero-headline">
+      <span class="gradient-text">Out-Prompt. Out-Debug. Out-Build.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      A high-intensity college tech triathlon built for first-year innovators. Form squads of 2 to 4 members to conquer 4 AI-charged arenas—where <strong>C programming is tested in only one round</strong> and speed breaks every tie.
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="index.html" class="btn btn-primary btn-lg">🚀 Enter Event Portal (Team Login)</a>
+      <a href="index.html#panel-standings" class="btn btn-ghost btn-lg">📊 Watch Live Leaderboard</a>
+    </div>
+
+    <!-- Quick Launch Bar for Students in Auditorium -->
+    <div class="quick-launch-bar">
+      <input type="text" id="quickTeamId" class="quick-launch-input" placeholder="Enter your Team Name (e.g. Neural Knights)" maxlength="30" autocomplete="off">
+      <button type="button" class="btn btn-cyan btn-sm" onclick="quickLaunch()">Launch ➔</button>
+    </div>
+
+    <!-- 4-Metric Telemetry Strip -->
+    <div class="telemetry-strip" id="funnel">
+      <div class="telemetry-card glass">
+        <div class="telemetry-num text-cyan">400+</div>
+        <div class="telemetry-label">First-Year Students</div>
+        <div class="telemetry-sub">200+ Squads Competing Side-by-Side</div>
+      </div>
+      <div class="telemetry-card card-neon glass">
+        <div class="telemetry-num text-neon">4</div>
+        <div class="telemetry-label">Distinct Arenas</div>
+        <div class="telemetry-sub">Zero Duplicate Challenges</div>
+      </div>
+      <div class="telemetry-card card-amber glass">
+        <div class="telemetry-num text-amber">1</div>
+        <div class="telemetry-label">C-Coding Round</div>
+        <div class="telemetry-sub">1st Year Beginner Syllabus Only</div>
+      </div>
+      <div class="telemetry-card card-indigo glass">
+        <div class="telemetry-num" style="color:var(--indigo)">100%</div>
+        <div class="telemetry-label">Live Telemetry</div>
+        <div class="telemetry-sub">Instant Tie-Breaking & Cutoffs</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ THE 4-STAGE ELIMINATION ROADMAP ═══ -->
+<section class="container" id="roadmap">
+  <div class="section-header">
+    <span class="section-tag">// TOURNAMENT ARCHITECTURE</span>
+    <h2 class="section-title">The 4-Stage Elimination Funnel</h2>
+    <p class="section-subtitle">
+      Only the fastest and sharpest duos survive each cutoff. Expand any card to inspect the recommended duo strategy.
+    </p>
+
+    <!-- Visual Funnel Progress Pill -->
+    <div class="funnel-flow">
+      <div class="funnel-step step-active">200 Teams Start</div>
+      <div class="funnel-arrow">➔</div>
+      <div class="funnel-step">Top 100 Advance</div>
+      <div class="funnel-arrow">➔</div>
+      <div class="funnel-step">Top 30 Advance</div>
+      <div class="funnel-arrow">➔</div>
+      <div class="funnel-step">Top 10 Finalists</div>
+      <div class="funnel-arrow">➔</div>
+      <div class="funnel-step" style="border-color:var(--amber);color:var(--amber)">🏆 Top 3 Podium</div>
+    </div>
+  </div>
+
+  <div class="roadmap-grid">
+    <!-- Round 1 -->
+    <div class="round-card glass" onclick="toggleDrawer(1)">
+      <div class="round-card-header">
+        <div class="round-title-group">
+          <h3>① AI Hallucination & Prompt Quiz</h3>
+          <div class="round-metrics">
+            <span>⏱️ 30:00 Mins</span> • <span>👥 200 → 100 Teams</span> • <span>📱 On Phone / PC</span>
+          </div>
+        </div>
+        <span class="round-badge-pill badge-no-coding">ZERO CODING</span>
+      </div>
+      <p class="round-desc">
+        Spot subtle AI logic hallucinations, catch bogus math traps, and reverse-engineer the prompt that generated a specific code snippet or diagram. 25 original scenarios shuffled deterministically by Team Name.
+      </p>
+      <div class="round-tags">
+        <span class="round-tag">Reverse Prompting</span>
+        <span class="round-tag">Spot The Hallucination</span>
+        <span class="round-tag">Prompt Fix Scenarios</span>
+        <span class="round-tag">Anti-Cheat Tab Tracking</span>
+      </div>
+      <button class="duo-strategy-toggle" type="button">
+        <span id="drawerIcon1">▸</span> Inspect Duo Role Strategy
+      </button>
+      <div class="duo-strategy-drawer" id="drawer1">
+        <div class="duo-roles-box">
+          <div class="role-row">
+            <span class="role-tag">PARTNER A:</span>
+            <span>Audits AI output for factual and mathematical hallucinations (calculates formulas manually).</span>
+          </div>
+          <div class="role-row">
+            <span class="role-tag role-b">PARTNER B:</span>
+            <span>Analyzes prompt nuance, tone constraints, and reverse-engineers system instructions.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round 2 -->
+    <div class="round-card glass" onclick="toggleDrawer(2)">
+      <div class="round-card-header">
+        <div class="round-title-group">
+          <h3>② C-Code Rescue Lab Arena</h3>
+          <div class="round-metrics">
+            <span>⏱️ 45:00 Mins</span> • <span>👥 100 → 30 Teams</span> • <span>💻 Lab Arena</span>
+          </div>
+        </div>
+        <span class="round-badge-pill badge-basic-c">BASIC C ONLY</span>
+      </div>
+      <p class="round-desc">
+        Qualifiers are split into Batch A and Batch B to fix 4 realistic broken beginner C programs (loops, if-else, 1D arrays, and strings). You can use ChatGPT or Gemini—but you have a strict limit of 2 prompts per bug!
+      </p>
+      <div class="round-tags">
+        <span class="round-tag">Odd/Even Batch Split</span>
+        <span class="round-tag">Max 2 Prompts / Bug</span>
+        <span class="round-tag">Share Link Proof</span>
+        <span class="round-tag">20 Hidden Test Cases</span>
+      </div>
+      <button class="duo-strategy-toggle" type="button">
+        <span id="drawerIcon2">▸</span> Inspect Duo Role Strategy
+      </button>
+      <div class="duo-strategy-drawer" id="drawer2">
+        <div class="duo-roles-box">
+          <div class="role-row">
+            <span class="role-tag">PARTNER A:</span>
+            <span>Spots syntax and logic traps (off-by-one errors, missing pointers, boundary checks).</span>
+          </div>
+          <div class="role-row">
+            <span class="role-tag role-b">PARTNER B:</span>
+            <span>Engineers the high-precision AI prompt containing the exact error symptoms without wasting your 2-prompt quota.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round 3 -->
+    <div class="round-card glass" onclick="toggleDrawer(3)">
+      <div class="round-card-header">
+        <div class="round-title-group">
+          <h3>③ Campus Mystery — 5-Clue AI Hunt</h3>
+          <div class="round-metrics">
+            <span>⏱️ 30:00 Mins</span> • <span>👥 30 → 10 Teams</span> • <span>🔍 Logic Hunt</span>
+          </div>
+        </div>
+        <span class="round-badge-pill badge-no-coding">ZERO CODING</span>
+      </div>
+      <p class="round-desc">
+        A sequential mystery across 5 encrypted clues: binary ASCII decodes, Caesar cipher shifts, boolean gate evaluations, sequence patterns, and a final vault formula. Speed is king—hints add +2 minute time penalties.
+      </p>
+      <div class="round-tags">
+        <span class="round-tag">Sequential Gates</span>
+        <span class="round-tag">Binary & Caesar Ciphers</span>
+        <span class="round-tag">Logic Gate Circuits</span>
+        <span class="round-tag">+2 Min Penalty Per Hint</span>
+      </div>
+      <button class="duo-strategy-toggle" type="button">
+        <span id="drawerIcon3">▸</span> Inspect Duo Role Strategy
+      </button>
+      <div class="duo-strategy-drawer" id="drawer3">
+        <div class="duo-roles-box">
+          <div class="role-row">
+            <span class="role-tag">PARTNER A:</span>
+            <span>Solves the cryptographic and mathematical decryption formulas (ASCII bytes, shifts).</span>
+          </div>
+          <div class="role-row">
+            <span class="role-tag role-b">PARTNER B:</span>
+            <span>Runs AI prompt queries for sequence identification and verifies answers before submission.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round 4 -->
+    <div class="round-card glass" onclick="toggleDrawer(4)">
+      <div class="round-card-header">
+        <div class="round-title-group">
+          <h3>④ Grand Finale — Champions Stage</h3>
+          <div class="round-metrics">
+            <span>⏱️ 60:00 Mins</span> • <span>👥 Top 10 → 3 Winners</span> • <span>🎤 Live Stage</span>
+          </div>
+        </div>
+        <span class="round-badge-pill badge-finale">STAGE DEMO</span>
+      </div>
+      <p class="round-desc">
+        The Top 10 duos build a working single-file interactive web tool using AI prompts. Then, on the auditorium main stage, teams execute a live 1-prompt surprise twist revealed by the jury, scored across 5 key pillars.
+      </p>
+      <div class="round-tags">
+        <span class="round-tag">Vibe-Coding Micro-App</span>
+        <span class="round-tag">Auditorium Projector</span>
+        <span class="round-tag">Live 1-Prompt Twist</span>
+        <span class="round-tag">50-Point Jury Matrix</span>
+      </div>
+      <button class="duo-strategy-toggle" type="button">
+        <span id="drawerIcon4">▸</span> Inspect Duo Role Strategy
+      </button>
+      <div class="duo-strategy-drawer" id="drawer4">
+        <div class="duo-roles-box">
+          <div class="role-row">
+            <span class="role-tag">PARTNER A:</span>
+            <span>Drives prompt engineering and handles real-time code iteration and debugging.</span>
+          </div>
+          <div class="role-row">
+            <span class="role-tag role-b">PARTNER B:</span>
+            <span>Presents the solution to the faculty jury and explains how the surprise twist was integrated.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW QUALIFICATION & TIE-BREAKING WORKS ═══ -->
+<section class="container" id="fairplay">
+  <div class="section-header">
+    <span class="section-tag">// FAIR-PLAY GUARANTEE</span>
+    <h2 class="section-title">Automated Tie-Breaking & Rules</h2>
+    <p class="section-subtitle">
+      Zero human bias. All 200 teams are evaluated through transparent algorithms executed in real-time.
+    </p>
+  </div>
+
+  <div class="rules-grid">
+    <div class="rule-card glass">
+      <div class="rule-icon">⚡</div>
+      <h3>Speed Breaks Every Tie</h3>
+      <p>
+        If two or more teams achieve the identical score, the leaderboard automatically ranks by the fastest recorded submission duration in <code>mm:ss</code>. Accuracy plus speed guarantees survival.
+      </p>
+    </div>
+
+    <div class="rule-card card-cyan glass">
+      <div class="rule-icon">🛡️</div>
+      <h3>Anti-Cheat & Balanced Batches</h3>
+      <p>
+        Questions and multiple-choice options are shuffled deterministically per Team Name so adjacent desks never see identical screens. Any browser tab switching is logged onto your final dossier.
+      </p>
+    </div>
+
+    <div class="rule-card card-amber glass">
+      <div class="rule-icon">⚖️</div>
+      <h3>Strict AI Prompt Budgets</h3>
+      <p>
+        In Round 2, you are limited to a maximum of 2 AI prompts per problem, verified via your shared conversation URL. In Round 3, hints reveal answers but append a permanent +2 minute hunt penalty.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FREQUENTLY ASKED QUESTIONS (ACCORDION) ═══ -->
+<section class="container" id="faq">
+  <div class="section-header">
+    <span class="section-tag">// INTEL BRIEFING</span>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-subtitle">
+      Everything first-year students need to know before the opening bell.
+    </p>
+  </div>
+
+  <div class="faq-wrap">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">
+        <span>Do we need prior knowledge of Machine Learning or Python?</span>
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-answer">
+        No! AI-ATHLON is strictly designed for college first-year students. You only need curiosity, analytical reasoning, and basic C programming (if-else, loops, arrays, strings) for Round 2.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">
+        <span>What if my partner has never written a line of C code?</span>
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-answer">
+        That is why you compete in duos! One partner can drive prompt crafting and error diagnosis while the other focuses on the C logic and test-case outputs.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">
+        <span>Can we use free versions of ChatGPT or Google Gemini?</span>
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-answer">
+        Yes! Free accounts on ChatGPT, Google Gemini, or Claude are 100% permitted. Just make sure to generate and save your conversation share link for prompt verification in Round 2.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">
+        <span>What hardware do we need to bring?</span>
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-answer">
+        For Round 1, any smartphone or tablet works smoothly. For Round 2 and onwards, you will be in the college computer lab with full desktop systems and high-speed campus internet provided.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA BANNER ═══ -->
+<section class="container">
+  <div class="cta-banner">
+    <h2 style="font-size:2.4rem;margin-bottom:0.75rem">Ready to Represent Your Section?</h2>
+    <p style="color:var(--text-body);font-size:1.1rem;max-width:600px;margin:0 auto 2rem">
+      Assemble your duo, review your basic C notes, and enter the official event portal to register your team.
+    </p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="index.html" class="btn btn-primary btn-lg">✨ Launch Event Portal</a>
+      <a href="index.html#panel-standings" class="btn btn-ghost btn-lg">📊 View Standings Board</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <strong style="color:var(--text-main);font-family:var(--font-mono)">AI-ATHLON: THE TECH TRIATHLON</strong><br>
+      <span style="font-size:0.8rem">Organized by Computer Science & Engineering Department • 2026</span>
+    </div>
+    <div style="display:flex;gap:1.5rem;font-size:0.85rem">
+      <a href="index.html" style="color:var(--primary);text-decoration:none;font-weight:600">Event Portal</a>
+      <a href="index.html#panel-standings" style="color:var(--text-muted);text-decoration:none">Live Standings</a>
+      <a href="#roadmap" style="color:var(--text-muted);text-decoration:none">Roadmap</a>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--neon);font-weight:700">
+      ● PORTAL ONLINE
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ JAVASCRIPT CONTROLLERS ═══ -->
+<script>
+// Theme switching
+function initTheme() {
+  const saved = localStorage.getItem('aiathlon_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('aiathlon_theme', next);
+  updateThemeIcon(next);
+}
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+// Toggle Duo Role Strategy Drawers
+function toggleDrawer(num) {
+  const drawer = document.getElementById('drawer' + num);
+  const icon = document.getElementById('drawerIcon' + num);
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+
+  // Close all drawers
+  for (let i = 1; i <= 4; i++) {
+    const d = document.getElementById('drawer' + i);
+    const ic = document.getElementById('drawerIcon' + i);
+    if (d) d.classList.remove('open');
+    if (ic) ic.textContent = '▸';
+  }
+
+  if (!isOpen) {
+    drawer.classList.add('open');
+    if (icon) icon.textContent = '▾';
+  }
+}
+
+// Toggle FAQ Accordion
+function toggleFaq(item) {
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  if (!isOpen) {
+    item.classList.add('open');
+  }
+}
+
+// Quick Launch Team Name helper
+function quickLaunch() {
+  const input = document.getElementById('quickTeamId');
+  const val = (input ? input.value : '').trim();
+  if (val) {
+    localStorage.setItem('aiathlon_login', val);
+  }
+  window.location.href = 'index.html';
+}
+
+const quickInput = document.getElementById('quickTeamId');
+if (quickInput) {
+  quickInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') quickLaunch();
+  });
+}
+
+// Initialize on page load
+initTheme();
+</script>
+</body>
+</html>
