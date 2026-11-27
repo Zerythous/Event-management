@@ -17,6 +17,9 @@ supabase/.branches/
 supabase/.temp/
 .supabase/
 
+# Landing page — kept local only, not pushed
+landing.html
+
 # OS / editor noise
 *.suo
 *.user

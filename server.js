@@ -11,8 +11,14 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.pdf': 'application/pdf',
+  '.webp': 'image/webp'
 };
 
 const server = http.createServer((req, res) => {
@@ -25,7 +31,6 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      // Fallback: try index.html if not found
       const fallbackPath = path.join(__dirname, 'index.html');
       fs.stat(fallbackPath, (fbErr, fbStats) => {
         if (!fbErr && fbStats.isFile()) {
@@ -48,9 +53,10 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`  🚀 AI-ATHLON: The Tech Triathlon is running!`);
-  console.log(`  - Landing Page:  http://localhost:${PORT}/landing.html`);
-  console.log(`  - Main Portal:   http://localhost:${PORT}/index.html`);
-  console.log(`  - Root (default): http://localhost:${PORT}/`);
+  console.log(`  Eventora & AI-ATHLON Server is running!`);
+  console.log(`  - Landing Page:     http://localhost:${PORT}/`);
+  console.log(`  - Eventora Home:    http://localhost:${PORT}/eventora/index.html`);
+  console.log(`  - Organizer Dash:   http://localhost:${PORT}/eventora/organizer-dashboard.html`);
+  console.log(`  - Participant Dash: http://localhost:${PORT}/eventora/participant-dashboard.html`);
   console.log(`======================================================\n`);
 });
