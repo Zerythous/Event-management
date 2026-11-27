@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventora — Discover. Participate. Create.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+  <style>
+    /* ── Landing Hero (Editorial Golden-Hour Composition + 3D Depth) ── */
+    .ev-hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 760px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background: #E8E6DC;
+    }
+
+    .ev-hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ev-hero-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 45%;
+      display: block;
+    }
+
+    /* Natural Atmospheric Sky Blend + Bottom Readability Vignette */
+    .ev-hero-sky-veil {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(246, 245, 239, 0.96) 0%,
+          rgba(246, 245, 239, 0.88) 31%,
+          rgba(246, 245, 239, 0.54) 48%,
+          rgba(24, 59, 42, 0.24) 74%,
+          rgba(16, 36, 24, 0.78) 100%
+        ),
+        radial-gradient(ellipse 72% 44% at 50% 24%, rgba(246, 245, 239, 0.85), transparent 74%);
+    }
+
+    /* Foreground Center Copy */
+    .ev-hero-center {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 1020px;
+      text-align: center;
+      padding: 6.25rem 1.25rem 1.5rem;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+      .ev-hero-center { padding-top: 6.75rem; }
+    }
+
+    .ev-hero-h1 {
+      font-family: var(--ev-font-display);
+      font-size: clamp(1.75rem, 6.2vw, 3.85rem);
+      font-weight: 500;
+      line-height: 1.06;
+      letter-spacing: -0.036em;
+      color: var(--ev-charcoal);
+      margin-bottom: 1rem;
+      overflow-wrap: break-word;
+    }
+    .ev-hero-h1-line2 {
+      display: block;
+      color: var(--ev-primary);
+      font-weight: 500;
+    }
+
+    .ev-hero-sub {
+      font-size: clamp(0.94rem, 1.25vw, 1.08rem);
+      line-height: 1.62;
+      color: var(--ev-charcoal);
+      max-width: 36rem;
+      margin: 0 auto;
+      text-shadow: 0 1px 18px rgba(246, 245, 239, 0.92);
+    }
+
+    /* Subtle Hero Bottom Bar (Editorial Split CTAs + Walkthrough Widget) */
+    .ev-hero-bottom {
+      position: relative;
+      z-index: 6;
+      padding: 2rem 0 2.5rem;
+    }
+    .ev-hero-bottom-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .ev-hero-bottom-inner {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+    }
+
+    .ev-hero-cta-block {
+      max-width: 26rem;
+      color: var(--ev-white);
+    }
+    .ev-hero-micro-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: rgba(246, 245, 239, 0.92);
+      margin-bottom: 0.55rem;
+    }
+    .ev-hero-cta-copy {
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.42;
+      color: var(--ev-white);
+      margin-bottom: 1.15rem;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    }
+    .ev-hero-cta-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+    }
+
+    .ev-walkthrough-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: rgba(24, 59, 42, 0.48);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      color: var(--ev-white);
+      border-radius: var(--ev-radius-pill);
+      padding: 0.55rem 1.05rem 0.55rem 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: transform 200ms var(--ev-ease), background-color 200ms ease;
+    }
+    .ev-walkthrough-trigger:hover {
+      background: rgba(24, 59, 42, 0.72);
+      transform: translateY(-2px);
+    }
+    .ev-play-dot {
+      width: 32px; height: 32px;
+      border-radius: var(--ev-radius-pill);
+      background: rgba(255, 255, 255, 0.22);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Floating Glass Preview Chip (Single Refined Accent in Lower-Right Above Trigger) */
+    .ev-hero-floating-card {
+      position: absolute;
+      right: 2.5rem;
+      bottom: 6.25rem;
+      z-index: 5;
+      display: none;
+      width: 248px;
+      padding: 0.95rem 1.1rem;
+      border-radius: var(--ev-radius-md);
+      background: rgba(246, 245, 239, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 22px 48px rgba(24, 59, 42, 0.18);
+      color: var(--ev-charcoal);
+    }
+    @media (min-width: 1200px) {
+      .ev-hero-floating-card { display: block; }
+    }
+
+    /* ── Landing Sections ── */
+    .ev-band {
+      padding: 5.5rem 0;
+    }
+    .ev-band-alt {
+      background: var(--ev-white);
+      border-top: 1px solid var(--ev-border);
+      border-bottom: 1px solid var(--ev-border);
+    }
+
+    .ev-section-head-split {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.75rem;
+    }
+
+    .ev-events-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.6rem;
+    }
+    @media (min-width: 720px) { .ev-events-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1080px) { .ev-events-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    /* Categories Grid */
+    .ev-cat-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+    @media (min-width: 600px) { .ev-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .ev-cat-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .ev-cat-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      background: var(--ev-cream);
+      border: 1px solid var(--ev-border);
+      border-radius: var(--ev-radius-md);
+      min-height: 176px;
+    }
+    .ev-cat-card:hover { background: var(--ev-white); }
+    .ev-cat-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: var(--ev-white);
+      border: 1px solid var(--ev-border);
+      color: var(--ev-forest);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      box-shadow: var(--ev-shadow-sm);
+    }
+    .ev-cat-title {
+      font-family: var(--ev-font-display);
+      font-size: 1.08rem;
+      font-weight: 600;
+      color: var(--ev-charcoal);
+      margin-bottom: 0.35rem;
+    }
+    .ev-cat-desc {
+      font-size: 0.82rem;
+      color: var(--ev-muted);
+      line-height: 1.5;
+    }
+
+    /* How Eventora Works Connected Timeline */
+    .ev-steps-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    @media (min-width: 768px) { .ev-steps-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1080px) { .ev-steps-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .ev-step-card {
+      padding: 1.75rem;
+      background: var(--ev-white);
+      border: 1px solid var(--ev-border);
+      border-radius: var(--ev-radius-lg);
+      box-shadow: var(--ev-shadow-sm);
+    }
+    .ev-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: var(--ev-radius-pill);
+      background: var(--ev-forest);
+      color: var(--ev-white);
+      font-family: var(--ev-font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1.1rem;
+    }
+    .ev-step-title {
+      font-family: var(--ev-font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--ev-charcoal);
+      margin-bottom: 0.45rem;
+    }
+    .ev-step-desc {
+      font-size: 0.88rem;
+      color: var(--ev-muted);
+      line-height: 1.55;
+    }
+
+    /* Colleges Strip */
+    .ev-colleges-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    @media (min-width: 768px) { .ev-colleges-grid { grid-template-columns: repeat(3, 1fr); } }
+    .ev-college-card {
+      padding: 1.5rem;
+      background: var(--ev-white);
+      border: 1px solid var(--ev-border);
+      border-radius: var(--ev-radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    /* Organizer Dashboard Split Showcase */
+    .ev-org-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .ev-org-split > *,
+    .ev-events-grid > *,
+    .ev-cat-grid > *,
+    .ev-steps-grid > *,
+    .ev-colleges-grid > * { min-width: 0; }
+    @media (min-width: 1024px) {
+      .ev-org-split { grid-template-columns: 0.95fr 1.15fr; }
+    }
+
+    .ev-cap-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem 1.25rem;
+      margin: 1.75rem 0 2rem;
+    }
+    @media (max-width: 520px) { .ev-cap-list { grid-template-columns: 1fr; } }
+    .ev-cap-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--ev-charcoal);
+    }
+    .ev-cap-check {
+      width: 22px; height: 22px;
+      border-radius: var(--ev-radius-pill);
+      background: var(--ev-sage-tint);
+      color: var(--ev-forest);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Interactive Organizer Preview Surface */
+    .ev-org-preview {
+      background: var(--ev-white);
+      border: 1px solid var(--ev-border-strong);
+      border-radius: var(--ev-radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--ev-shadow-lg);
+    }
+    .ev-org-preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--ev-border);
+      margin-bottom: 1.15rem;
+    }
+    .ev-preview-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.8rem 1rem;
+      background: var(--ev-cream);
+      border: 1px solid var(--ev-border);
+      border-radius: var(--ev-radius-sm);
+      margin-bottom: 0.65rem;
+    }
+    .ev-preview-row:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div id="evNavMount"></div>
+
+  <main>
+    <!-- ═══ SECTION 4 & 5: IMMERSIVE 3D HERO ═══ -->
+    <section class="ev-hero ev-hero-scene" id="evHeroStage">
+      <div class="ev-hero-bg">
+        <img
+          src="assets/hero-campus.jpg"
+          alt="University students gathered outdoors on a sunlit campus lawn during a collaborative festival"
+          class="ev-hero-photo ev-parallax-bg"
+        />
+      </div>
+
+      <div class="ev-hero-sky-veil"></div>
+
+      <!-- Subtle Living Golden-Hour Light Motes -->
+      <div class="ev-bokeh-field ev-parallax-mid" aria-hidden="true">
+        <span class="ev-bokeh b1"></span>
+        <span class="ev-bokeh b2"></span>
+        <span class="ev-bokeh b3"></span>
+        <span class="ev-bokeh b4"></span>
+      </div>
+
+      <!-- Hero Copy Layer -->
+      <div class="ev-hero-center ev-parallax-mid">
+        <h1 class="ev-hero-h1">
+          Discover. Participate. Create.
+          <span class="ev-hero-h1-line2">Make Every Event Count.</span>
+        </h1>
+        <p class="ev-hero-sub">
+          Discover hackathons, workshops, competitions and campus events. Find your community, build your skills and be part of something happening.
+        </p>
+      </div>
+
+      <!-- Refined Hero Floating Event Preview (Single 3D Depth Card) -->
+      <div class="ev-hero-floating-card ev-parallax-fore" aria-label="Featured sample preview">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.55rem;">
+          <span class="ev-badge ev-badge-open">Sample Event</span>
+          <span style="font-size:0.72rem;color:var(--ev-muted);font-weight:500;">3 Rounds</span>
+        </div>
+        <div style="font-family:var(--ev-font-display);font-weight:600;font-size:0.95rem;color:var(--ev-charcoal);margin-bottom:0.25rem;">
+          Solstice Campus Hackathon
+        </div>
+        <div style="font-size:0.76rem;color:var(--ev-muted);margin-bottom:0.75rem;">
+          Pacific Ridge Tech • Dec 12–14
+        </div>
+        <a href="event.html?slug=solstice-campus-hack" style="font-size:0.78rem;font-weight:600;color:var(--ev-forest);display:inline-flex;align-items:center;gap:0.35rem;">
+          View dynamic page &rarr;
+        </a>
+      </div>
+
+      <!-- Hero Bottom CTAs & Walkthrough Trigger -->
+      <div class="ev-hero-bottom ev-parallax-fore">
+        <div class="ev-container ev-hero-bottom-inner">
+          <div class="ev-hero-cta-block">
+            <div class="ev-hero-micro-kicker">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <span>Tech Events • Hackathons • Workshops</span>
+            </div>
+            <p class="ev-hero-cta-copy">
+              Be a part of the next big innovation happening across your campus community.
+            </p>
+            <div class="ev-hero-cta-actions">
+              <a href="discover.html" class="ev-btn ev-btn-sage ev-btn-lg">
+                Explore Events &rarr;
+              </a>
+              <a href="index.html#organizer" class="ev-btn ev-btn-link-light">
+                Organize an Event &rarr;
+              </a>
+            </div>
+          </div>
+
+          <button type="button" class="ev-walkthrough-trigger" data-open-walkthrough="true">
+            <span class="ev-play-dot">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px;"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </span>
+            <span>See how Eventora works • 1:20</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 6: FEATURED EVENTS ═══ -->
+    <section class="ev-band" id="featured">
+      <div class="ev-container">
+        <div class="ev-section-head-split ev-reveal">
+          <div>
+            <span class="ev-section-kicker">Featured Events</span>
+            <h2 class="ev-section-title">What's happening <span class="ev-accent">around you?</span></h2>
+            <p class="ev-section-sub">
+              Explore experiences worth showing up for. <span class="ev-badge ev-badge-sample" style="margin-left:0.4rem;">Illustrative Sample Listings</span>
+            </p>
+          </div>
+          <a href="discover.html" class="ev-btn ev-btn-outline">
+            Explore All Events &rarr;
+          </a>
+        </div>
+
+        <div class="ev-events-grid" id="evFeaturedGrid"></div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 7: EXPLORE EVENT CATEGORIES ═══ -->
+    <section class="ev-band ev-band-alt" id="categories">
+      <div class="ev-container">
+        <div class="ev-section-head-split ev-reveal">
+          <div>
+            <span class="ev-section-kicker">Browse By Format</span>
+            <h2 class="ev-section-title">Explore event <span class="ev-accent">categories</span></h2>
+            <p class="ev-section-sub">
+              Jump directly into live discovery filtered by the discipline, format, or campus community you care about.
+            </p>
+          </div>
+        </div>
+
+        <div class="ev-cat-grid" id="evCategoriesGrid"></div>
+      </div>
+    </section>
+
+    <!-- ═══ CAMPUS COMMUNITIES (COLLEGES ANCHOR) ═══ -->
+    <section class="ev-band" id="colleges">
+      <div class="ev-container">
+        <div class="ev-reveal" style="max-width:44rem;">
+          <span class="ev-section-kicker">Multi-Campus Ready</span>
+          <h2 class="ev-section-title">Designed for independent <span class="ev-accent">colleges &amp; clubs</span></h2>
+          <p class="ev-section-sub">
+            Every institution, department society, and festival team runs its own branded event experience without sharing hard-coded schedules or rigid competition templates.
+          </p>
+        </div>
+
+        <div class="ev-colleges-grid">
+          <div class="ev-3d-stage ev-reveal ev-delay-1">
+            <div class="ev-3d-card ev-college-card">
+              <span class="ev-badge ev-badge-sample" style="align-self:flex-start;">Example Institution</span>
+              <h3 style="font-family:var(--ev-font-display);font-size:1.15rem;font-weight:600;color:var(--ev-charcoal);">Pacific Ridge Tech</h3>
+              <p style="font-size:0.86rem;color:var(--ev-muted);">Multi-round 36-hour hackathons with mentor audits and team registration controls.</p>
+              <a href="event.html?slug=solstice-campus-hack" style="font-size:0.84rem;font-weight:600;color:var(--ev-forest);margin-top:auto;">Inspect sample event &rarr;</a>
+            </div>
+          </div>
+          <div class="ev-3d-stage ev-reveal ev-delay-2">
+            <div class="ev-3d-card ev-college-card">
+              <span class="ev-badge ev-badge-sample" style="align-self:flex-start;">Example Institution</span>
+              <h3 style="font-family:var(--ev-font-display);font-size:1.15rem;font-weight:600;color:var(--ev-charcoal);">Sahyadri Engineering</h3>
+              <p style="font-size:0.86rem;color:var(--ev-muted);">Tactile two-day hardware &amp; physical computing workshops for solo or duo makers.</p>
+              <a href="event.html?slug=verdant-hardware-design-lab" style="font-size:0.84rem;font-weight:600;color:var(--ev-forest);margin-top:auto;">Inspect sample event &rarr;</a>
+            </div>
+          </div>
+          <div class="ev-3d-stage ev-reveal ev-delay-3">
+            <div class="ev-3d-card ev-college-card">
+              <span class="ev-badge ev-badge-sample" style="align-self:flex-start;">Example Institution</span>
+              <h3 style="font-family:var(--ev-font-display);font-size:1.15rem;font-weight:600;color:var(--ev-charcoal);">Central SciEng Campus</h3>
+              <p style="font-size:0.86rem;color:var(--ev-muted);">Zero-round open research seminars and guest speaker lecture schedules.</p>
+              <a href="event.html?slug=sustainable-systems-colloquium" style="font-size:0.84rem;font-weight:600;color:var(--ev-forest);margin-top:auto;">Inspect sample event &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 8: HOW EVENTORA WORKS ═══ -->
+    <section class="ev-band ev-band-alt" id="how-it-works">
+      <div class="ev-container">
+        <div class="ev-reveal" style="text-align:center;max-width:40rem;margin:0 auto;">
+          <span class="ev-section-kicker">Participant Journey</span>
+          <h2 class="ev-section-title">How <span class="ev-accent">Eventora</span> works</h2>
+          <p class="ev-section-sub" style="margin:0 auto;">
+            A calm, clear path from discovering campus experiences to competing across configured stages.
+          </p>
+        </div>
+
+        <div class="ev-steps-grid">
+          <div class="ev-3d-stage ev-reveal ev-delay-1">
+            <div class="ev-3d-card ev-step-card">
+              <div class="ev-step-num">01</div>
+              <h3 class="ev-step-title">Discover</h3>
+              <p class="ev-step-desc">Find events that match your interests across hackathons, coding opens, workshops, and seminars.</p>
+            </div>
+          </div>
+          <div class="ev-3d-stage ev-reveal ev-delay-2">
+            <div class="ev-3d-card ev-step-card">
+              <div class="ev-step-num">02</div>
+              <h3 class="ev-step-title">Join</h3>
+              <p class="ev-step-desc">Register individually or form and join a squad when team collaboration is enabled for that event.</p>
+            </div>
+          </div>
+          <div class="ev-3d-stage ev-reveal ev-delay-3">
+            <div class="ev-3d-card ev-step-card">
+              <div class="ev-step-num">03</div>
+              <h3 class="ev-step-title">Participate</h3>
+              <p class="ev-step-desc">Attend workshops, follow dynamic schedules, and advance cleanly through organizer-configured rounds.</p>
+            </div>
+          </div>
+          <div class="ev-3d-stage ev-reveal ev-delay-4">
+            <div class="ev-3d-card ev-step-card">
+              <div class="ev-step-num">04</div>
+              <h3 class="ev-step-title">Achieve</h3>
+              <p class="ev-step-desc">Track your progress, verified round evaluations, and published results when scoring is enabled.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 9: ORGANIZER EXPERIENCE ═══ -->
+    <section class="ev-band" id="organizer">
+      <div class="ev-container ev-org-split">
+        <div class="ev-reveal">
+          <span class="ev-section-kicker">Organizer Studio</span>
+          <h2 class="ev-section-title">Your event deserves more than <span class="ev-accent">spreadsheets.</span></h2>
+          <p class="ev-section-sub">
+            From registrations to rounds and results, manage your event from one place.
+          </p>
+
+          <div class="ev-cap-list">
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Create &amp; brand events</div>
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Create &amp; name rounds</div>
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Manage registrations</div>
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Organize participants &amp; teams</div>
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Assign event managers</div>
+            <div class="ev-cap-item"><span class="ev-cap-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Configure access &amp; results</div>
+          </div>
+
+          <button type="button" class="ev-btn ev-btn-forest ev-btn-lg" data-open-create="true">
+            Create Your Event &rarr;
+          </button>
+        </div>
+
+        <!-- Realistic 3D Organizer Dashboard Preview (UI Visualization) -->
+        <div class="ev-reveal ev-delay-2">
+          <div class="ev-org-preview ev-dashboard-3d">
+            <div class="ev-org-preview-head">
+              <div>
+                <span class="ev-badge ev-badge-sample" style="margin-bottom:0.35rem;">Interactive UI Preview (Sample State)</span>
+                <div style="font-family:var(--ev-font-display);font-weight:600;font-size:1.1rem;color:var(--ev-charcoal);">Solstice Campus Hackathon — Admin Console</div>
+              </div>
+              <div class="ev-tabs" style="border-bottom:none;">
+                <button type="button" class="ev-tab-btn is-active" data-org-tab="rounds" style="padding:0.45rem 0.8rem;font-size:0.82rem;">Rounds</button>
+                <button type="button" class="ev-tab-btn" data-org-tab="teams" style="padding:0.45rem 0.8rem;font-size:0.82rem;">Teams</button>
+                <button type="button" class="ev-tab-btn" data-org-tab="managers" style="padding:0.45rem 0.8rem;font-size:0.82rem;">Managers</button>
+              </div>
+            </div>
+
+            <div id="evOrgPreviewBody"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="evFooterMount"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/file-store.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script>
+    (function initLandingPage() {
+      EventoraUI.mountShell('home');
+
+      // Populate Featured Events (hydrate from Supabase if active)
+      const featuredGrid = document.getElementById('evFeaturedGrid');
+      function renderFeaturedGrid() {
+        if (!featuredGrid) return;
+        const featured = EventoraStore.getFeaturedEvents();
+        if (featured.length === 0) {
+          featuredGrid.innerHTML = `<div class="ev-ws-card" style="grid-column:1/-1;text-align:center;padding:2rem;"><p style="color:var(--ev-muted);margin:0;">No published events available yet.</p></div>`;
+          return;
+        }
+        featuredGrid.innerHTML = featured.map((ev, i) => `
+          <div class="ev-reveal ev-delay-${(i % 3) + 1} is-visible">
+            ${EventoraUI.renderEventCard(ev)}
+          </div>
+        `).join('');
+        EventoraMotion.bindCardTilts(featuredGrid);
+      }
+      renderFeaturedGrid();
+      if (window.EventoraSync) {
+        window.EventoraSync.hydratePublicCatalog({}).then((res) => {
+          if (res && res.mode === 'supabase' && res.ok) {
+            renderFeaturedGrid();
+            if (window.EventoraRealtime) {
+              window.EventoraRealtime.subscribePublicCatalog({
+                scopeKey: 'home-public-catalog',
+                onChange: async () => {
+                  await window.EventoraSync.hydratePublicCatalog({});
+                  renderFeaturedGrid();
+                }
+              });
+            }
+          }
+        });
+      }
+
+      // Populate Categories Grid (Clicking navigates & filters Discovery)
+      const catGrid = document.getElementById('evCategoriesGrid');
+      if (catGrid) {
+        catGrid.innerHTML = EventoraStore.getCategories().map((cat, i) => `
+          <div class="ev-3d-stage ev-reveal ev-delay-${(i % 4) + 1}">
+            <a href="discover.html?category=${encodeURIComponent(cat.slug)}" class="ev-3d-card ev-cat-card">
+              <div>
+                <div class="ev-cat-icon">${EventoraUI.icon(cat.icon)}</div>
+                <div class="ev-cat-title">${EventoraUI.escapeHTML(cat.name)}</div>
+                <p class="ev-cat-desc">${EventoraUI.escapeHTML(cat.description)}</p>
+              </div>
+              <div style="margin-top:1rem;font-size:0.8rem;font-weight:600;color:var(--ev-forest);display:inline-flex;align-items:center;gap:0.35rem;">
+                Explore ${EventoraUI.icon('arrowRight')}
+              </div>
+            </a>
+          </div>
+        `).join('');
+      }
+
+      // Interactive Organizer Dashboard Preview Switcher (UI Visualization)
+      const orgBody = document.getElementById('evOrgPreviewBody');
+      const orgTabs = document.querySelectorAll('[data-org-tab]');
+      const ORG_VIEWS = {
+        rounds: `
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Stage 1 • Architecture Framing</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">Proposal Screening • 4 Hours</div>
+            </div>
+            <span class="ev-badge ev-badge-open">Configured</span>
+          </div>
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Stage 2 • Working Prototype</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">Mentor Technical Audit • 24 Hours</div>
+            </div>
+            <span class="ev-badge ev-badge-open">Configured</span>
+          </div>
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Stage 3 • Open Lawn Demo Finale</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">Jury Rubric Scoring • Top 12</div>
+            </div>
+            <span class="ev-badge ev-badge-filling">Pending Stage</span>
+          </div>
+        `,
+        teams: `
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Canopy Systems (Sample Squad)</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">3 Members • Team Format 2–4</div>
+            </div>
+            <span class="ev-badge ev-badge-open">Approved</span>
+          </div>
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Veridian Robotics (Sample Squad)</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">4 Members • Team Format 2–4</div>
+            </div>
+            <span class="ev-badge ev-badge-filling">Pending Review</span>
+          </div>
+          <div style="padding-top:0.5rem;font-size:0.78rem;color:var(--ev-muted);">
+            Organizer preview controls illustrate how registration statuses and squads are reviewed.
+          </div>
+        `,
+        managers: `
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Ananya Deshmukh</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">Lead Organizer • Full Event Access</div>
+            </div>
+            <span class="ev-badge ev-badge-open">Owner</span>
+          </div>
+          <div class="ev-preview-row">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);">Dr. Rohan Kulkarni</div>
+              <div style="font-size:0.78rem;color:var(--ev-muted);">Assigned Scope • Stage 3 Jury Rubric</div>
+            </div>
+            <span class="ev-badge ev-badge-category" style="border:1px solid var(--ev-border);">Judge</span>
+          </div>
+        `
+      };
+
+      function renderOrgTab(tabName) {
+        orgTabs.forEach((b) => b.classList.toggle('is-active', b.dataset.orgTab === tabName));
+        if (orgBody) orgBody.innerHTML = ORG_VIEWS[tabName] || ORG_VIEWS.rounds;
+      }
+      orgTabs.forEach((b) => b.addEventListener('click', () => renderOrgTab(b.dataset.orgTab)));
+      renderOrgTab('rounds');
+
+      EventoraMotion.initAll(document.getElementById('evHeroStage'));
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Participant Dashboard — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evParticipantRoot"></div>
+  <div id="evModalsMount"></div>
+  <div id="evParticipantPortalMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/file-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/registrations-api.js"></script>
+  <script src="scripts/teams-api.js"></script>
+  <script src="scripts/round-content-api.js"></script>
+  <script src="scripts/submissions-api.js"></script>
+  <script src="scripts/evaluations-api.js"></script>
+  <script src="scripts/qualification-api.js"></script>
+  <script src="scripts/leaderboard-api.js"></script>
+  <script src="scripts/announcements-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script src="scripts/participant-round-portal.js"></script>
+  <script>
+    (function initParticipantDashboard() {
+      const rootEl = document.getElementById('evParticipantRoot');
+      const modalsMount = document.getElementById('evModalsMount');
+
+      if (modalsMount && !modalsMount.innerHTML.trim()) {
+        EventoraUI.mountShell('participant');
+        const navM = document.getElementById('evNavMount');
+        const footM = document.getElementById('evFooterMount');
+        if (navM) navM.innerHTML = '';
+        if (footM) footM.innerHTML = '';
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const validSections = new Set(['overview', 'browse', 'registrations', 'teams', 'activity']);
+      let activeSection = validSections.has(params.get('section')) ? params.get('section') : 'overview';
+      let browseQuery = '';
+      let browseCategory = 'all';
+      let regStatusFilter = 'all';
+      let detailRegSlug = '';
+      const preRegId = params.get('reg') || '';
+      let shellCtrl = null;
+
+      const NAV_GROUPS = [
+        {
+          title: 'Participant Hub',
+          items: [
+            { id: 'overview', label: 'Overview', icon: 'overview' },
+            { id: 'browse', label: 'Browse Events', icon: 'events' }
+          ]
+        },
+        {
+          title: 'Participation',
+          items: [
+            { id: 'registrations', label: 'My Registrations', icon: 'registration' },
+            { id: 'teams', label: 'My Teams', icon: 'teams' },
+            { id: 'activity', label: 'My Activity', icon: 'rounds' }
+          ]
+        }
+      ];
+
+      const SECTION_TITLES = {
+        overview: 'Participant Dashboard',
+        browse: 'Discover Campus Events',
+        registrations: 'My Registrations',
+        teams: 'My Teams & Squads',
+        activity: 'My Event Activity'
+      };
+
+      function getStatusBadge(st) {
+        if (st === 'Approved') return 'ev-badge-open';
+        if (st === 'Waitlisted') return 'ev-badge-filling';
+        if (st === 'Rejected' || st === 'Cancelled') return 'ev-badge-closed';
+        return 'ev-badge-sample';
+      }
+
+      function formatDate(iso) {
+        if (!iso) return 'N/A';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return String(iso);
+        return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+      }
+
+      function renderActionForEvent(ev, user, compact) {
+        const avail = EventoraStore.evaluateRegistrationAvailability(ev, user);
+        if (avail.state === 'already_registered' && avail.existingRegistration) {
+          return `<button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-p-view-reg="${escSlug(ev.slug)}">${compact ? 'View Reg' : 'View My Registration'}</button>`;
+        }
+        if (avail.state === 'waitlist_available') {
+          return `<a href="register.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">Join Waitlist</a>`;
+        }
+        if (avail.canRegister) {
+          return `<a href="register.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">${avail.state === 'cancelled_can_reapply' ? 'Register Again' : 'Register Now'}</a>`;
+        }
+        return `<button type="button" class="ev-btn ev-btn-outline ev-btn-sm" disabled style="opacity:0.6;cursor:not-allowed;">Closed</button>`;
+      }
+
+      function escSlug(s) {
+        return EventoraUI.escapeHTML(s || '');
+      }
+
+      function renderRegistrationDetailsView(user, entry) {
+        const esc = EventoraUI.escapeHTML;
+        const { event: ev, registration: reg, team } = entry;
+        const canCancelCheck = EventoraStore.isCancellationAllowedNow(ev, reg);
+        const canEdit = reg.registrationStatus !== 'Cancelled' && reg.registrationStatus !== 'Rejected' && ev.statusKey !== 'cancelled' && ev.statusKey !== 'completed';
+        const fields = ev.registrationConfig.formFields || [];
+        const pMap = new Map((ev.participants || []).map((p) => [p.id, p]));
+        const teamMembers = team ? (team.memberIds || []).map((id) => pMap.get(id)).filter(Boolean) : [];
+        const leader = team && team.teamLeaderId ? pMap.get(team.teamLeaderId) : null;
+
+        let statusBanner = '';
+        if (reg.registrationStatus === 'Approved') {
+          statusBanner = `<div class="ev-auth-status is-success"><span><strong>Registration Confirmed:</strong> ${esc(ev.registrationConfig.confirmationMessage)} (Stored locally; no email notification sent.)</span></div>`;
+        } else if (reg.registrationStatus === 'Waitlisted') {
+          statusBanner = `<div class="ev-auth-status is-info"><span><strong>Waitlisted:</strong> Confirmed seats are currently full. You remain visible to the event organizer in the waitlist queue.</span></div>`;
+        } else if (reg.registrationStatus === 'Rejected') {
+          statusBanner = `<div class="ev-auth-status is-error"><span><strong>Registration Rejected:</strong> The event organizer marked this submission as Rejected.</span></div>`;
+        } else if (reg.registrationStatus === 'Cancelled') {
+          statusBanner = `<div class="ev-auth-status is-error"><span><strong>Registration Cancelled:</strong> Cancelled on ${esc(formatDate(reg.cancellation && reg.cancellation.cancelledAt))}.</span></div>`;
+        } else {
+          statusBanner = `<div class="ev-auth-status is-info"><span><strong>Pending Organizer Approval:</strong> Your registration was received locally and awaits organizer approval.</span></div>`;
+        }
+
+        return `
+          <div class="ev-ws-card">
+            <div class="ev-ws-card-head">
+              <div>
+                <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+                  <span class="ev-badge ${esc(getStatusBadge(reg.registrationStatus))}">${esc(reg.registrationStatus)}</span>
+                  <span class="ev-rb-id-chip">Reg ID: <code>${esc(reg.registrationId)}</code></span>
+                </div>
+                <h2 class="ev-display" style="font-size:1.45rem;font-weight:600;">${esc(ev.name)}</h2>
+                <p style="font-size:0.84rem;color:var(--ev-muted);margin-top:0.2rem;">${esc(ev.dateLabel)} &bull; ${esc(ev.location)} (${esc(ev.mode)})</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evRegDetailBackBtn">&larr; All My Registrations</button>
+                <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">View Event Page &rarr;</a>
+              </div>
+            </div>
+
+            <div style="margin-bottom:1.15rem;">${statusBanner}</div>
+
+            <div class="ev-pt-detail-grid" style="margin-bottom:1.15rem;">
+              <div><span class="ev-pt-kv-label">Registration ID</span><strong class="ev-pt-kv-val">${esc(reg.registrationId)}</strong></div>
+              <div><span class="ev-pt-kv-label">Registered On</span><strong class="ev-pt-kv-val">${esc(formatDate(reg.registeredAt))}</strong></div>
+              <div><span class="ev-pt-kv-label">Participation Mode</span><strong class="ev-pt-kv-val">${esc(ev.teamConfig.label)}</strong></div>
+              <div><span class="ev-pt-kv-label">Cancellation Eligibility</span><strong class="ev-pt-kv-val">${canCancelCheck.allowed ? 'Eligible to cancel' : esc(canCancelCheck.reason)}</strong></div>
+            </div>
+
+            ${ev.teamConfig.supported ? `
+              <div class="ev-rb-subpanel" style="margin-bottom:1.15rem;">
+                <div class="ev-rb-subhead">
+                  <span>Team Details</span>
+                  <span class="ev-rb-subnote">${esc(ev.teamConfig.label)}</span>
+                </div>
+                ${team ? `
+                  <div style="font-size:0.9rem;color:var(--ev-charcoal);font-weight:600;">${esc(team.teamName)} (${team.memberIds.length}/${team.maxTeamSize} members &bull; ${esc(team.status)})</div>
+                  <div style="font-size:0.8rem;color:var(--ev-muted);margin-top:0.25rem;">Leader: ${leader ? esc(leader.fullName) : 'Unassigned'} &bull; Members: ${teamMembers.map((m) => esc(m.fullName)).join(', ') || 'None'}</div>
+                ` : `<div style="font-size:0.84rem;color:var(--ev-muted);">Not currently assigned to a team. Manage squads inside My Teams where permitted.</div>`}
+              </div>
+            ` : ''}
+
+            <div class="ev-rb-subpanel" style="margin-bottom:1.15rem;">
+              <div class="ev-rb-subhead">
+                <span>Submitted Registration Details</span>
+                <span class="ev-rb-subnote">Your submitted profile &amp; custom answers</span>
+              </div>
+              <div class="ev-pt-detail-grid" style="background:var(--ev-white);">
+                ${fields.filter((f) => f.enabled !== false).map((f) => {
+                  const val = reg.submittedData && reg.submittedData[f.key] !== undefined
+                    ? reg.submittedData[f.key]
+                    : (f.key === 'fullName' ? reg.fullName : (f.key === 'email' ? reg.email : (reg.metadata && reg.metadata[f.key])));
+                  const disp = f.fieldType === 'checkbox' ? (val ? 'Yes' : 'No') : (String(val || '').trim() || 'Not provided');
+                  return `<div><span class="ev-pt-kv-label">${esc(f.label)}</span><strong class="ev-pt-kv-val">${esc(disp)}</strong></div>`;
+                }).join('')}
+              </div>
+            </div>
+
+            <div style="padding:0.95rem 1rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);margin-bottom:1.15rem;">
+              <div class="ev-pt-kv-label">Organizer Registration Instructions</div>
+              <p style="font-size:0.84rem;color:var(--ev-body);line-height:1.55;">${esc(ev.registrationConfig.registrationInstructions)}</p>
+            </div>
+
+            <div style="display:flex;gap:0.65rem;flex-wrap:wrap;justify-content:flex-end;">
+              ${canEdit ? `<a href="register.html?slug=${encodeURIComponent(ev.slug)}&edit=1" class="ev-btn ev-btn-forest ev-btn-sm">Edit Registration</a>` : ''}
+              ${canCancelCheck.allowed ? `<button type="button" class="ev-btn ev-btn-outline ev-btn-sm ev-rb-btn-danger" id="evRegDetailCancelBtn" data-p-cancel="${esc(ev.slug)}">Cancel Registration</button>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSectionContent(user) {
+        if (!shellCtrl || !shellCtrl.bodyMount || !user) return;
+        const esc = EventoraUI.escapeHTML;
+        const myRegs = EventoraStore.getUserRegistrations(user);
+        const myTeams = EventoraStore.getUserTeams(user);
+        const allEvents = EventoraStore.getAllEvents();
+        const categories = EventoraStore.getCategories ? EventoraStore.getCategories() : [];
+        const activeRegs = myRegs.filter((r) => r.registration.registrationStatus !== 'Cancelled' && r.registration.registrationStatus !== 'Rejected');
+
+        if (preRegId && !detailRegSlug && activeSection === 'registrations') {
+          const matched = myRegs.find((item) => item.registration.registrationId === preRegId);
+          if (matched) detailRegSlug = matched.event.slug;
+        }
+
+        if (activeSection === 'overview') {
+          const featured = allEvents.slice(0, 3);
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card" style="margin-bottom:1.5rem;background:linear-gradient(135deg, #FFFFFF 0%, rgba(146,169,139,0.14) 100%);">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1.25rem;flex-wrap:wrap;">
+                <div style="max-width:40rem;">
+                  <span class="ev-badge ev-badge-open" style="margin-bottom:0.55rem;">Verified Participant</span>
+                  <h2 class="ev-display" style="font-size:clamp(1.5rem,2.6vw,2.05rem);font-weight:600;color:var(--ev-charcoal);">
+                    Welcome back, ${esc(user.fullName)}
+                  </h2>
+                  <p style="font-size:0.9rem;color:var(--ev-muted);margin-top:0.35rem;line-height:1.58;">
+                    Discover events, complete multi-step registration, join or manage permitted teams, and track registration approval statuses from one hub.
+                  </p>
+                </div>
+                <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+                  <button type="button" class="ev-btn ev-btn-forest" data-jump-section="browse">Browse Events &rarr;</button>
+                  <a href="profile.html" class="ev-btn ev-btn-outline">Edit Profile</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="ev-stat-grid">
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">My Registrations</div>
+                <div class="ev-stat-value">${myRegs.length}</div>
+                <div class="ev-stat-sub">${activeRegs.length} active pass(es)</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">My Teams</div>
+                <div class="ev-stat-value">${myTeams.length}</div>
+                <div class="ev-stat-sub">Synced with event squads</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Upcoming Events</div>
+                <div class="ev-stat-value">${allEvents.length}</div>
+                <div class="ev-stat-sub">Available on Eventora</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Account Role</div>
+                <div class="ev-stat-value" style="font-size:1.25rem;padding-top:0.35rem;">Participant</div>
+                <div class="ev-stat-sub">${user.emailConfirmed ? 'Verified account' : 'Check email verification'}</div>
+              </div>
+            </div>
+
+            <div class="ev-ws-split">
+              <div class="ev-ws-card">
+                <div class="ev-ws-card-head">
+                  <div>
+                    <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Upcoming Events For You</h2>
+                    <p style="font-size:0.82rem;color:var(--ev-muted);">Register directly or manage your existing event passes.</p>
+                  </div>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="browse">Explore All &rarr;</button>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:0.85rem;">
+                  ${featured.map((ev) => {
+                    const avail = EventoraStore.evaluateRegistrationAvailability(ev, user);
+                    const regSt = avail.state === 'already_registered' && avail.existingRegistration ? avail.existingRegistration.registrationStatus : null;
+                    return `
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.9rem 1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        <div style="display:flex;align-items:center;gap:0.85rem;min-width:0;flex:1 1 230px;">
+                          <div style="width:82px;flex-shrink:0;border-radius:10px;overflow:hidden;aspect-ratio:16/9;">
+                            ${EventoraWorkspace.renderPosterThumbHTML(ev, 'aspect-ratio:16/9;')}
+                          </div>
+                          <div style="min-width:0;">
+                            <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+                              <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                              <span class="ev-badge ${regSt ? esc(getStatusBadge(regSt)) : 'ev-badge-sample'}">${regSt ? `Registered • ${esc(regSt)}` : esc(ev.mode)}</span>
+                            </div>
+                            <div style="font-weight:600;color:var(--ev-charcoal);font-size:0.92rem;">${esc(ev.name)}</div>
+                            <div style="font-size:0.76rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.location)}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+                          <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Details</a>
+                          ${renderActionForEvent(ev, user, true)}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <div class="ev-ws-card">
+                <span class="ev-badge ev-badge-open" style="margin-bottom:0.5rem;">Participant Journey</span>
+                <h2 class="ev-display" style="font-size:1.2rem;font-weight:600;">My Activity Summary</h2>
+                <p style="font-size:0.82rem;color:var(--ev-muted);margin:0.35rem 0 1rem;line-height:1.55;">
+                  ${myRegs.length > 0
+                    ? `You have ${myRegs.length} registration record(s) and ${myTeams.length} team membership(s) saved in this session.`
+                    : 'Register for any campus event to track approval statuses, round schedules, and team assignments here.'}
+                </p>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                  <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-jump-section="registrations">View My Registrations (${myRegs.length})</button>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="teams">Manage My Teams (${myTeams.length})</button>
+                  <a href="discover.html" class="ev-btn ev-btn-white ev-btn-sm">Full Discovery Directory &rarr;</a>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'browse') {
+          const q = browseQuery.trim().toLowerCase();
+          const filtered = allEvents.filter((ev) => {
+            if (browseCategory !== 'all' && ev.category !== browseCategory) return false;
+            if (q) {
+              const hay = `${ev.name} ${ev.categoryLabel} ${ev.institution || ''} ${ev.location || ''}`.toLowerCase();
+              if (!hay.includes(q)) return false;
+            }
+            return true;
+          });
+
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-filter-bar">
+              <div class="ev-ws-status-pills">
+                <button type="button" class="ev-ws-pill ${browseCategory === 'all' ? 'is-active' : ''}" data-p-cat="all">All Categories</button>
+                ${categories.slice(0, 5).map((cat) => `
+                  <button type="button" class="ev-ws-pill ${browseCategory === cat.slug ? 'is-active' : ''}" data-p-cat="${esc(cat.slug)}">${esc(cat.name)}</button>
+                `).join('')}
+              </div>
+              <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+                <input class="ev-input" id="evPBrowseSearch" value="${esc(browseQuery)}" placeholder="Search upcoming events..." style="width:230px;padding:0.46rem 0.85rem;font-size:0.84rem;" />
+                <a href="discover.html" class="ev-btn ev-btn-outline ev-btn-sm">Public Discover Page &rarr;</a>
+              </div>
+            </div>
+
+            ${filtered.length === 0 ? EventoraWorkspace.renderEmptyState({
+              iconName: 'events',
+              title: 'No matching events found',
+              message: 'Clear your search or category filter to inspect upcoming events.',
+              actionHTML: '<button type="button" class="ev-btn ev-btn-forest ev-btn-sm" id="evPBrowseResetBtn">Reset Filters</button>'
+            }) : `
+              <div class="ev-ws-events-grid">
+                ${filtered.map((ev) => {
+                  const avail = EventoraStore.evaluateRegistrationAvailability(ev, user);
+                  const regSt = avail.state === 'already_registered' && avail.existingRegistration ? avail.existingRegistration.registrationStatus : null;
+                  return `
+                    <article class="ev-ws-event-card">
+                      ${EventoraWorkspace.renderPosterThumbHTML(ev)}
+                      <div class="ev-ws-event-body">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.45rem;flex-wrap:wrap;">
+                          <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                          <span class="ev-badge ${regSt ? esc(getStatusBadge(regSt)) : esc(ev.registrationBadgeClass || 'ev-badge-sample')}">${regSt ? `Registered • ${esc(regSt)}` : esc(ev.registrationStatus)}</span>
+                        </div>
+                        <h3 class="ev-display" style="font-size:1.05rem;font-weight:600;color:var(--ev-charcoal);line-height:1.25;">${esc(ev.name)}</h3>
+                        <p style="font-size:0.8rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.location)}</p>
+                        <p style="font-size:0.8rem;color:var(--ev-body);line-height:1.45;">${esc(ev.tagline)}</p>
+                        <div class="ev-ws-event-actions">
+                          <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">View Event</a>
+                          ${renderActionForEvent(ev, user, true)}
+                        </div>
+                      </div>
+                    </article>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          `;
+        } else if (activeSection === 'registrations') {
+          if (detailRegSlug) {
+            const detailEntry = myRegs.find((item) => item.event.slug === detailRegSlug);
+            if (detailEntry) {
+              shellCtrl.bodyMount.innerHTML = renderRegistrationDetailsView(user, detailEntry);
+              bindSectionInteractions(user);
+              return;
+            }
+            detailRegSlug = '';
+          }
+
+          const counts = {
+            all: myRegs.length,
+            Pending: myRegs.filter((r) => r.registration.registrationStatus === 'Pending').length,
+            Approved: myRegs.filter((r) => r.registration.registrationStatus === 'Approved').length,
+            Waitlisted: myRegs.filter((r) => r.registration.registrationStatus === 'Waitlisted').length,
+            Rejected: myRegs.filter((r) => r.registration.registrationStatus === 'Rejected').length,
+            Cancelled: myRegs.filter((r) => r.registration.registrationStatus === 'Cancelled').length
+          };
+          const visibleRegs = regStatusFilter === 'all'
+            ? myRegs
+            : myRegs.filter((r) => r.registration.registrationStatus === regStatusFilter);
+
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <span class="ev-badge ev-badge-open" style="margin-bottom:0.4rem;">Event-Scoped Registration Sync</span>
+                  <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">My Registrations (${myRegs.length})</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Showing registrations belonging strictly to ${esc(user.email)}. Stored locally in prototype sessionStorage.</p>
+                </div>
+                <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-jump-section="browse">+ Browse Events</button>
+              </div>
+
+              ${myRegs.length > 0 ? `
+                <div class="ev-ws-status-pills" style="margin-bottom:1.15rem;">
+                  ${['all', 'Pending', 'Approved', 'Waitlisted', 'Rejected', 'Cancelled'].map((k) => `
+                    <button type="button" class="ev-ws-pill ${regStatusFilter === k ? 'is-active' : ''}" data-p-reg-filter="${esc(k)}">
+                      ${k === 'all' ? 'All' : esc(k)} (${counts[k]})
+                    </button>
+                  `).join('')}
+                </div>
+              ` : ''}
+
+              ${myRegs.length === 0 ? EventoraWorkspace.renderEmptyState({
+                iconName: 'registration',
+                title: 'No event registrations yet',
+                message: 'You have not submitted a registration yet. Browse upcoming events to complete a registration form and get your pass.',
+                actionHTML: '<button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-jump-section="browse">Browse Upcoming Events &rarr;</button>'
+              }) : (visibleRegs.length === 0 ? EventoraWorkspace.renderEmptyState({
+                iconName: 'registration',
+                title: `No ${esc(regStatusFilter)} registrations`,
+                message: 'Select All or another status filter to view your event registrations.',
+                actionHTML: '<button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evPResetRegFilterBtn">Show All Registrations</button>'
+              }) : `
+                <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                  ${visibleRegs.map(({ event: ev, registration: reg, team }) => {
+                    const cancelCheck = EventoraStore.isCancellationAllowedNow(ev, reg);
+                    const canEdit = reg.registrationStatus !== 'Cancelled' && reg.registrationStatus !== 'Rejected' && ev.statusKey !== 'cancelled' && ev.statusKey !== 'completed';
+                    return `
+                      <div class="ev-p-reg-card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 1.1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        <div style="display:flex;align-items:center;gap:0.95rem;min-width:0;flex:1 1 280px;">
+                          <div style="width:92px;flex-shrink:0;border-radius:10px;overflow:hidden;aspect-ratio:16/9;">
+                            ${EventoraWorkspace.renderPosterThumbHTML(ev, 'aspect-ratio:16/9;')}
+                          </div>
+                          <div style="min-width:0;">
+                            <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+                              <span class="ev-badge ${esc(getStatusBadge(reg.registrationStatus))}">${esc(reg.registrationStatus)}</span>
+                              <span class="ev-rb-id-chip"><code>${esc(reg.registrationId)}</code></span>
+                              <span class="ev-badge ev-badge-sample">${esc(ev.teamConfig.label)}</span>
+                            </div>
+                            <div style="font-weight:600;color:var(--ev-charcoal);font-size:1rem;">${esc(ev.name)}</div>
+                            <div style="font-size:0.8rem;color:var(--ev-muted);">
+                              ${esc(ev.dateLabel)} &bull; Registered ${esc(formatDate(reg.registeredAt))}
+                              ${team ? ` &bull; Team: <strong style="color:var(--ev-forest);">${esc(team.teamName)}</strong> (${team.memberIds.length}/${team.maxTeamSize})` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+                          <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-p-view-reg="${esc(ev.slug)}">View Registration</button>
+                          <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">View Event</a>
+                          ${canEdit ? `<a href="register.html?slug=${encodeURIComponent(ev.slug)}&edit=1" class="ev-btn ev-btn-outline ev-btn-sm">Edit</a>` : ''}
+                          ${cancelCheck.allowed ? `<button type="button" class="ev-btn ev-btn-sm ev-rb-btn-danger ev-btn-outline" data-p-cancel="${esc(ev.slug)}">Cancel</button>` : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `)}
+            </div>
+          `;
+        } else if (activeSection === 'teams') {
+          const registeredTeamEvents = myRegs
+            .filter(({ event: ev, registration: reg }) =>
+              ev.teamConfig.supported
+              && !ev.teamConfig.locked
+              && reg.registrationStatus !== 'Cancelled'
+              && reg.registrationStatus !== 'Rejected'
+            );
+
+          const creatableEvents = registeredTeamEvents.filter(({ event: ev, registration: reg }) => {
+            if (ev.teamConfig.creationMode === 'organizer_only') return false;
+            if (ev.teamConfig.exclusiveMembership && reg.teamId) return false;
+            return true;
+          });
+
+          const joinableOpenTeams = [];
+          registeredTeamEvents.forEach(({ event: ev, registration: reg }) => {
+            if (!ev.teamConfig.allowJoinExisting) return;
+            if (ev.teamConfig.exclusiveMembership && reg.teamId) return;
+            (ev.teams || []).forEach((t) => {
+              if (t.memberIds.length < t.maxTeamSize && !t.memberIds.includes(reg.id)) {
+                joinableOpenTeams.push({ event: ev, team: t });
+              }
+            });
+          });
+
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-split">
+              <div class="ev-ws-card">
+                <div class="ev-ws-card-head">
+                  <div>
+                    <span class="ev-badge ev-badge-open" style="margin-bottom:0.4rem;">Event-Synced Teams</span>
+                    <h2 class="ev-display" style="font-size:1.3rem;font-weight:600;">My Teams &amp; Squads (${myTeams.length})</h2>
+                    <p style="font-size:0.82rem;color:var(--ev-muted);">Teams shown here synchronize directly with each event's organizer Teams roster.</p>
+                  </div>
+                </div>
+
+                ${myTeams.length === 0 ? EventoraWorkspace.renderEmptyState({
+                  iconName: 'teams',
+                  title: 'Not assigned to a team yet',
+                  message: registeredTeamEvents.length > 0
+                    ? 'Create a permitted squad or join an open team on the right.'
+                    : 'Register for a team-enabled event to form or join squads where permitted.',
+                  actionHTML: registeredTeamEvents.length === 0 ? '<button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-jump-section="browse">Browse Team Events &rarr;</button>' : ''
+                }) : `
+                  <div style="display:flex;flex-direction:column;gap:0.85rem;">
+                    ${myTeams.map(({ event: ev, registration: reg, team: tm }) => {
+                      const pMap = new Map((ev.participants || []).map((p) => [p.id, p]));
+                      const memberNames = tm.memberIds.map((id) => pMap.get(id)?.fullName).filter(Boolean);
+                      const isLeader = tm.teamLeaderId === reg.id;
+                      return `
+                        <div style="padding:1rem 1.1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.45rem;">
+                            <div>
+                              <span class="ev-badge ev-badge-open">${isLeader ? 'Team Leader' : 'Member'}</span>
+                              <strong style="margin-left:0.45rem;color:var(--ev-charcoal);font-size:0.98rem;">${esc(tm.teamName)}</strong>
+                            </div>
+                            <span class="ev-badge ev-badge-category">${tm.memberIds.length}/${tm.maxTeamSize} members &bull; ${esc(tm.status)}</span>
+                          </div>
+                          <div style="font-size:0.82rem;color:var(--ev-muted);margin-bottom:0.65rem;">
+                            Event: <strong>${esc(ev.name)}</strong> &bull; Roster: ${memberNames.map(esc).join(', ')}
+                          </div>
+                          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Event Details</a>
+                            ${!ev.teamConfig.locked ? `<button type="button" class="ev-btn ev-btn-sm ev-rb-btn-danger ev-btn-outline" data-p-leave-team="${esc(tm.id)}" data-p-leave-ev="${esc(ev.slug)}">Leave Team</button>` : '<span style="font-size:0.76rem;color:var(--ev-muted);">Locked by organizer</span>'}
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                `}
+              </div>
+
+              <div class="ev-ws-card">
+                <h3 class="ev-display" style="font-size:1.15rem;font-weight:600;margin-bottom:0.35rem;">Create or Join Permitted Teams</h3>
+                <p style="font-size:0.8rem;color:var(--ev-muted);margin-bottom:1rem;">Only registered team-enabled events with open team rules appear here.</p>
+
+                ${creatableEvents.length === 0 ? `
+                  <div style="padding:0.85rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);font-size:0.8rem;color:var(--ev-muted);margin-bottom:1rem;">
+                    No eligible registered events currently permit creating a new team (you may already be in an exclusive team, registered individually, or the organizer manages team creation).
+                  </div>
+                ` : `
+                  <form id="evPCreateTeamForm" style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.15rem;" novalidate>
+                    <div class="ev-field">
+                      <label class="ev-label" for="evPTeamEvent">Select Registered Event</label>
+                      <select class="ev-select" id="evPTeamEvent">
+                        ${creatableEvents.map(({ event: ev }) => `<option value="${esc(ev.slug)}">${esc(ev.name)} (${esc(ev.teamConfig.label)})</option>`).join('')}
+                      </select>
+                    </div>
+                    <div class="ev-field">
+                      <label class="ev-label" for="evPTeamName">Team Name <span style="color:#9E2A20;">*</span></label>
+                      <input class="ev-input" id="evPTeamName" required placeholder="e.g. Emerald Builders" />
+                    </div>
+                    <button type="submit" class="ev-btn ev-btn-forest ev-btn-sm">Create Team</button>
+                  </form>
+                `}
+
+                <div style="border-top:1px solid var(--ev-border);padding-top:1rem;">
+                  <div style="font-weight:600;font-size:0.9rem;color:var(--ev-charcoal);margin-bottom:0.5rem;">Open Teams in Your Events (${joinableOpenTeams.length})</div>
+                  ${joinableOpenTeams.length === 0 ? `
+                    <div style="font-size:0.8rem;color:var(--ev-muted);">No open joinable teams available across your eligible registrations.</div>
+                  ` : `
+                    <div style="display:flex;flex-direction:column;gap:0.55rem;">
+                      ${joinableOpenTeams.map(({ event: ev, team: tm }) => `
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.65rem 0.75rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                          <div style="min-width:0;">
+                            <div style="font-weight:600;font-size:0.84rem;color:var(--ev-charcoal);">${esc(tm.teamName)}</div>
+                            <div style="font-size:0.74rem;color:var(--ev-muted);">${esc(ev.name)} &bull; ${tm.memberIds.length}/${tm.maxTeamSize} slots</div>
+                          </div>
+                          <button type="button" class="ev-btn ev-btn-forest ev-btn-xs" data-p-join-team="${esc(tm.id)}" data-p-join-ev="${esc(ev.slug)}">Join Team</button>
+                        </div>
+                      `).join('')}
+                    </div>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'activity') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <span class="ev-badge ev-badge-open" style="margin-bottom:0.4rem;">Participant Progress</span>
+                  <h2 class="ev-display" style="font-size:1.3rem;font-weight:600;">My Activity &amp; Round Timeline</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Track configured event rounds across your active registrations.</p>
+                </div>
+                <a href="profile.html" class="ev-btn ev-btn-outline ev-btn-sm">Account Profile</a>
+              </div>
+
+              ${activeRegs.length === 0 ? EventoraWorkspace.renderEmptyState({
+                iconName: 'rounds',
+                title: 'No active event timelines yet',
+                message: 'Once you submit an active registration for an event, its stage schedule appears here.',
+                actionHTML: '<button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-jump-section="browse">Explore Upcoming Events</button>'
+              }) : `
+                <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                  ${activeRegs.map(({ event: ev, registration: reg }) => {
+                    const rounds = (Array.isArray(ev.rounds) ? ev.rounds : []).filter((r) => r.enabled !== false);
+                    const pubRes = EventoraStore.getPublishedEventResults ? EventoraStore.getPublishedEventResults(ev, user) : null;
+                    const myRes = pubRes && pubRes.myResultSummary ? pubRes.myResultSummary : null;
+                    return `
+                      <div style="padding:1.05rem 1.15rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                          <div>
+                            <div style="font-weight:600;color:var(--ev-charcoal);font-size:1rem;">${esc(ev.name)}</div>
+                            <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; Pass ${esc(reg.registrationId)} (${esc(reg.registrationStatus)})</div>
+                          </div>
+                          <span class="ev-badge ev-badge-open">${rounds.length > 0 ? `${rounds.length} Stage(s)` : 'Single Session'}</span>
+                        </div>
+                        ${pubRes && (pubRes.overallPublished || (myRes && myRes.roundEntries && myRes.roundEntries.length)) ? `
+                          <div style="margin-bottom:0.75rem;padding:0.72rem 0.85rem;border-radius:var(--ev-radius-sm);background:var(--ev-white);border:1px solid var(--ev-sage-border);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                              <strong style="font-size:0.84rem;color:var(--ev-forest);">Published Results &amp; Standings</strong>
+                              ${pubRes.overallPublished && myRes && myRes.overallEntry ? `<span class="ev-badge ev-badge-open">Overall Rank #${myRes.overallEntry.rank} &bull; ${myRes.overallEntry.overallScore}/${myRes.overallEntry.overallMax} (${myRes.overallEntry.overallPercentage}%)</span>` : ''}
+                            </div>
+                            ${myRes && myRes.roundEntries && myRes.roundEntries.length ? `
+                              <div style="display:flex;flex-wrap:wrap;gap:0.45rem;margin-top:0.45rem;">
+                                ${myRes.roundEntries.map((re) => `
+                                  <span class="ev-lc-pill">R${re.roundOrder}: <strong>${re.entry.awardedMarks}/${re.entry.maxMarks}</strong> (${re.entry.percentage}%) &bull; Rank #${re.entry.rank}${re.entry.qualified ? ' &bull; Qualified' : ''}</span>
+                                `).join('')}
+                              </div>
+                            ` : ''}
+                            ${myRes && myRes.roundEntries && myRes.roundEntries.some((re) => re.entry.publicFeedback) ? `
+                              <div style="margin-top:0.4rem;font-size:0.78rem;color:var(--ev-muted);">
+                                ${myRes.roundEntries.filter((re) => re.entry.publicFeedback).map((re) => `<div><strong>R${re.roundOrder} Feedback:</strong> ${esc(re.entry.publicFeedback)}</div>`).join('')}
+                              </div>
+                            ` : ''}
+                          </div>
+                        ` : `
+                          <div style="margin-bottom:0.65rem;font-size:0.76rem;color:var(--ev-muted);">Official scores &amp; leaderboards appear here only after the organizer publishes them.</div>
+                        `}
+                        ${rounds.length > 0 ? `
+                          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.65rem;">
+                            ${rounds.map((r) => {
+                              const portalSnap = EventoraStore.getParticipantRoundPortalSnapshot
+                                ? EventoraStore.getParticipantRoundPortalSnapshot(ev.slug, r.id, user)
+                                : { access: EventoraStore.getParticipantRoundContent(ev.slug, r.id, user), submissionStatus: 'Not Submitted' };
+                              const rcAccess = portalSnap.access || { allowed: false, reason: 'Locked' };
+                              const pkg = rcAccess && rcAccess.allowed ? rcAccess.content : null;
+                              const opStatus = (portalSnap.roundOp && portalSnap.roundOp.roundStatus) || r.status;
+                              const subStatus = portalSnap.submissionStatus || 'Not Submitted';
+                              const totalItems = pkg
+                                ? (pkg.pdfs.length + pkg.questions.length + pkg.codingProblems.length + (pkg.attachments ? pkg.attachments.length : 0))
+                                : 0;
+                              return `
+                                <div style="background:var(--ev-white);border:1px solid var(--ev-border);border-radius:var(--ev-radius-sm);padding:0.78rem 0.88rem;display:flex;flex-direction:column;gap:0.45rem;">
+                                  <div style="display:flex;justify-content:space-between;align-items:center;gap:0.35rem;flex-wrap:wrap;">
+                                    <div style="font-size:0.7rem;font-weight:700;color:var(--ev-primary);text-transform:uppercase;">Stage ${r.order} &bull; ${esc(r.typeLabel || r.type)}</div>
+                                    <span class="ev-badge ${rcAccess.allowed ? 'ev-badge-open' : 'ev-badge-sample'}">${rcAccess.allowed ? 'Materials Unlocked' : 'Locked'}</span>
+                                  </div>
+                                  <div style="font-weight:600;font-size:0.86rem;color:var(--ev-charcoal);">${esc(r.name)}</div>
+                                  <div style="font-size:0.74rem;color:var(--ev-muted);">${esc(r.duration)} &bull; ${esc(opStatus)} &bull; Submission: <strong>${esc(subStatus)}</strong></div>
+                                  ${!rcAccess.allowed ? `
+                                    <div style="font-size:0.74rem;color:var(--ev-muted);padding:0.42rem 0.55rem;background:var(--ev-cream);border-radius:6px;border:1px dashed var(--ev-border);">
+                                      ${esc(rcAccess.reason)}
+                                    </div>
+                                  ` : `
+                                    <div style="font-size:0.76rem;color:var(--ev-forest);padding:0.5rem 0.6rem;background:var(--ev-sage-tint);border-radius:6px;border:1px solid var(--ev-sage-border);">
+                                      <strong style="display:block;">${esc((pkg && pkg.paperTitle) || 'Released Materials')}</strong>
+                                      ${pkg && pkg.instructions ? `<span style="display:block;color:var(--ev-body);margin-top:0.15rem;">${esc(pkg.instructions)}</span>` : ''}
+                                      <span style="display:block;margin-top:0.25rem;color:var(--ev-muted);">
+                                        ${pkg ? `${pkg.pdfs.length} PDF(s) &bull; ${pkg.questions.length} Question(s) &bull; ${pkg.codingProblems.length} Problem(s) &bull; ${(pkg.attachments || []).length} Asset(s)` : ''}
+                                      </span>
+                                      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;margin-top:0.45rem;">
+                                        <button type="button" class="ev-btn ev-btn-forest ev-btn-xs" data-p-open-portal="${esc(r.id)}" data-p-open-ev="${esc(ev.slug)}">
+                                          Open Round Workspace${totalItems ? ` (${totalItems})` : ''} &rarr;
+                                        </button>
+                                        ${pkg && pkg.pdfs.some((p) => p.allowDownload === false) ? `<span class="ev-lc-pill">View-Only Policy</span>` : ''}
+                                      </div>
+                                    </div>
+                                  `}
+                                </div>
+                              `;
+                            }).join('')}
+                          </div>
+                        ` : `
+                          <p style="font-size:0.82rem;color:var(--ev-body);">Check-in open on event day — single-session format without elimination rounds.</p>
+                        `}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          `;
+        }
+
+        bindSectionInteractions(user);
+      }
+
+      function bindSectionInteractions(user) {
+        document.querySelectorAll('[data-jump-section]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            detailRegSlug = '';
+            switchSection(btn.dataset.jumpSection);
+          });
+        });
+
+        document.querySelectorAll('[data-p-view-reg]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            detailRegSlug = btn.dataset.pViewReg;
+            switchSection('registrations');
+          });
+        });
+
+        document.getElementById('evRegDetailBackBtn')?.addEventListener('click', () => {
+          detailRegSlug = '';
+          renderSectionContent(user);
+        });
+
+        document.querySelectorAll('[data-p-reg-filter]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            regStatusFilter = btn.dataset.pRegFilter;
+            renderSectionContent(user);
+          });
+        });
+        document.getElementById('evPResetRegFilterBtn')?.addEventListener('click', () => {
+          regStatusFilter = 'all';
+          renderSectionContent(user);
+        });
+
+        document.querySelectorAll('[data-p-cancel]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const evSlug = btn.dataset.pCancel;
+            const ev = EventoraStore.getEventBySlug(evSlug);
+            EventoraWorkspace.openConfirm({
+              title: 'Cancel Registration',
+              body: `Cancel your registration for "${ev ? ev.name : evSlug}"? If you belong to a team in this event, you will also leave that team.`,
+              confirmLabel: 'Confirm Cancellation',
+              danger: true,
+              onConfirm: () => {
+                const res = EventoraStore.cancelUserRegistration(evSlug, user, 'Cancelled by participant');
+                if (!res.ok) {
+                  EventoraUI.showToast(res.error || 'Unable to cancel registration.');
+                } else {
+                  EventoraUI.showToast(`Registration cancelled for "${ev ? ev.name : evSlug}".`);
+                }
+                renderSectionContent(user);
+              }
+            });
+          });
+        });
+
+        document.querySelectorAll('[data-p-cat]').forEach((pill) => {
+          pill.addEventListener('click', () => {
+            browseCategory = pill.dataset.pCat;
+            renderSectionContent(user);
+          });
+        });
+
+        const searchInp = document.getElementById('evPBrowseSearch');
+        if (searchInp) {
+          searchInp.addEventListener('input', () => {
+            browseQuery = searchInp.value;
+            renderSectionContent(user);
+            const ref = document.getElementById('evPBrowseSearch');
+            if (ref) { ref.focus(); ref.setSelectionRange(ref.value.length, ref.value.length); }
+          });
+        }
+
+        document.getElementById('evPBrowseResetBtn')?.addEventListener('click', () => {
+          browseCategory = 'all';
+          browseQuery = '';
+          renderSectionContent(user);
+        });
+
+        const createTeamForm = document.getElementById('evPCreateTeamForm');
+        if (createTeamForm) {
+          createTeamForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const evSlug = document.getElementById('evPTeamEvent').value;
+            const teamName = document.getElementById('evPTeamName').value.trim();
+            const res = EventoraStore.participantCreateTeam(evSlug, user, { teamName });
+            if (!res.ok) {
+              EventoraUI.showToast(res.error || 'Could not create team.');
+              return;
+            }
+            EventoraUI.showToast(`Team "${teamName}" created cleanly.`);
+            renderSectionContent(user);
+          });
+        }
+
+        document.querySelectorAll('[data-p-join-team]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const res = EventoraStore.participantJoinTeamById(btn.dataset.pJoinEv, user, btn.dataset.pJoinTeam);
+            if (!res.ok) {
+              EventoraUI.showToast(res.error || 'Could not join team.');
+              return;
+            }
+            EventoraUI.showToast('Joined team cleanly.');
+            renderSectionContent(user);
+          });
+        });
+
+        document.querySelectorAll('[data-p-leave-team]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const tid = btn.dataset.pLeaveTeam;
+            const evSlug = btn.dataset.pLeaveEv;
+            EventoraWorkspace.openConfirm({
+              title: 'Leave Team',
+              body: 'Leave this team? Your event registration will remain intact as unassigned.',
+              confirmLabel: 'Leave Team',
+              danger: true,
+              onConfirm: () => {
+                const res = EventoraStore.participantLeaveTeam(evSlug, user, tid);
+                EventoraUI.showToast(res.ok ? 'Left team cleanly.' : (res.error || 'Could not leave team.'));
+                renderSectionContent(user);
+              }
+            });
+          });
+        });
+
+        document.querySelectorAll('[data-p-open-portal]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (!window.EventoraParticipantPortal || typeof window.EventoraParticipantPortal.openRoundPortal !== 'function') {
+              EventoraUI.showToast('Round workspace module is not loaded yet.');
+              return;
+            }
+            window.EventoraParticipantPortal.openRoundPortal({
+              slug: btn.dataset.pOpenEv,
+              roundId: btn.dataset.pOpenPortal,
+              user,
+              onSubmitted: () => renderSectionContent(user)
+            });
+          });
+        });
+      }
+
+      function switchSection(nextSection) {
+        if (!validSections.has(nextSection)) return;
+        activeSection = nextSection;
+        try {
+          window.history.replaceState({}, document.title, `participant-dashboard.html?section=${encodeURIComponent(nextSection)}`);
+        } catch (_) {}
+        const activeUser = EventoraAuth.getSession();
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, SECTION_TITLES[activeSection] || 'Participant Dashboard');
+        renderSectionContent(activeUser);
+      }
+
+      function mountPage() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['participant'],
+          rootEl,
+          pageName: 'Participant Dashboard'
+        });
+        if (!access.allowed) return;
+
+        shellCtrl = EventoraWorkspace.renderWorkspaceShell({
+          rootEl,
+          user: access.user,
+          navGroups: NAV_GROUPS,
+          activeSection,
+          topTitle: SECTION_TITLES[activeSection] || 'Participant Dashboard',
+          onSelectSection: (sec) => {
+            detailRegSlug = '';
+            switchSection(sec);
+          },
+          onSearchSubmit: (q) => {
+            browseQuery = q;
+            switchSection('browse');
+          },
+          onLogout: async () => {
+            await EventoraAuth.signOut();
+            window.location.href = 'login.html';
+          }
+        });
+        renderSectionContent(access.user);
+      }
+
+      window.addEventListener('eventora:authchange', mountPage);
+      mountPage();
+      EventoraAuth.ready().then(mountPage);
+    })();
+  </script>
+</body>
+</html>

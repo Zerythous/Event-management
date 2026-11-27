@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Admin Console — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evAdminRoot"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script>
+    (function initAdminDashboard() {
+      const rootEl = document.getElementById('evAdminRoot');
+      const modalsMount = document.getElementById('evModalsMount');
+
+      if (modalsMount && !modalsMount.innerHTML.trim()) {
+        EventoraUI.mountShell('admin');
+        const navM = document.getElementById('evNavMount');
+        const footM = document.getElementById('evFooterMount');
+        if (navM) navM.innerHTML = '';
+        if (footM) footM.innerHTML = '';
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const validSections = new Set(['overview', 'moderation', 'roles']);
+      let activeSection = validSections.has(params.get('section')) ? params.get('section') : 'overview';
+      let shellCtrl = null;
+
+      const NAV_GROUPS = [
+        {
+          title: 'Platform Governance',
+          items: [
+            { id: 'overview', label: 'Admin Overview', icon: 'overview' },
+            { id: 'moderation', label: 'Directory Review', icon: 'events' },
+            { id: 'roles', label: 'Role Policies', icon: 'settings' }
+          ]
+        }
+      ];
+
+      const SECTION_TITLES = {
+        overview: 'Platform Admin Console',
+        moderation: 'Institution & Event Directory',
+        roles: 'Role & Access Policies'
+      };
+
+      function renderSectionContent(user) {
+        if (!shellCtrl || !shellCtrl.bodyMount || !user) return;
+        const esc = EventoraUI.escapeHTML;
+        const role = EventoraAccess.getEffectiveRole(user);
+        const events = EventoraStore.getAllEvents();
+
+        if (activeSection === 'overview') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-auth-status is-info" style="margin-bottom:1.35rem;" role="note">
+              <span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${EventoraUI.icon('alert')}</span>
+              <span><strong>Backend Governance Pending:</strong> You are viewing the Admin Console frontend shell as verified role <strong>${esc(EventoraAccess.getRoleLabel(role))}</strong>. Live directory approvals and database write actions activate in Phase 3+ after RPC/RLS connection.</span>
+            </div>
+
+            <div class="ev-stat-grid">
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Listed Events</div>
+                <div class="ev-stat-value">${events.length}</div>
+                <div class="ev-stat-sub">Catalog entries in preview</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Admin Authority</div>
+                <div class="ev-stat-value" style="font-size:1.2rem;padding-top:0.35rem;">${esc(EventoraAccess.getRoleLabel(role))}</div>
+                <div class="ev-stat-sub">Isolated from Participant/Organizer workspaces</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Role Safeguards</div>
+                <div class="ev-stat-value">Active</div>
+                <div class="ev-stat-sub">app_metadata verified + SQL RLS ready</div>
+              </div>
+            </div>
+
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Governance Areas</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Separated strictly from organizer event creation tools.</p>
+                </div>
+                ${role === 'super_admin' ? '<a href="superadmin-dashboard.html" class="ev-btn ev-btn-forest ev-btn-sm">Open Super Admin Console &rarr;</a>' : ''}
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
+                <div style="padding:1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                  <strong style="color:var(--ev-charcoal);font-size:0.95rem;">Institution &amp; Event Moderation</strong>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);margin:0.35rem 0 0.85rem;">Review campus event compliance before live database publishing.</p>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="moderation">Inspect Directory</button>
+                </div>
+                <div style="padding:1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                  <strong style="color:var(--ev-charcoal);font-size:0.95rem;">Role Access &amp; RLS Architecture</strong>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);margin:0.35rem 0 0.85rem;">Audit verified role mapping across Participant, Organizer, Manager, and Admin tiers.</p>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="roles">View Matrix</button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'moderation') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <span class="ev-badge ev-badge-sample" style="margin-bottom:0.4rem;">Read-Only Preview</span>
+                  <h2 class="ev-display" style="font-size:1.3rem;font-weight:600;">Directory Moderation Queue</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Database status mutations require verified backend admin RPCs.</p>
+                </div>
+              </div>
+              <div class="ev-table-wrap">
+                <table class="ev-table">
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Institution</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Public View</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${events.map((ev) => `
+                      <tr>
+                        <td><strong>${esc(ev.name)}</strong></td>
+                        <td>${esc(ev.institution || 'Campus Partner')}</td>
+                        <td>${esc(ev.categoryLabel)}</td>
+                        <td><span class="ev-badge ev-badge-sample">${esc(ev.eventStatus || 'Sample')}</span></td>
+                        <td><a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-text-link">Inspect &rarr;</a></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'roles') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <span class="ev-badge ev-badge-open" style="margin-bottom:0.45rem;">RBAC Boundary</span>
+              <h2 class="ev-display" style="font-size:1.3rem;font-weight:600;margin-bottom:0.4rem;">Role Assignment Policy</h2>
+              <p style="font-size:0.85rem;color:var(--ev-muted);margin-bottom:1.1rem;line-height:1.6;">
+                Eventora verifies user roles strictly from server-controlled claims (<code>app_metadata.platform_role</code> / backend DB). Self-registration and profile editing cannot assign Admin or Super Admin authority.
+              </p>
+              <div class="ev-role-grid">
+                ${Object.entries(EventoraAccess.ROLE_LABELS).map(([k, lbl]) => `
+                  <div class="ev-role-item ${k === role ? 'is-current' : ''}">
+                    <div>
+                      <div style="font-weight:600;font-size:0.86rem;color:var(--ev-charcoal);">${esc(lbl)}</div>
+                      <div style="font-size:0.75rem;color:var(--ev-muted);">Default workspace: <code>${esc(EventoraAccess.getDashboardUrl(k))}</code></div>
+                    </div>
+                    <span class="ev-badge ${k === role ? 'ev-badge-open' : 'ev-badge-sample'}">${k === role ? 'Active Role' : 'Isolated'}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        document.querySelectorAll('[data-jump-section]').forEach((btn) => {
+          btn.addEventListener('click', () => switchSection(btn.dataset.jumpSection));
+        });
+      }
+
+      function switchSection(nextSection) {
+        if (!validSections.has(nextSection)) return;
+        activeSection = nextSection;
+        const user = EventoraAuth.getSession();
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, SECTION_TITLES[activeSection] || 'Platform Admin Console');
+        renderSectionContent(user);
+      }
+
+      function mountPage() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['admin', 'super_admin'],
+          rootEl,
+          pageName: 'Platform Admin Console'
+        });
+        if (!access.allowed) return;
+
+        shellCtrl = EventoraWorkspace.renderWorkspaceShell({
+          rootEl,
+          user: access.user,
+          navGroups: NAV_GROUPS,
+          activeSection,
+          topTitle: SECTION_TITLES[activeSection] || 'Platform Admin Console',
+          onSelectSection: switchSection,
+          onSearchSubmit: () => switchSection('moderation'),
+          onLogout: async () => {
+            await EventoraAuth.signOut();
+            window.location.href = 'login.html';
+          }
+        });
+        renderSectionContent(access.user);
+        if (window.EventoraSync) {
+          window.EventoraSync.hydratePublicCatalog({}).then(() => renderSectionContent(access.user));
+        }
+      }
+
+      window.addEventListener('eventora:authchange', mountPage);
+      mountPage();
+      EventoraAuth.ready().then(mountPage);
+    })();
+  </script>
+</body>
+</html>

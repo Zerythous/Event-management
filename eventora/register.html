@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Registration — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evNavMount"></div>
+
+  <main id="evRegisterRoot" style="min-height:70vh;background:var(--ev-cream);padding-top:1.25rem;"></main>
+
+  <div id="evFooterMount"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/registrations-api.js"></script>
+  <script src="scripts/teams-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script src="scripts/registration-flow.js"></script>
+  <script>
+    (function initRegistrationPage() {
+      EventoraUI.mountShell('discover');
+
+      const rootEl = document.getElementById('evRegisterRoot');
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug') || '';
+      const isEditMode = params.get('edit') === '1';
+      let mountedForKey = '';
+
+      function mountRegistration() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['participant', 'organizer', 'manager', 'admin', 'super_admin'],
+          rootEl,
+          pageName: 'Event Registration'
+        });
+        if (!access.allowed) return;
+
+        const userKey = String(access.user.id || access.user.email || '');
+        if (mountedForKey === userKey) return;
+        mountedForKey = userKey;
+
+        const ev = EventoraStore.getEventBySlug(slug);
+        if (ev) {
+          document.title = `Register: ${ev.name} — Eventora`;
+        }
+        window.EventoraRegistrationFlow.mount(rootEl, {
+          slug,
+          user: access.user,
+          isEditMode
+        });
+      }
+
+      window.addEventListener('eventora:authchange', mountRegistration);
+      mountRegistration();
+      EventoraAuth.ready().then(mountRegistration);
+    })();
+  </script>
+</body>
+</html>

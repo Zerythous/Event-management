@@ -1,0 +1,5 @@
+# Local Supabase browser credentials (never commit actual project keys)
+scripts/supabase-config.local.js
+*.local.js
+.env
+.env.*

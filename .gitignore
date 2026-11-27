@@ -2,5 +2,23 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# Environment & secrets — NEVER commit real credentials
 .env
+.env.*
 .env.local
+*.local.js
+
+# Supabase local credentials (real keys live here — always excluded)
+eventora/scripts/supabase-config.local.js
+
+# Supabase CLI local dev state
+supabase/.branches/
+supabase/.temp/
+.supabase/
+
+# OS / editor noise
+*.suo
+*.user
+.vscode/settings.json
+.idea/

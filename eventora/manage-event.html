@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Event — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evManageRoot"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/collaborators-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/registrations-api.js"></script>
+  <script src="scripts/teams-api.js"></script>
+  <script src="scripts/round-content-api.js"></script>
+  <script src="scripts/submissions-api.js"></script>
+  <script src="scripts/evaluations-api.js"></script>
+  <script src="scripts/qualification-api.js"></script>
+  <script src="scripts/leaderboard-api.js"></script>
+  <script src="scripts/announcements-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/data-migrator.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script src="scripts/round-builder.js"></script>
+  <script src="scripts/file-store.js"></script>
+  <script src="scripts/round-content.js"></script>
+  <script src="scripts/participants-teams.js"></script>
+  <script src="scripts/registration-manager.js"></script>
+  <script src="scripts/live-control.js"></script>
+  <script src="scripts/evaluation-manager.js"></script>
+  <script>
+    (function initManageEventWorkspace() {
+      const rootEl = document.getElementById('evManageRoot');
+      const modalsMount = document.getElementById('evModalsMount');
+
+      if (modalsMount && !modalsMount.innerHTML.trim()) {
+        EventoraUI.mountShell('manage');
+        const navM = document.getElementById('evNavMount');
+        const footM = document.getElementById('evFooterMount');
+        if (navM) navM.innerHTML = '';
+        if (footM) footM.innerHTML = '';
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug') || '';
+      const validSections = new Set(['overview', 'details', 'registration', 'participants', 'teams', 'rounds', 'content', 'live', 'results', 'collaborators', 'settings']);
+      let activeSection = validSections.has(params.get('section')) ? params.get('section') : 'overview';
+      let focusRoundId = params.get('roundId') || '';
+      let shellCtrl = null;
+      let editPosterDataUrl = '';
+      let editPosterMeta = '';
+      let editPosterFile = null;
+      let editPosterRemoved = false;
+      let syncHydrating = false;
+      let syncError = '';
+      let hydratedKey = '';
+
+      async function hydrateManageEvent(user, force) {
+        if (!slug || !window.EventoraSync) return;
+        const k = `${slug}:${user ? user.id : 'anon'}`;
+        if (!force && hydratedKey === k) return;
+        syncHydrating = true;
+        syncError = '';
+        if (shellCtrl && shellCtrl.bodyMount) {
+          shellCtrl.bodyMount.innerHTML = window.EventoraSync.renderLoadingCardHTML('Loading event workspace from PostgreSQL...');
+        }
+        const res = await window.EventoraSync.hydrateEventBySlug(slug, user, { organizerView: true });
+        syncHydrating = false;
+        hydratedKey = k;
+        if (res && !res.ok && res.mode === 'supabase') {
+          syncError = res.error || 'Failed to load event workspace.';
+        }
+        const ev = EventoraStore.getEventBySlug(slug);
+        if (syncError) {
+          if (shellCtrl && shellCtrl.bodyMount) {
+            shellCtrl.bodyMount.innerHTML = window.EventoraSync.renderDatabaseErrorCardHTML({
+              title: 'Unable to Load Event Workspace',
+              message: syncError,
+              retryButtonId: 'evManageRetryBtn'
+            });
+            document.getElementById('evManageRetryBtn')?.addEventListener('click', () => hydrateManageEvent(user, true));
+          }
+          return;
+        }
+        if (!ev) {
+          renderMissingEvent();
+          return;
+        }
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, ev.name);
+        renderSection(ev);
+
+        if (ev.dbId && window.EventoraRealtime && window.EventoraSync.getStatus().mode === 'supabase') {
+          window.EventoraRealtime.subscribeEventWorkspace({
+            scopeKey: `manage-${ev.dbId}`,
+            eventId: ev.dbId,
+            includeOrganizerTables: true,
+            onChange: async () => {
+              await window.EventoraSync.hydrateEventBySlug(slug, user, { organizerView: true });
+              const fresh = EventoraStore.getEventBySlug(slug);
+              if (!fresh) return;
+              if (activeSection === 'details' || activeSection === 'rounds' || activeSection === 'content') {
+                window.EventoraRealtime.notifyImportantChange('Live database update received in background.');
+                return;
+              }
+              window.EventoraRealtime.notifyImportantChange('Event workspace synchronized with live update.');
+              renderSection(fresh);
+            }
+          });
+        }
+      }
+
+      const NAV_GROUPS = [
+        {
+          title: 'Event Workspace',
+          items: [
+            { id: 'overview', label: 'Overview', icon: 'overview' },
+            { id: 'details', label: 'Event Details', icon: 'details' },
+            { id: 'registration', label: 'Registration', icon: 'registration' }
+          ]
+        },
+        {
+          title: 'Competition & People',
+          items: [
+            { id: 'participants', label: 'Participants', icon: 'participants' },
+            { id: 'teams', label: 'Teams', icon: 'teams' },
+            { id: 'rounds', label: 'Round Builder', icon: 'rounds' },
+            { id: 'content', label: 'Round Content', icon: 'content' },
+            { id: 'live', label: 'Live Control', icon: 'live' },
+            { id: 'results', label: 'Results & Leaderboard', icon: 'results' }
+          ]
+        },
+        {
+          title: 'Administration',
+          items: [
+            { id: 'collaborators', label: 'Collaborators', icon: 'collaborators' },
+            { id: 'settings', label: 'Settings', icon: 'settings' }
+          ]
+        }
+      ];
+
+      function renderMissingEvent(msg) {
+        const user = EventoraAuth.getSession();
+        const role = user && window.EventoraAccess ? EventoraAccess.getEffectiveRole(user) : 'organizer';
+        const dashUrl = user && window.EventoraAccess ? EventoraAccess.getDashboardUrl(role) : 'organizer-dashboard.html';
+        const dashLabel = role === 'manager' ? 'Manager Workspace' : 'Organizer Dashboard';
+        rootEl.innerHTML = `
+          <div class="ev-auth-page" style="min-height:100vh;">
+            <header class="ev-auth-topbar">
+              <div class="ev-container ev-auth-topbar-inner">
+                <a href="${EventoraUI.escapeHTML(dashUrl)}" class="ev-brand">
+                  <span class="ev-brand-mark">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  </span>
+                  <span>Eventora</span>
+                </a>
+                <a href="${EventoraUI.escapeHTML(dashUrl)}" class="ev-back-link" style="font-size:0.86rem;font-weight:600;color:var(--ev-forest);">&larr; Back to ${EventoraUI.escapeHTML(dashLabel)}</a>
+              </div>
+            </header>
+            <main class="ev-auth-main">
+              <div class="ev-container" style="max-width:600px;">
+                ${EventoraWorkspace.renderEmptyState({
+                  iconName: 'events',
+                  title: 'Event Workspace Not Found',
+                  message: msg || 'No event matches the requested slug in this session.',
+                  actionHTML: `<a href="${EventoraUI.escapeHTML(dashUrl)}" class="ev-btn ev-btn-forest">Return to ${EventoraUI.escapeHTML(dashLabel)}</a>`
+                })}
+              </div>
+            </main>
+          </div>
+        `;
+      }
+
+      function renderSection(ev) {
+        if (!shellCtrl || !shellCtrl.bodyMount) return;
+        const esc = EventoraUI.escapeHTML;
+        const progressLabel = ev.rounds.length > 0 ? `${ev.rounds.length} Stage${ev.rounds.length > 1 ? 's' : ''} Configured` : 'Single-Session Format';
+        const isDbMode = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev);
+        const connPill = window.EventoraSync ? window.EventoraSync.renderConnectionPillHTML() : '';
+        const collabs = isDbMode ? (Array.isArray(ev.collaborators) ? ev.collaborators : []) : EventoraStore.getCollaborators(ev.slug);
+
+        if (activeSection === 'overview') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card" style="margin-bottom:1.5rem;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;align-items:center;">
+                ${EventoraWorkspace.renderPosterThumbHTML(ev, 'border-radius:16px;aspect-ratio:16/9;')}
+                <div style="min-width:0;">
+                  <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                    <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                    <span class="ev-badge ${esc(ev.statusBadgeClass)}" id="evWsEventStatusBadge">${esc(ev.eventStatus)}</span>
+                    ${isDbMode ? connPill : `<span class="ev-badge ev-badge-sample">${ev.isCreatedEvent ? 'Created Draft' : 'Sample Listing'}</span>`}
+                  </div>
+                  <h2 class="ev-display" style="font-size:clamp(1.45rem,2.5vw,2rem);font-weight:600;margin-bottom:0.45rem;">${esc(ev.name)}</h2>
+                  <p style="font-size:0.9rem;color:var(--ev-muted);margin-bottom:1rem;line-height:1.55;">${esc(ev.tagline || ev.description)}</p>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.65rem;font-size:0.82rem;">
+                    <div><strong style="color:var(--ev-charcoal);">Date:</strong> <span style="color:var(--ev-muted);">${esc(ev.dateLabel)}</span></div>
+                    <div><strong style="color:var(--ev-charcoal);">Venue:</strong> <span style="color:var(--ev-muted);">${esc(ev.location)} (${esc(ev.mode)})</span></div>
+                    <div><strong style="color:var(--ev-charcoal);">Format:</strong> <span style="color:var(--ev-muted);">${esc(ev.teamConfig.label)}</span></div>
+                    <div><strong style="color:var(--ev-charcoal);">Institution:</strong> <span style="color:var(--ev-muted);">${esc(ev.institution)}</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ev-stat-grid">
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Registrations</div>
+                <div class="ev-stat-value">${ev.registrationCount}</div>
+                <div class="ev-stat-sub">Status: ${esc(ev.registrationStatus)}</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Configured Rounds</div>
+                <div class="ev-stat-value">${ev.rounds.length}</div>
+                <div class="ev-stat-sub">${esc(progressLabel)}</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Capacity Target</div>
+                <div class="ev-stat-value">${ev.capacity}</div>
+                <div class="ev-stat-sub">Visibility: ${esc(ev.visibility)}</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Collaborators</div>
+                <div class="ev-stat-value">${collabs.length}</div>
+                <div class="ev-stat-sub">Event-scoped roles</div>
+              </div>
+            </div>
+
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <h3 class="ev-display" style="font-size:1.25rem;font-weight:600;">Event Quick Actions</h3>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Jump straight to any section for "${esc(ev.name)}".</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.65rem;">
+                <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-ws-jump="details">Edit Event</button>
+                <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">View Public Event &rarr;</a>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ws-jump="participants">Manage Participants</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ws-jump="teams">Manage Teams</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ws-jump="rounds">Configure Rounds</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ws-jump="results">View Results</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ws-jump="settings">Event Settings</button>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'details') {
+          editPosterDataUrl = ev.coverImage || '';
+          editPosterFile = null;
+          editPosterRemoved = false;
+          editPosterMeta = editPosterDataUrl ? 'Active event cover image' : 'No poster selected (using fallback)';
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <span class="ev-badge ev-badge-sample" style="margin-bottom:0.45rem;">Shared Event Data Model</span>
+                  <h2 class="ev-display" style="font-size:1.45rem;font-weight:600;">Edit Event Details</h2>
+                  <p style="font-size:0.85rem;color:var(--ev-muted);">Saved edits sync immediately with Discovery, Dashboard, and the public Event Page.</p>
+                </div>
+                <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">View Public Page &rarr;</a>
+              </div>
+
+              <form id="evWsDetailsForm" novalidate style="display:flex;flex-direction:column;gap:1rem;">
+                <div id="evWsDetailsErr" class="ev-wizard-error" role="alert" hidden></div>
+
+                <div class="ev-form-grid-2">
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvName">Event Title <span style="color:#9E2A20;">*</span></label>
+                    <input class="ev-input" id="evEditEvName" required value="${esc(ev.name)}" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvCat">Category</label>
+                    <select class="ev-select" id="evEditEvCat">
+                      ${EventoraStore.getCategories().map((c) => `
+                        <option value="${esc(c.slug)}" ${c.slug === ev.category ? 'selected' : ''}>${esc(c.name)}</option>
+                      `).join('')}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="ev-form-grid-3">
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvDate">Event Date <span style="color:#9E2A20;">*</span></label>
+                    <input class="ev-input" id="evEditEvDate" required value="${esc(ev.dateLabel)}" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvCity">City</label>
+                    <input class="ev-input" id="evEditEvCity" value="${esc(ev.city)}" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvMode">Mode</label>
+                    <select class="ev-select" id="evEditEvMode">
+                      <option value="In-Person" ${ev.mode === 'In-Person' ? 'selected' : ''}>In-Person</option>
+                      <option value="Online" ${ev.mode === 'Online' ? 'selected' : ''}>Online</option>
+                      <option value="Hybrid" ${ev.mode === 'Hybrid' ? 'selected' : ''}>Hybrid</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="ev-form-grid-2">
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvLoc">Venue / Location <span style="color:#9E2A20;">*</span></label>
+                    <input class="ev-input" id="evEditEvLoc" required value="${esc(ev.location)}" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvPart">Participation Format</label>
+                    <select class="ev-select" id="evEditEvPart">
+                      <option value="team" ${ev.participationType === 'team' ? 'selected' : ''}>Team Participation</option>
+                      <option value="individual" ${ev.participationType === 'individual' ? 'selected' : ''}>Individual Participation</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="ev-form-grid-2">
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvInst">Institution <span style="color:#9E2A20;">*</span></label>
+                    <input class="ev-input" id="evEditEvInst" required value="${esc(ev.institution)}" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evEditEvOrg">Organizer <span style="color:#9E2A20;">*</span></label>
+                    <input class="ev-input" id="evEditEvOrg" required value="${esc(ev.organizer)}" />
+                  </div>
+                </div>
+
+                <div class="ev-field">
+                  <label class="ev-label" for="evEditEvDesc">Description <span style="color:#9E2A20;">*</span></label>
+                  <textarea class="ev-textarea" id="evEditEvDesc" rows="3" required>${esc(ev.description)}</textarea>
+                </div>
+
+                <!-- Reuse Cover & Poster Studio inside Event Details -->
+                <div class="ev-upload-studio">
+                  <div class="ev-upload-head">
+                    <div>
+                      <div class="ev-upload-title">Poster &amp; Cover Image</div>
+                      <p class="ev-upload-sub">Replace or remove the cover image displayed across cards and the public hero.</p>
+                    </div>
+                    <span class="ev-upload-pill-tag">Browser Preview Only</span>
+                  </div>
+                  <input type="file" id="evWsPosterInput" class="ev-visually-hidden" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" />
+                  <div class="ev-dropzone" id="evWsPosterDrop" tabindex="0" role="button" ${editPosterDataUrl ? 'hidden' : ''}>
+                    <div class="ev-dropzone-icon">${EventoraUI.icon('upload')}</div>
+                    <div class="ev-dropzone-copy">Drag and drop cover image, or click to select</div>
+                    <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evWsPosterChooseBtn" style="margin-top:0.65rem;">Choose Image</button>
+                    <div class="ev-upload-specs">
+                      <span class="ev-spec-chip">16:9 Landscape</span>
+                      <span class="ev-spec-chip">JPEG, PNG, WebP</span>
+                      <span class="ev-spec-chip">Max 5 MB</span>
+                    </div>
+                  </div>
+                  <div class="ev-upload-preview" id="evWsPosterPrevBox" ${editPosterDataUrl ? '' : 'hidden'}>
+                    <div class="ev-upload-preview-stage">
+                      <img id="evWsPosterPrevImg" src="${esc(editPosterDataUrl)}" alt="Event cover preview" />
+                    </div>
+                    <div class="ev-upload-preview-bar">
+                      <div class="ev-upload-filemeta">
+                        <div class="ev-upload-filename" id="evWsPosterMeta">${esc(editPosterMeta)}</div>
+                      </div>
+                      <div class="ev-upload-actions">
+                        <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evWsPosterReplaceBtn">Replace</button>
+                        <button type="button" class="ev-btn ev-btn-sm ev-btn-danger-ghost" id="evWsPosterRemoveBtn">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ev-upload-feedback" id="evWsPosterFeedback" hidden></div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.75rem;flex-wrap:wrap;padding-top:0.5rem;">
+                  <button type="button" class="ev-btn ev-btn-outline" data-ws-jump="overview">Cancel</button>
+                  <button type="submit" class="ev-btn ev-btn-forest" id="evWsSaveDetailsBtn">Save Event Details</button>
+                </div>
+              </form>
+            </div>
+          `;
+        } else if (activeSection === 'registration') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageRegistrationMount"></div>`;
+          const rgMount = document.getElementById('evManageRegistrationMount');
+          if (rgMount && window.EventoraRegistrationManager) {
+            window.EventoraRegistrationManager.mount(rgMount, {
+              slug: ev.slug,
+              readOnly: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'participants') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageParticipantsMount"></div>`;
+          const ptMount = document.getElementById('evManageParticipantsMount');
+          if (ptMount && window.EventoraRoster) {
+            window.EventoraRoster.mountParticipants(ptMount, {
+              slug: ev.slug,
+              readOnly: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'teams') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageTeamsMount"></div>`;
+          const tmMount = document.getElementById('evManageTeamsMount');
+          if (tmMount && window.EventoraRoster) {
+            window.EventoraRoster.mountTeams(tmMount, {
+              slug: ev.slug,
+              readOnly: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'rounds') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageRoundBuilderMount"></div>`;
+          const rbMount = document.getElementById('evManageRoundBuilderMount');
+          if (rbMount && window.EventoraRoundBuilder) {
+            window.EventoraRoundBuilder.mount(rbMount, {
+              slug: ev.slug,
+              readOnly: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'content') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageRoundContentMount"></div>`;
+          const rcMount = document.getElementById('evManageRoundContentMount');
+          if (rcMount && window.EventoraRoundContent) {
+            window.EventoraRoundContent.mount(rcMount, {
+              slug: ev.slug,
+              initialRoundId: focusRoundId,
+              readOnly: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'live') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageLiveMount"></div>`;
+          const liveMount = document.getElementById('evManageLiveMount');
+          if (liveMount && window.EventoraLiveControl) {
+            window.EventoraLiveControl.mount(liveMount, {
+              slug: ev.slug,
+              isManager: activeRole === 'manager',
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'results') {
+          shellCtrl.bodyMount.innerHTML = `<div id="evManageResultsMount"></div>`;
+          const resMount = document.getElementById('evManageResultsMount');
+          if (resMount && window.EventoraEvaluation) {
+            window.EventoraEvaluation.mount(resMount, {
+              slug: ev.slug,
+              initialRoundId: focusRoundId,
+              onJumpSection: switchSection
+            });
+          }
+        } else if (activeSection === 'collaborators') {
+          const isDbCollab = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev);
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-split">
+              <div class="ev-ws-card">
+                <div class="ev-ws-card-head">
+                  <div>
+                    <span class="ev-badge ev-badge-sample" style="margin-bottom:0.45rem;">Scoped to This Event Only</span>
+                    <h2 class="ev-display" style="font-size:1.4rem;font-weight:600;">Event Collaborators (${collabs.length})</h2>
+                    <p style="font-size:0.84rem;color:var(--ev-muted);">Manage event-scoped collaborator permissions for "${esc(ev.name)}".</p>
+                  </div>
+                </div>
+                ${collabs.length > 0 ? `
+                  <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    ${collabs.map((c) => `
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.85rem;flex-wrap:wrap;padding:0.9rem 1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        <div style="min-width:0;">
+                          <div style="font-weight:600;color:var(--ev-charcoal);">${esc(c.name)}</div>
+                          <div style="font-size:0.78rem;color:var(--ev-muted);word-break:break-all;">${esc(c.email)}</div>
+                          <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.35rem;">
+                            <span class="ev-badge ev-badge-open">${esc(c.role)}</span>
+                            <span class="ev-badge ev-badge-sample">${esc(c.status)}</span>
+                          </div>
+                        </div>
+                        <button type="button" class="ev-btn ev-btn-sm ev-btn-danger-ghost" data-remove-collab="${esc(c.id)}">Remove</button>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : EventoraWorkspace.renderEmptyState({
+                  iconName: 'collaborators',
+                  title: 'No collaborators invited yet',
+                  message: 'Add a Co-Organizer, Event Manager, Evaluator, Coordinator, or Viewer scoped strictly to this event.'
+                })}
+              </div>
+
+              <div class="ev-ws-card">
+                <h3 class="ev-display" style="font-size:1.2rem;font-weight:600;">Invite Collaborator</h3>
+                <p style="font-size:0.82rem;color:var(--ev-muted);margin:0.3rem 0 1rem;">
+                  ${isDbCollab ? 'Persisted in Supabase `event_collaborators` and enforced via Row Level Security.' : 'UI prototype mode — switch to connected Supabase backend for server-enforced scoped access.'}
+                </p>
+                <form id="evWsCollabForm" novalidate style="display:flex;flex-direction:column;gap:0.85rem;">
+                  <div id="evWsCollabErr" class="ev-wizard-error" role="alert" hidden></div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evCollabName">Collaborator Name</label>
+                    <input class="ev-input" id="evCollabName" required placeholder="e.g. Meera Nair" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evCollabEmail">Email Address</label>
+                    <input type="email" class="ev-input" id="evCollabEmail" required placeholder="meera@university.edu" />
+                  </div>
+                  <div class="ev-field">
+                    <label class="ev-label" for="evCollabRole">Event Role</label>
+                    <select class="ev-select" id="evCollabRole">
+                      <option value="co_organizer">Co-Organizer (Full Event Access)</option>
+                      <option value="manager" selected>Event Manager (Operations &amp; Roster)</option>
+                      <option value="evaluator">Evaluator (Scoring &amp; Rubrics)</option>
+                      <option value="coordinator">Coordinator (Registrations &amp; Teams)</option>
+                      <option value="viewer">Viewer (Read-Only)</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="ev-btn ev-btn-forest" id="evWsCollabSubmitBtn">${isDbCollab ? 'Assign Collaborator in DB' : 'Add Collaborator (Preview)'}</button>
+                </form>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'settings') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:1.5rem;">
+              <div class="ev-ws-card">
+                <div class="ev-ws-card-head">
+                  <div>
+                    <span class="ev-badge ${esc(ev.statusBadgeClass)}" style="margin-bottom:0.45rem;">Current Status: ${esc(ev.eventStatus)}</span>
+                    <h2 class="ev-display" style="font-size:1.45rem;font-weight:600;">Event Lifecycle &amp; Visibility</h2>
+                    <p style="font-size:0.85rem;color:var(--ev-muted);">Control event status, directory visibility, and public URL access.</p>
+                  </div>
+                  <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Open Public Event Page &rarr;</a>
+                </div>
+
+                <form id="evWsSettingsForm" style="display:flex;flex-direction:column;gap:1rem;">
+                  <div class="ev-form-grid-2">
+                    <div class="ev-field">
+                      <label class="ev-label" for="evSetStatus">Event Status</label>
+                      <select class="ev-select" id="evSetStatus">
+                        <option value="draft" ${ev.statusKey === 'draft' ? 'selected' : ''}>Draft</option>
+                        <option value="published" ${ev.statusKey === 'published' ? 'selected' : ''}>Published</option>
+                        <option value="ongoing" ${ev.statusKey === 'ongoing' ? 'selected' : ''}>Ongoing</option>
+                        <option value="completed" ${ev.statusKey === 'completed' ? 'selected' : ''}>Completed</option>
+                        <option value="cancelled" ${ev.statusKey === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                      </select>
+                    </div>
+                    <div class="ev-field">
+                      <label class="ev-label" for="evSetVisibility">Visibility Setting</label>
+                      <select class="ev-select" id="evSetVisibility">
+                        <option value="public" ${ev.visibility === 'public' ? 'selected' : ''}>Public Directory</option>
+                        <option value="unlisted" ${ev.visibility === 'unlisted' ? 'selected' : ''}>Unlisted (Link Only)</option>
+                        <option value="private" ${ev.visibility === 'private' ? 'selected' : ''}>Private Organizer Draft</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;">
+                    <button type="submit" class="ev-btn ev-btn-forest ev-btn-sm">Save Status &amp; Visibility</button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="ev-ws-card" style="border-color:rgba(158,42,32,0.28);">
+                <h3 class="ev-display" style="font-size:1.2rem;font-weight:600;color:#96261B;margin-bottom:0.35rem;">Event Cancellation &amp; Deletion</h3>
+                <p style="font-size:0.85rem;color:var(--ev-muted);margin-bottom:1.1rem;">
+                  Destructive changes always ask for explicit confirmation before modifying your prototype workspace.
+                </p>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evWsCancelEventBtn">Cancel Event</button>
+                  <button type="button" class="ev-btn ev-btn-sm ev-btn-danger-ghost" id="evWsDeleteEventBtn">Delete Event Permanently</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        bindSectionHandlers(ev);
+      }
+
+      function bindSectionHandlers(ev) {
+        document.querySelectorAll('[data-ws-jump]').forEach((btn) => {
+          btn.addEventListener('click', () => switchSection(btn.dataset.wsJump));
+        });
+
+        // Event Details form & inline cover upload
+        const detForm = document.getElementById('evWsDetailsForm');
+        if (detForm) {
+          const inp = document.getElementById('evWsPosterInput');
+          const drop = document.getElementById('evWsPosterDrop');
+          const chooseBtn = document.getElementById('evWsPosterChooseBtn');
+          const prevBox = document.getElementById('evWsPosterPrevBox');
+          const prevImg = document.getElementById('evWsPosterPrevImg');
+          const metaEl = document.getElementById('evWsPosterMeta');
+          const repBtn = document.getElementById('evWsPosterReplaceBtn');
+          const remBtn = document.getElementById('evWsPosterRemoveBtn');
+          const fbEl = document.getElementById('evWsPosterFeedback');
+
+          function setFb(kind, text) {
+            if (!fbEl) return;
+            fbEl.hidden = !text;
+            fbEl.className = text ? `ev-upload-feedback is-${kind}` : 'ev-upload-feedback';
+            fbEl.textContent = text || '';
+          }
+
+          function handleCoverFile(file) {
+            if (!file) return;
+            const okMime = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+            if (!okMime) return setFb('error', 'Unsupported format. Please select a JPEG, PNG, or WebP image.');
+            if (file.size > 5 * 1024 * 1024) return setFb('error', 'Image exceeds 5 MB upload limit.');
+            editPosterFile = file;
+            editPosterRemoved = false;
+            const reader = new FileReader();
+            reader.onload = () => {
+              const url = String(reader.result || '');
+              editPosterDataUrl = url;
+              if (prevImg) prevImg.src = url;
+              if (metaEl) metaEl.textContent = `${file.name} • Ready to save`;
+              if (drop) drop.hidden = true;
+              if (prevBox) prevBox.hidden = false;
+              const isDb = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev);
+              setFb('ready', isDb ? 'Cover selected — clicking Save will upload to private eventora-media Storage.' : 'Updated local cover preview.');
+            };
+            reader.readAsDataURL(file);
+          }
+
+          if (chooseBtn) chooseBtn.addEventListener('click', () => inp && inp.click());
+          if (repBtn) repBtn.addEventListener('click', () => inp && inp.click());
+          if (remBtn) {
+            remBtn.addEventListener('click', () => {
+              editPosterDataUrl = '';
+              editPosterFile = null;
+              editPosterRemoved = true;
+              if (inp) inp.value = '';
+              if (prevImg) prevImg.removeAttribute('src');
+              if (prevBox) prevBox.hidden = true;
+              if (drop) drop.hidden = false;
+              setFb('warn', 'Poster removed — save changes to apply.');
+            });
+          }
+          if (inp) {
+            inp.addEventListener('change', () => {
+              if (inp.files && inp.files[0]) handleCoverFile(inp.files[0]);
+            });
+          }
+
+          detForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errBox = document.getElementById('evWsDetailsErr');
+            const saveBtn = document.getElementById('evWsSaveDetailsBtn');
+            const nameVal = document.getElementById('evEditEvName').value.trim();
+            const dateVal = document.getElementById('evEditEvDate').value.trim();
+            const locVal = document.getElementById('evEditEvLoc').value.trim();
+            const instVal = document.getElementById('evEditEvInst').value.trim();
+            const orgVal = document.getElementById('evEditEvOrg').value.trim();
+            const descVal = document.getElementById('evEditEvDesc').value.trim();
+            if (!nameVal || !dateVal || !locVal || !instVal || !orgVal || !descVal) {
+              if (errBox) { errBox.hidden = false; errBox.textContent = 'Please complete all required fields before saving.'; }
+              return;
+            }
+            if (errBox) errBox.hidden = true;
+
+            const isDb = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev);
+            if (isDb && saveBtn) {
+              saveBtn.disabled = true;
+              saveBtn.textContent = 'Saving to PostgreSQL...';
+            }
+
+            if (isDb && editPosterFile) {
+              const upRes = await window.EventoraSync.saveEventPosterFromFile(ev.slug, editPosterFile, 'poster');
+              if (!upRes.ok) {
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Event Details'; }
+                if (errBox) { errBox.hidden = false; errBox.textContent = upRes.error || 'Failed to upload poster to Supabase Storage.'; }
+                return;
+              }
+              editPosterDataUrl = upRes.signedUrl || editPosterDataUrl;
+            } else if (isDb && editPosterRemoved && (ev.posterPath || ev.coverPath)) {
+              await window.EventoraSync.removeEventPoster(ev.slug);
+            }
+
+            const freshEvAfterPoster = EventoraStore.getEventBySlug(ev.slug) || ev;
+            const partType = document.getElementById('evEditEvPart').value;
+            const catSlug = document.getElementById('evEditEvCat').value;
+            const res = EventoraStore.updateEvent(ev.slug, {
+              name: nameVal,
+              category: catSlug,
+              dateLabel: dateVal,
+              city: document.getElementById('evEditEvCity').value.trim() || ev.city,
+              mode: document.getElementById('evEditEvMode').value,
+              location: locVal,
+              institution: instVal,
+              institutionShort: instVal,
+              organizer: orgVal,
+              description: descVal,
+              tagline: descVal.slice(0, 140),
+              coverImage: editPosterRemoved ? '' : (freshEvAfterPoster.coverImage || editPosterDataUrl),
+              posterPath: editPosterRemoved ? '' : (freshEvAfterPoster.posterPath || ''),
+              coverPath: editPosterRemoved ? '' : (freshEvAfterPoster.coverPath || ''),
+              participationType: partType,
+              teamConfig: EventoraStore.normalizeTeamConfig({
+                ...ev.teamConfig,
+                supported: partType === 'team',
+                minSize: partType === 'team' ? Math.max(1, ev.teamConfig.minSize || 2) : 1,
+                maxSize: partType === 'team' ? Math.max(ev.teamConfig.maxSize || 4, ev.teamConfig.minSize || 2) : 1
+              }, partType)
+            });
+            if (isDb && window.EventoraSync) {
+              await window.EventoraSync.flushEventWriteThrough(ev.slug);
+            }
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Event Details'; }
+            EventoraUI.showToast(res.omittedImage ? 'Details updated (oversized image omitted from sessionStorage).' : (isDb ? 'Event details saved to Supabase PostgreSQL.' : 'Event details updated in workspace.'));
+            switchSection('overview');
+          });
+        }
+
+        document.getElementById('evWsPublishResultsBtn')?.addEventListener('click', () => {
+          EventoraUI.showToast('No evaluation scores exist yet — scoring & publishing connect in later phases.');
+        });
+
+        // Collaborators invite & remove
+        const colForm = document.getElementById('evWsCollabForm');
+        if (colForm) {
+          colForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cName = document.getElementById('evCollabName').value.trim();
+            const cEmail = document.getElementById('evCollabEmail').value.trim();
+            const cRole = document.getElementById('evCollabRole').value;
+            const errEl = document.getElementById('evWsCollabErr');
+            const subBtn = document.getElementById('evWsCollabSubmitBtn');
+            if (!cName || !EventoraAuth.isValidEmail(cEmail)) {
+              if (errEl) { errEl.hidden = false; errEl.textContent = 'Enter a collaborator name and valid email address.'; }
+              return;
+            }
+            if (errEl) errEl.hidden = true;
+            const isDbCollab = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev) && window.EventoraCollaboratorsApi;
+            if (isDbCollab) {
+              if (subBtn) { subBtn.disabled = true; subBtn.textContent = 'Saving...'; }
+              const cRes = await window.EventoraCollaboratorsApi.addCollaborator(ev.dbId, {
+                email: cEmail,
+                collaboratorRole: cRole
+              });
+              if (subBtn) { subBtn.disabled = false; subBtn.textContent = 'Assign Collaborator in DB'; }
+              if (!cRes.ok) {
+                if (errEl) { errEl.hidden = false; errEl.textContent = cRes.error || 'Could not assign collaborator.'; }
+                return;
+              }
+              await window.EventoraSync.hydrateEventBySlug(ev.slug, EventoraAuth.getSession(), { organizerView: true });
+              EventoraUI.showToast(`Assigned ${cEmail} (${cRole}) in PostgreSQL.`);
+              renderSection(EventoraStore.getEventBySlug(ev.slug));
+              return;
+            }
+            EventoraStore.addCollaborator(ev.slug, { name: cName, email: cEmail, role: cRole });
+            EventoraUI.showToast(`Added ${cName} (${cRole}) to event preview list.`);
+            renderSection(EventoraStore.getEventBySlug(ev.slug));
+          });
+        }
+        document.querySelectorAll('[data-remove-collab]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const cid = btn.dataset.removeCollab;
+            const isDbCollab = window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev) && window.EventoraCollaboratorsApi;
+            if (isDbCollab && window.EventoraSupabase.db.isUuid(cid)) {
+              const rRes = await window.EventoraCollaboratorsApi.removeCollaborator(cid);
+              if (!rRes.ok) {
+                EventoraUI.showToast(rRes.error || 'Permission denied removing collaborator.');
+                return;
+              }
+              await window.EventoraSync.hydrateEventBySlug(ev.slug, EventoraAuth.getSession(), { organizerView: true });
+              EventoraUI.showToast('Removed collaborator from PostgreSQL.');
+              renderSection(EventoraStore.getEventBySlug(ev.slug));
+              return;
+            }
+            EventoraStore.removeCollaborator(ev.slug, cid);
+            EventoraUI.showToast('Removed collaborator from event preview.');
+            renderSection(EventoraStore.getEventBySlug(ev.slug));
+          });
+        });
+
+        // Settings lifecycle & confirmation-gated destructive actions
+        const setForm = document.getElementById('evWsSettingsForm');
+        if (setForm) {
+          setForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            EventoraStore.updateEvent(ev.slug, {
+              statusKey: document.getElementById('evSetStatus').value,
+              visibility: document.getElementById('evSetVisibility').value
+            });
+            EventoraUI.showToast('Event status & visibility updated.');
+            renderSection(EventoraStore.getEventBySlug(ev.slug));
+          });
+        }
+
+        document.getElementById('evWsCancelEventBtn')?.addEventListener('click', () => {
+          EventoraWorkspace.openConfirm({
+            title: 'Cancel Event Preview',
+            body: `Mark "${ev.name}" as Cancelled inside your local Eventora workspace?`,
+            confirmLabel: 'Confirm Cancellation',
+            danger: true,
+            onConfirm: () => {
+              EventoraStore.updateEvent(ev.slug, { statusKey: 'cancelled', eventStatus: 'Cancelled' });
+              EventoraUI.showToast('Event marked as Cancelled.');
+              renderSection(EventoraStore.getEventBySlug(ev.slug));
+            }
+          });
+        });
+
+        document.getElementById('evWsDeleteEventBtn')?.addEventListener('click', () => {
+          EventoraWorkspace.openConfirm({
+            title: 'Delete Event Permanently',
+            body: `Delete "${ev.name}" from your workspace? You will return to the Organizer Dashboard.`,
+            confirmLabel: 'Delete Event',
+            danger: true,
+            onConfirm: async () => {
+              if (window.EventoraSync && window.EventoraSync.isSupabaseActiveForEvent(ev) && window.EventoraEventsApi) {
+                const delRes = await window.EventoraEventsApi.deleteEvent(ev.dbId);
+                if (!delRes.ok) {
+                  EventoraUI.showToast(delRes.error || 'Could not delete event in database.');
+                  return;
+                }
+              }
+              EventoraStore.deleteEvent(ev.slug);
+              if (window.EventoraRealtime) await window.EventoraRealtime.unsubscribeAll();
+              EventoraUI.showToast('Event deleted cleanly.');
+              window.location.href = 'organizer-dashboard.html?section=my-events';
+            }
+          });
+        });
+      }
+
+      const MANAGER_SECTIONS = new Set(['overview', 'participants', 'teams', 'rounds', 'content', 'live']);
+      let activeRole = 'organizer';
+
+      function getScopedNavGroups(role) {
+        if (role !== 'manager') return NAV_GROUPS;
+        return [
+          {
+            title: 'Manager Scope',
+            items: [
+              { id: 'overview', label: 'Overview', icon: 'overview' },
+              { id: 'participants', label: 'Participants', icon: 'participants' },
+              { id: 'teams', label: 'Teams', icon: 'teams' },
+              { id: 'rounds', label: 'Round Operations', icon: 'rounds' },
+              { id: 'content', label: 'Round Content', icon: 'content' },
+              { id: 'live', label: 'Live Moderation', icon: 'live' }
+            ]
+          }
+        ];
+      }
+
+      function switchSection(nextSection, optRoundId) {
+        if (!validSections.has(nextSection)) return;
+        if (activeRole === 'manager' && !MANAGER_SECTIONS.has(nextSection)) {
+          EventoraUI.showToast('This section requires Event Organizer owner permissions.');
+          return;
+        }
+        window.EventoraLiveControl?.stopActiveTicker?.();
+        if (optRoundId !== undefined) focusRoundId = String(optRoundId || '');
+        activeSection = nextSection;
+        try {
+          const rParam = focusRoundId ? `&roundId=${encodeURIComponent(focusRoundId)}` : '';
+          window.history.replaceState({}, document.title, `manage-event.html?slug=${encodeURIComponent(slug)}&section=${encodeURIComponent(nextSection)}${rParam}`);
+        } catch (_) {}
+        const freshEv = EventoraStore.getEventBySlug(slug);
+        if (!freshEv) return renderMissingEvent();
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, freshEv.name);
+        renderSection(freshEv);
+      }
+
+      function mountWorkspace() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['organizer', 'manager'],
+          rootEl,
+          pageName: 'Event Management Workspace'
+        });
+        if (!access.allowed) return;
+
+        activeRole = access.role;
+        if (activeRole === 'manager' && !MANAGER_SECTIONS.has(activeSection)) {
+          activeSection = 'overview';
+        }
+
+        const ev = EventoraStore.getEventBySlug(slug);
+        const isManager = activeRole === 'manager';
+        const backHref = isManager ? 'manager-dashboard.html?section=assigned-events' : 'organizer-dashboard.html?section=my-events';
+        const backText = isManager ? 'Assigned Events' : 'All Events';
+
+        document.title = ev ? `Manage: ${ev.name} — Eventora` : 'Manage Event — Eventora';
+        shellCtrl = EventoraWorkspace.renderWorkspaceShell({
+          rootEl,
+          user: access.user,
+          navGroups: getScopedNavGroups(activeRole),
+          activeSection,
+          topTitle: ev ? (isManager ? `${ev.name} (Manager)` : ev.name) : 'Loading Event Workspace...',
+          backLinkHTML: `<a href="${backHref}" class="ev-ws-nav-item" style="margin-bottom:0.4rem;color:var(--ev-forest);font-weight:600;"><span class="ev-ws-nav-icon">&larr;</span><span class="ev-ws-nav-label">${backText}</span></a>`,
+          onSelectSection: switchSection,
+          onSearchSubmit: () => {
+            window.location.href = backHref;
+          },
+          onLogout: async () => {
+            if (window.EventoraRealtime) await window.EventoraRealtime.unsubscribeAll();
+            await EventoraAuth.signOut();
+            window.location.href = 'login.html';
+          }
+        });
+        if (ev) {
+          renderSection(ev);
+        } else if (!window.EventoraSync) {
+          renderMissingEvent();
+          return;
+        }
+        hydrateManageEvent(access.user, false);
+      }
+
+      window.addEventListener('eventora:authchange', mountWorkspace);
+      mountWorkspace();
+      EventoraAuth.ready().then(mountWorkspace);
+    })();
+  </script>
+</body>
+</html>

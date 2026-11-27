@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+</head>
+<body class="ev-auth-page">
+  <header class="ev-auth-topbar">
+    <div class="ev-container ev-auth-topbar-inner">
+      <a href="index.html" class="ev-brand" aria-label="Eventora Home">
+        <span class="ev-brand-mark">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </span>
+        <span>Eventora</span>
+      </a>
+      <a href="index.html" class="ev-back-link" style="font-size:0.86rem;font-weight:600;color:var(--ev-forest);">
+        &larr; Back to Eventora
+      </a>
+    </div>
+  </header>
+
+  <main class="ev-auth-main">
+    <div class="ev-container">
+      <div class="ev-auth-shell">
+        <!-- Decorative Brand Visual Panel -->
+        <aside class="ev-auth-visual" aria-hidden="true">
+          <img src="assets/event-hackathon.jpg" alt="" class="ev-auth-visual-bg" />
+          <div class="ev-auth-visual-scrim"></div>
+          <div>
+            <span class="ev-badge" style="background:rgba(255,255,255,0.18);color:#FFFFFF;border:1px solid rgba(255,255,255,0.28);">Built For Every Campus</span>
+            <h2 class="ev-display" style="font-size:2.1rem;font-weight:600;color:#FFFFFF;margin-top:1.1rem;line-height:1.12;">
+              Start participating or organizing with clarity.
+            </h2>
+            <p style="margin-top:0.8rem;font-size:0.94rem;color:rgba(246,245,239,0.86);line-height:1.6;">
+              Create your Eventora account with verified email credentials or Google OAuth to explore events and organizer workspaces.
+            </p>
+          </div>
+          <div class="ev-auth-feature-list">
+            <div class="ev-auth-feature-item">
+              <span>Participant accounts explore events, build squads, and follow round timelines.</span>
+            </div>
+            <div class="ev-auth-feature-item">
+              <span>Organizer focus sets your workspace view while backend roles enforce authorization securely.</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Signup Form Card -->
+        <section class="ev-auth-card" aria-labelledby="evSignupTitle">
+          <span class="ev-badge ev-badge-open">Eventora Account</span>
+          <h1 id="evSignupTitle" class="ev-display" style="font-size:1.85rem;font-weight:600;margin-top:0.85rem;">
+            Create an Eventora account
+          </h1>
+          <p style="font-size:0.9rem;color:var(--ev-muted);margin-top:0.35rem;">
+            Sign up with Google or create your account with email verification.
+          </p>
+
+          <div id="evSignupConfigBanner" class="ev-auth-status is-info" role="note" style="margin-top:1rem;" hidden></div>
+          <div id="evSignupStatus" class="ev-auth-status" role="status" aria-live="polite" style="margin-top:1rem;" hidden></div>
+
+          <div id="evSignupSuccessActions" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap;" hidden>
+            <button type="button" class="ev-btn ev-btn-outline" id="evSignupResendBtn" hidden>Resend Verification Email</button>
+            <a href="login.html" class="ev-btn ev-btn-forest" id="evSignupLoginCta">Go to Login &rarr;</a>
+            <a href="profile.html" class="ev-btn ev-btn-forest" id="evSignupProfileCta" hidden>Go to Your Profile &rarr;</a>
+            <a href="discover.html" class="ev-btn ev-btn-outline">Explore Events</a>
+          </div>
+
+          <div id="evSignupOAuthBlock" style="margin-top:1.35rem;">
+            <button type="button" class="ev-btn ev-btn-google" id="evGoogleSignupBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+                <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+            <div class="ev-oauth-divider"><span>or sign up with email</span></div>
+          </div>
+
+          <form class="ev-auth-form" id="evSignupForm" novalidate style="margin-top:0.9rem;">
+            <div class="ev-form-grid-2">
+              <div class="ev-field">
+                <label class="ev-label" for="evSignupName">Full Name</label>
+                <input
+                  class="ev-input"
+                  id="evSignupName"
+                  type="text"
+                  autocomplete="name"
+                  required
+                  placeholder="e.g. Ananya Deshmukh"
+                />
+                <div class="ev-field-err" id="evSignupNameErr" hidden></div>
+              </div>
+
+              <div class="ev-field">
+                <label class="ev-label" for="evSignupRole">Account Role</label>
+                <select class="ev-select" id="evSignupRole" aria-describedby="evSignupRoleHint">
+                  <option value="participant">Participant</option>
+                  <option value="organizer">Event Organizer</option>
+                  <option value="manager">Event Manager</option>
+                </select>
+                <div id="evSignupRoleHint" style="font-size:0.71rem;color:var(--ev-muted);margin-top:0.2rem;">
+                  Select your Eventora workspace role (Admin roles require server assignment).
+                </div>
+              </div>
+            </div>
+
+            <div class="ev-field">
+              <label class="ev-label" for="evSignupEmail">Email Address</label>
+              <input
+                class="ev-input"
+                id="evSignupEmail"
+                type="email"
+                autocomplete="email"
+                required
+                placeholder="you@university.edu"
+              />
+              <div class="ev-field-err" id="evSignupEmailErr" hidden></div>
+            </div>
+
+            <div class="ev-field">
+              <label class="ev-label" for="evSignupPassword">Password</label>
+              <div class="ev-password-wrap">
+                <input
+                  class="ev-input"
+                  id="evSignupPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  placeholder="At least 8 characters"
+                />
+                <button
+                  type="button"
+                  class="ev-password-toggle"
+                  id="evSignupPwToggle"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                ></button>
+              </div>
+              <div class="ev-strength-wrap" id="evPasswordStrengthWrap" data-tier="empty">
+                <div class="ev-strength-bars" aria-hidden="true">
+                  <span class="ev-strength-seg"></span>
+                  <span class="ev-strength-seg"></span>
+                  <span class="ev-strength-seg"></span>
+                  <span class="ev-strength-seg"></span>
+                </div>
+                <span class="ev-strength-text" id="evPasswordStrengthText">Use 8+ characters with letters, numbers, or symbols</span>
+              </div>
+              <div class="ev-field-err" id="evSignupPasswordErr" hidden></div>
+            </div>
+
+            <div class="ev-field">
+              <label class="ev-label" for="evSignupConfirm">Confirm Password</label>
+              <div class="ev-password-wrap">
+                <input
+                  class="ev-input"
+                  id="evSignupConfirm"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  placeholder="Re-enter your password"
+                />
+                <button
+                  type="button"
+                  class="ev-password-toggle"
+                  id="evSignupConfirmToggle"
+                  aria-label="Show confirm password"
+                  aria-pressed="false"
+                ></button>
+              </div>
+              <div class="ev-field-err" id="evSignupConfirmErr" hidden></div>
+            </div>
+
+            <div>
+              <label class="ev-checkbox-row" for="evSignupTerms">
+                <input type="checkbox" id="evSignupTerms" required />
+                <span>I agree to Eventora's terms of use and understand passwords are handled securely by Supabase Auth.</span>
+              </label>
+              <div class="ev-field-err" id="evSignupTermsErr" hidden></div>
+            </div>
+
+            <button type="submit" class="ev-btn ev-btn-forest ev-btn-lg" id="evSignupSubmitBtn" style="width:100%;margin-top:0.2rem;">
+              Create Account
+            </button>
+          </form>
+
+          <div class="ev-auth-divider">
+            Already have an account? <a href="login.html" class="ev-text-link">Log in</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/components.js"></script>
+  <script>
+    (function initSignupPage() {
+      const form = document.getElementById('evSignupForm');
+      const oauthBlock = document.getElementById('evSignupOAuthBlock');
+      const googleBtn = document.getElementById('evGoogleSignupBtn');
+      const nameEl = document.getElementById('evSignupName');
+      const roleEl = document.getElementById('evSignupRole');
+      const emailEl = document.getElementById('evSignupEmail');
+      const pwEl = document.getElementById('evSignupPassword');
+      const confirmEl = document.getElementById('evSignupConfirm');
+      const termsEl = document.getElementById('evSignupTerms');
+      const submitBtn = document.getElementById('evSignupSubmitBtn');
+      const configBanner = document.getElementById('evSignupConfigBanner');
+      const statusBox = document.getElementById('evSignupStatus');
+      const successActions = document.getElementById('evSignupSuccessActions');
+      const resendBtn = document.getElementById('evSignupResendBtn');
+      const loginCta = document.getElementById('evSignupLoginCta');
+      const profileCta = document.getElementById('evSignupProfileCta');
+
+      const nameErr = document.getElementById('evSignupNameErr');
+      const emailErr = document.getElementById('evSignupEmailErr');
+      const pwErr = document.getElementById('evSignupPasswordErr');
+      const confirmErr = document.getElementById('evSignupConfirmErr');
+      const termsErr = document.getElementById('evSignupTermsErr');
+
+      const strengthWrap = document.getElementById('evPasswordStrengthWrap');
+      const strengthText = document.getElementById('evPasswordStrengthText');
+      const strengthSegs = strengthWrap ? strengthWrap.querySelectorAll('.ev-strength-seg') : [];
+
+      const params = new URLSearchParams(window.location.search);
+      const preRole = params.get('role');
+      if (preRole && roleEl) {
+        const sanitizedRole = EventoraAuth.sanitizePreferredRole(preRole);
+        if (Array.from(roleEl.options).some((o) => o.value === sanitizedRole)) {
+          roleEl.value = sanitizedRole;
+        }
+      }
+
+      let isSubmitting = false;
+      let isOAuthLoading = false;
+      let isResending = false;
+      let pendingVerificationEmail = '';
+
+      function bindPwToggle(btnId, inputEl, showLabel, hideLabel) {
+        const btn = document.getElementById(btnId);
+        if (!btn || !inputEl) return;
+        btn.innerHTML = EventoraUI.icon('eye');
+        btn.addEventListener('click', () => {
+          const showing = inputEl.type === 'text';
+          inputEl.type = showing ? 'password' : 'text';
+          btn.innerHTML = EventoraUI.icon(showing ? 'eye' : 'eyeOff');
+          btn.setAttribute('aria-pressed', String(!showing));
+          btn.setAttribute('aria-label', showing ? showLabel : hideLabel);
+        });
+      }
+
+      bindPwToggle('evSignupPwToggle', pwEl, 'Show password', 'Hide password');
+      bindPwToggle('evSignupConfirmToggle', confirmEl, 'Show confirm password', 'Hide confirm password');
+
+      function setFieldError(inputEl, errEl, msg) {
+        if (errEl) {
+          errEl.hidden = !msg;
+          errEl.textContent = msg || '';
+        }
+        if (inputEl) inputEl.classList.toggle('is-invalid', Boolean(msg));
+      }
+
+      function setStatus(kind, msg) {
+        if (!statusBox) return;
+        if (!msg) {
+          statusBox.hidden = true;
+          statusBox.className = 'ev-auth-status';
+          statusBox.innerHTML = '';
+          return;
+        }
+        statusBox.hidden = false;
+        statusBox.className = `ev-auth-status is-${kind}`;
+        const ic = kind === 'success' ? EventoraUI.icon('check') : EventoraUI.icon('alert');
+        statusBox.innerHTML = `<span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${ic}</span><span>${EventoraUI.escapeHTML(msg)}</span>`;
+      }
+
+      function setConfigNotice(msg) {
+        if (!configBanner) return;
+        if (!msg) {
+          configBanner.hidden = true;
+          configBanner.innerHTML = '';
+          return;
+        }
+        configBanner.hidden = false;
+        configBanner.innerHTML = `<span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${EventoraUI.icon('alert')}</span><span>${EventoraUI.escapeHTML(msg)}</span>`;
+      }
+
+      function updateStrengthUI() {
+        const evalRes = EventoraAuth.evaluatePasswordStrength(pwEl.value);
+        if (strengthWrap) strengthWrap.setAttribute('data-tier', evalRes.tier);
+        if (strengthText) strengthText.textContent = evalRes.label;
+        strengthSegs.forEach((seg, idx) => {
+          seg.classList.toggle('is-filled', idx < evalRes.score);
+        });
+      }
+
+      pwEl.addEventListener('input', () => {
+        updateStrengthUI();
+        setFieldError(pwEl, pwErr, '');
+        if (confirmEl.value && confirmEl.value === pwEl.value) {
+          setFieldError(confirmEl, confirmErr, '');
+        }
+      });
+      confirmEl.addEventListener('input', () => {
+        if (confirmEl.value && pwEl.value !== confirmEl.value) {
+          setFieldError(confirmEl, confirmErr, 'Passwords do not match.');
+        } else {
+          setFieldError(confirmEl, confirmErr, '');
+        }
+      });
+      nameEl.addEventListener('input', () => setFieldError(nameEl, nameErr, ''));
+      emailEl.addEventListener('input', () => setFieldError(emailEl, emailErr, ''));
+      termsEl.addEventListener('change', () => setFieldError(null, termsErr, ''));
+
+      EventoraAuth.ready().then((state) => {
+        if (!state.configured) {
+          setConfigNotice(state.configStatus.errorMessage || 'Local Supabase credentials are not configured yet. Follow SUPABASE_AUTH_SETUP.md to enable real account registration.');
+        } else {
+          setConfigNotice('');
+        }
+      });
+
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+          if (isOAuthLoading || isSubmitting) return;
+          setStatus('', '');
+          isOAuthLoading = true;
+          googleBtn.disabled = true;
+          const originalHTML = googleBtn.innerHTML;
+          googleBtn.innerHTML = '<span class="ev-spinner" aria-hidden="true"></span><span>Connecting to Google...</span>';
+
+          const selectedRole = EventoraAuth.sanitizePreferredRole(roleEl ? roleEl.value : 'participant');
+          const res = await EventoraAuth.signInWithGoogle(`login.html?oauth=google&intended_role=${encodeURIComponent(selectedRole)}`);
+          if (!res.ok) {
+            isOAuthLoading = false;
+            googleBtn.disabled = false;
+            googleBtn.innerHTML = originalHTML;
+            setStatus('error', res.error);
+          } else if (!res.url) {
+            setTimeout(() => {
+              isOAuthLoading = false;
+              googleBtn.disabled = false;
+              googleBtn.innerHTML = originalHTML;
+            }, 3000);
+          }
+        });
+      }
+
+      if (resendBtn) {
+        resendBtn.addEventListener('click', async () => {
+          if (isResending || !pendingVerificationEmail) return;
+          isResending = true;
+          resendBtn.disabled = true;
+          resendBtn.textContent = 'Sending...';
+
+          const res = await EventoraAuth.resendSignupVerification(pendingVerificationEmail);
+          isResending = false;
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Verification Email';
+
+          if (!res.ok) {
+            setStatus('error', res.error);
+          } else {
+            setStatus('success', `Verification link re-sent to ${pendingVerificationEmail}. Please check your inbox and spam folder.`);
+          }
+        });
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (isSubmitting || isOAuthLoading) return;
+
+        setStatus('', '');
+        let firstBad = null;
+
+        const nameVal = nameEl.value.trim();
+        const emailVal = emailEl.value.trim();
+        const pwVal = pwEl.value;
+        const confirmVal = confirmEl.value;
+        const roleVal = EventoraAuth.sanitizePreferredRole(roleEl ? roleEl.value : 'participant');
+        const strength = EventoraAuth.evaluatePasswordStrength(pwVal);
+
+        if (!nameVal || nameVal.length < 2) {
+          setFieldError(nameEl, nameErr, 'Enter your full name (at least 2 characters).');
+          firstBad = firstBad || nameEl;
+        } else {
+          setFieldError(nameEl, nameErr, '');
+        }
+
+        if (!emailVal) {
+          setFieldError(emailEl, emailErr, 'Email address is required.');
+          firstBad = firstBad || emailEl;
+        } else if (!EventoraAuth.isValidEmail(emailVal)) {
+          setFieldError(emailEl, emailErr, 'Enter a valid email address.');
+          firstBad = firstBad || emailEl;
+        } else {
+          setFieldError(emailEl, emailErr, '');
+        }
+
+        if (!pwVal || !strength.checks.length) {
+          setFieldError(pwEl, pwErr, 'Password must be at least 8 characters.');
+          firstBad = firstBad || pwEl;
+        } else {
+          setFieldError(pwEl, pwErr, '');
+        }
+
+        if (!confirmVal) {
+          setFieldError(confirmEl, confirmErr, 'Please confirm your password.');
+          firstBad = firstBad || confirmEl;
+        } else if (pwVal !== confirmVal) {
+          setFieldError(confirmEl, confirmErr, 'Password confirmation does not match.');
+          firstBad = firstBad || confirmEl;
+        } else {
+          setFieldError(confirmEl, confirmErr, '');
+        }
+
+        if (!termsEl.checked) {
+          setFieldError(null, termsErr, 'Please agree to the terms of use checkbox to continue.');
+          firstBad = firstBad || termsEl;
+        } else {
+          setFieldError(null, termsErr, '');
+        }
+
+        if (firstBad) {
+          setStatus('error', 'Please resolve the highlighted fields before continuing.');
+          firstBad.focus();
+          return;
+        }
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="ev-spinner" aria-hidden="true"></span><span>Creating Account...</span>';
+
+        const res = await EventoraAuth.signUpWithEmail({
+          fullName: nameVal,
+          email: emailVal,
+          password: pwVal,
+          role: roleVal
+        });
+
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Account';
+
+        if (!res.ok) {
+          setStatus('error', res.error);
+          return;
+        }
+
+        pwEl.value = '';
+        confirmEl.value = '';
+
+        if (res.alreadyRegisteredNotice) {
+          setStatus(
+            'error',
+            `An account with ${emailVal} may already be registered. Try logging in or using Forgot password instead.`
+          );
+          return;
+        }
+
+        form.hidden = true;
+        if (oauthBlock) oauthBlock.hidden = true;
+        if (successActions) {
+          successActions.hidden = false;
+          successActions.style.display = 'flex';
+        }
+
+        if (res.needsEmailVerification) {
+          pendingVerificationEmail = emailVal;
+          if (resendBtn) resendBtn.hidden = false;
+          if (loginCta) loginCta.hidden = false;
+          if (profileCta) profileCta.hidden = true;
+          setStatus(
+            'success',
+            `Account created for ${nameVal}! A verification email was sent to ${emailVal}. Open the confirmation link in your inbox before logging in.`
+          );
+        } else {
+          pendingVerificationEmail = '';
+          const roleDest = EventoraAccess.getPostLoginRedirect(res.user);
+          const roleLabel = EventoraAccess.getRoleLabel(EventoraAccess.getEffectiveRole(res.user));
+          if (resendBtn) resendBtn.hidden = true;
+          if (loginCta) loginCta.hidden = true;
+          if (profileCta) {
+            profileCta.hidden = false;
+            profileCta.href = roleDest;
+            profileCta.textContent = `Go to ${roleLabel} Dashboard →`;
+          }
+          setStatus(
+            'success',
+            `Account created and signed in as ${res.user ? res.user.fullName : nameVal} (${roleLabel}). Redirecting...`
+          );
+          setTimeout(() => {
+            window.location.href = roleDest;
+          }, 550);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

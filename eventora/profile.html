@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Profile — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evNavMount"></div>
+
+  <main id="evProfileRoot"></main>
+
+  <div id="evFooterMount"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script>
+    (function initProfilePage() {
+      EventoraUI.mountShell('profile');
+      const root = document.getElementById('evProfileRoot');
+      let isEditing = false;
+      let isSaving = false;
+      let isSigningOut = false;
+      let callbackErrorMsg = '';
+
+      function readParticipantPreview(user) {
+        try {
+          const raw = localStorage.getItem(`eventora_participant_preview_v1_${(user && user.id) || 'anon'}`);
+          if (!raw) return { registrations: [], teams: [] };
+          const parsed = JSON.parse(raw);
+          return {
+            registrations: Array.isArray(parsed.registrations) ? parsed.registrations : [],
+            teams: Array.isArray(parsed.teams) ? parsed.teams : []
+          };
+        } catch (_) {
+          return { registrations: [], teams: [] };
+        }
+      }
+
+      function renderLoadingView() {
+        root.innerHTML = `
+          <section class="ev-profile-hero" style="padding-bottom:4.5rem;">
+            <div class="ev-container" style="max-width:640px;">
+              <div class="ev-empty-state">
+                <div class="ev-empty-icon"><span class="ev-spinner" aria-hidden="true"></span></div>
+                <h1 class="ev-display" style="font-size:1.65rem;font-weight:600;margin-bottom:0.45rem;">Restoring your session</h1>
+                <p style="font-size:0.92rem;color:var(--ev-muted);max-width:26rem;margin:0 auto;">
+                  Verifying your Eventora authentication state...
+                </p>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function renderRoleSpecificBodyCards(user, role, esc) {
+        if (role === 'participant') {
+          const pData = readParticipantPreview(user);
+          return `
+            <div class="ev-profile-card" id="my-events">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">My Registrations</h2>
+                  <p style="font-size:0.84rem;color:var(--ev-muted);">Events you joined in your participant dashboard.</p>
+                </div>
+                <a href="participant-dashboard.html?section=registrations" class="ev-btn ev-btn-outline ev-btn-sm">Manage Passes &rarr;</a>
+              </div>
+
+              ${pData.registrations.length > 0 ? `
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                  ${pData.registrations.map((reg) => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.95rem 1.05rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                      <div style="min-width:0;flex:1 1 200px;">
+                        <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+                          <span class="ev-badge ev-badge-category">${esc(reg.categoryLabel)}</span>
+                          <span class="ev-badge ev-badge-open">${esc(reg.status || 'Registered')}</span>
+                        </div>
+                        <div style="font-weight:600;color:var(--ev-charcoal);">${esc(reg.eventName)}</div>
+                        <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(reg.dateLabel)} &bull; ${esc(reg.location)}</div>
+                      </div>
+                      <a href="event.html?slug=${encodeURIComponent(reg.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">View Event &rarr;</a>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <div style="padding:1.5rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px dashed var(--ev-border-strong);text-align:center;">
+                  <p style="font-size:0.9rem;color:var(--ev-muted);margin-bottom:0.9rem;">
+                    No event registrations yet. Explore upcoming campus hackathons, workshops, and seminars.
+                  </p>
+                  <a href="discover.html" class="ev-btn ev-btn-forest ev-btn-sm">Browse Events &rarr;</a>
+                </div>
+              `}
+            </div>
+
+            <div class="ev-profile-card" id="my-teams">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">My Teams</h2>
+                  <p style="font-size:0.84rem;color:var(--ev-muted);">Active squads for team-enabled competitions.</p>
+                </div>
+                <a href="participant-dashboard.html?section=teams" class="ev-btn ev-btn-outline ev-btn-sm">Manage Teams &rarr;</a>
+              </div>
+              ${pData.teams.length > 0 ? `
+                <div style="display:flex;flex-direction:column;gap:0.65rem;">
+                  ${pData.teams.map((tm) => `
+                    <div style="padding:0.85rem 1rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+                      <div>
+                        <strong style="color:var(--ev-charcoal);">${esc(tm.teamName)}</strong>
+                        <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(tm.eventName)} &bull; Code: ${esc(tm.inviteCode)}</div>
+                      </div>
+                      <span class="ev-badge ev-badge-open">${esc(tm.role || 'Member')}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <p style="font-size:0.86rem;color:var(--ev-muted);">No team squads created or joined yet. <a href="participant-dashboard.html?section=teams" class="ev-text-link">Create or join a team &rarr;</a></p>
+              `}
+            </div>
+          `;
+        }
+
+        if (role === 'organizer') {
+          const orgEvents = EventoraStore.getOrganizerEvents(user.email);
+          return `
+            <div class="ev-profile-card" id="my-events">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">My Events</h2>
+                  <p style="font-size:0.84rem;color:var(--ev-muted);">Events configured in your Organizer Studio workspace.</p>
+                </div>
+                <a href="organizer-dashboard.html?section=my-events" class="ev-btn ev-btn-outline ev-btn-sm">All Organizer Events &rarr;</a>
+              </div>
+              ${orgEvents.length > 0 ? `
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                  ${orgEvents.slice(0, 4).map((ev) => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.95rem 1.05rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                      <div style="min-width:0;flex:1 1 200px;">
+                        <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+                          <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                          <span class="ev-badge ev-badge-open">${esc(ev.eventStatus || 'Draft')}</span>
+                        </div>
+                        <div style="font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</div>
+                        <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.location)}</div>
+                      </div>
+                      <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+                        <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">Manage &rarr;</a>
+                        <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Public View</a>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <div style="padding:1.5rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px dashed var(--ev-border-strong);text-align:center;">
+                  <p style="font-size:0.9rem;color:var(--ev-muted);margin-bottom:0.9rem;">
+                    No event drafts in your workspace yet. Launch the Create Event Studio to configure one.
+                  </p>
+                  <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-open-create="true">+ Create Event</button>
+                </div>
+              `}
+            </div>
+          `;
+        }
+
+        if (role === 'manager') {
+          const assigned = EventoraStore.getAllEvents().slice(0, 3);
+          return `
+            <div class="ev-profile-card" id="assigned-events">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">Assigned Event Operations</h2>
+                  <p style="font-size:0.84rem;color:var(--ev-muted);">Manage rounds and participant check-ins for events within your manager scope.</p>
+                </div>
+                <a href="manager-dashboard.html" class="ev-btn ev-btn-outline ev-btn-sm">Manager Workspace &rarr;</a>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.7rem;">
+                ${assigned.map((ev) => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.9rem 1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                    <div>
+                      <div style="font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</div>
+                      <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${(ev.rounds || []).length} stage(s)</div>
+                    </div>
+                    <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&scope=manager" class="ev-btn ev-btn-forest ev-btn-sm">Open Scoped View &rarr;</a>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        // Admin / Super Admin
+        return `
+          <div class="ev-profile-card" id="admin-governance">
+            <span class="ev-badge ev-badge-open" style="margin-bottom:0.45rem;">Governance Separation</span>
+            <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">Platform Governance Access</h2>
+            <p style="font-size:0.86rem;color:var(--ev-muted);margin:0.4rem 0 1rem;line-height:1.6;">
+              Your account carries server-verified <strong>${esc(EventoraAccess.getRoleLabel(role))}</strong> permissions. Administrative interfaces are isolated from Participant and Organizer workspaces.
+            </p>
+            <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+              ${role === 'super_admin' ? '<a href="superadmin-dashboard.html" class="ev-btn ev-btn-forest ev-btn-sm">Open Super Admin Console &rarr;</a>' : ''}
+              <a href="admin-dashboard.html" class="ev-btn ${role === 'super_admin' ? 'ev-btn-outline' : 'ev-btn-forest'} ev-btn-sm">Open Admin Console &rarr;</a>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderRoleSpecificSidebar(role, esc) {
+        if (role === 'organizer') {
+          return `
+            <div class="ev-profile-card">
+              <span class="ev-badge ev-badge-open" style="margin-bottom:0.55rem;">Organizer Workspace</span>
+              <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Organizer Dashboard</h2>
+              <p style="font-size:0.84rem;color:var(--ev-muted);margin:0.45rem 0 1.1rem;line-height:1.55;">
+                Manage events, rounds, teams, collaborators, live controls, and cover posters from your studio.
+              </p>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                <a href="organizer-dashboard.html" class="ev-btn ev-btn-forest" style="width:100%;">Open Organizer Dashboard &rarr;</a>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-open-create="true" style="width:100%;">+ Create Event</button>
+              </div>
+            </div>
+          `;
+        }
+        if (role === 'manager') {
+          return `
+            <div class="ev-profile-card">
+              <span class="ev-badge ev-badge-open" style="margin-bottom:0.55rem;">Scoped Coordinator</span>
+              <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Event Manager Workspace</h2>
+              <p style="font-size:0.84rem;color:var(--ev-muted);margin:0.45rem 0 1.1rem;line-height:1.55;">
+                Coordinate assigned competition rounds and verify roster check-ins for your assigned events.
+              </p>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                <a href="manager-dashboard.html" class="ev-btn ev-btn-forest" style="width:100%;">Open Manager Workspace &rarr;</a>
+                <a href="manager-dashboard.html?section=round-operations" class="ev-btn ev-btn-outline ev-btn-sm" style="width:100%;">Round Operations</a>
+              </div>
+            </div>
+          `;
+        }
+        if (role === 'admin' || role === 'super_admin') {
+          const isSuper = role === 'super_admin';
+          return `
+            <div class="ev-profile-card">
+              <span class="ev-badge ev-badge-open" style="margin-bottom:0.55rem;">${isSuper ? 'System Authority' : 'Platform Admin'}</span>
+              <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">${isSuper ? 'Super Admin Console' : 'Admin Console'}</h2>
+              <p style="font-size:0.84rem;color:var(--ev-muted);margin:0.45rem 0 1.1rem;line-height:1.55;">
+                Access platform governance, directory moderation, and RBAC policy views.
+              </p>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                ${isSuper ? '<a href="superadmin-dashboard.html" class="ev-btn ev-btn-forest" style="width:100%;">Open Super Admin Console &rarr;</a>' : ''}
+                <a href="admin-dashboard.html" class="ev-btn ${isSuper ? 'ev-btn-outline' : 'ev-btn-forest'}" style="width:100%;">Open Admin Console &rarr;</a>
+              </div>
+            </div>
+          `;
+        }
+
+        // Default Participant Sidebar — NO organizer actions
+        return `
+          <div class="ev-profile-card">
+            <span class="ev-badge ev-badge-open" style="margin-bottom:0.55rem;">Participant Hub</span>
+            <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Participant Dashboard</h2>
+            <p style="font-size:0.84rem;color:var(--ev-muted);margin:0.45rem 0 1.1rem;line-height:1.55;">
+              Browse upcoming campus events, manage your registrations, build squads, and follow round milestones.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+              <a href="participant-dashboard.html" class="ev-btn ev-btn-forest" style="width:100%;">Open Participant Dashboard &rarr;</a>
+              <a href="discover.html" class="ev-btn ev-btn-outline ev-btn-sm" style="width:100%;">Browse Upcoming Events</a>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderProfileView() {
+        const esc = EventoraUI.escapeHTML;
+        const authState = EventoraAuth.getAuthState();
+
+        if (authState.restoring) {
+          renderLoadingView();
+          return;
+        }
+
+        const user = authState.user;
+        if (!user) {
+          if (!callbackErrorMsg && authState.callbackError) {
+            callbackErrorMsg = EventoraAuth.consumeCallbackError() || authState.callbackError;
+          }
+          const callbackErrNote = callbackErrorMsg
+            ? `
+              <div class="ev-auth-status is-error" style="max-width:34rem;margin:0 auto 1.35rem;text-align:left;" role="alert">
+                <span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${EventoraUI.icon('alert')}</span>
+                <span>${esc(callbackErrorMsg)}</span>
+              </div>
+            `
+            : '';
+          const notConfiguredNote = !authState.configured
+            ? `
+              <div class="ev-auth-status is-info" style="max-width:34rem;margin:0 auto 1.35rem;text-align:left;">
+                <span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${EventoraUI.icon('alert')}</span>
+                <span>${esc(authState.configStatus.errorMessage || 'Local Supabase credentials are not configured yet.')}</span>
+              </div>
+            `
+            : '';
+
+          root.innerHTML = `
+            <section class="ev-profile-hero" style="padding-bottom:4.5rem;">
+              <div class="ev-container" style="max-width:660px;">
+                <div class="ev-empty-state">
+                  <div class="ev-empty-icon">${EventoraUI.icon('users')}</div>
+                  <h1 class="ev-display" style="font-size:1.8rem;font-weight:600;margin-bottom:0.5rem;">Sign in to view your profile</h1>
+                  <p style="font-size:0.95rem;color:var(--ev-muted);max-width:29rem;margin:0 auto 1.35rem;">
+                    No active Eventora session was found. Log in with your verified account or Google to view and manage your profile.
+                  </p>
+                  ${callbackErrNote}
+                  ${notConfiguredNote}
+                  <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+                    <a href="login.html?redirect=profile.html" class="ev-btn ev-btn-forest">Log in</a>
+                    <a href="signup.html" class="ev-btn ev-btn-outline">Create Account</a>
+                  </div>
+                </div>
+              </div>
+            </section>
+          `;
+          return;
+        }
+        callbackErrorMsg = '';
+
+        const role = EventoraAccess.getEffectiveRole(user);
+        const roleLabel = EventoraAccess.getRoleLabel(role);
+        const dashUrl = EventoraAccess.getDashboardUrl(role);
+        const initials = EventoraAuth.getInitials(user.fullName);
+        const avatarInner = user.avatarUrl
+          ? `<img src="${esc(user.avatarUrl)}" alt="${esc(user.fullName)}" data-ev-avatar-img="true" />`
+          : esc(initials);
+        const providerLabel = user.provider === 'google' ? 'Google OAuth' : 'Email & Password';
+
+        root.innerHTML = `
+          <section class="ev-profile-hero">
+            <div class="ev-container">
+              <div class="ev-profile-header-card">
+                <div class="ev-profile-identity">
+                  <div class="ev-avatar-lg" id="evProfileAvatar" data-ev-initials="${esc(initials)}">${avatarInner}</div>
+                  <div style="min-width:0;">
+                    <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.35rem;">
+                      <span class="ev-badge ev-badge-open">${esc(roleLabel)}</span>
+                      <span class="ev-badge ${user.emailConfirmed ? 'ev-badge-open' : 'ev-badge-filling'}">
+                        ${user.emailConfirmed ? 'Verified Email' : 'Verification Pending'}
+                      </span>
+                      <span class="ev-badge ev-badge-sample">${esc(providerLabel)}</span>
+                    </div>
+                    <h1 class="ev-display" id="evProfileDisplayName" style="font-size:clamp(1.55rem,3vw,2.15rem);font-weight:600;color:var(--ev-charcoal);">
+                      ${esc(user.fullName)}
+                    </h1>
+                    <p style="font-size:0.9rem;color:var(--ev-muted);margin-top:0.2rem;word-break:break-all;">
+                      ${esc(user.email)}${user.institution ? ` &bull; ${esc(user.institution)}` : ''}${user.city ? ` &bull; ${esc(user.city)}` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+                  <a href="${esc(dashUrl)}" class="ev-btn ev-btn-outline ev-btn-sm">${esc(roleLabel)} Dashboard &rarr;</a>
+                  <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" id="evEditProfileBtn" ${isEditing || isSigningOut ? 'disabled' : ''}>
+                    Edit Profile
+                  </button>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm ev-btn-danger-ghost" id="evProfileLogoutBtn" ${isSigningOut ? 'disabled' : ''}>
+                    ${isSigningOut ? 'Signing out...' : 'Logout'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="ev-profile-main">
+            <div class="ev-container ev-profile-grid">
+              <!-- Left Column: Account Details / Editing + Role-Scoped Activity -->
+              <div style="display:flex;flex-direction:column;gap:1.5rem;min-width:0;">
+                <div class="ev-profile-card" id="evProfileDetailsCard">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.15rem;">
+                    <div>
+                      <h2 class="ev-display" style="font-size:1.35rem;font-weight:600;">Account Information</h2>
+                      <p style="font-size:0.84rem;color:var(--ev-muted);">Manage your personal display fields synced with Supabase Auth.</p>
+                    </div>
+                  </div>
+
+                  ${isEditing ? `
+                    <form id="evProfileEditForm" style="display:flex;flex-direction:column;gap:0.95rem;" novalidate>
+                      <div id="evProfileEditErr" class="ev-wizard-error" role="alert" hidden></div>
+                      <div class="ev-form-grid-2">
+                        <div class="ev-field">
+                          <label class="ev-label" for="evEditName">Full Name <span style="color:#9E2A20;">*</span></label>
+                          <input class="ev-input" id="evEditName" required value="${esc(user.fullName)}" />
+                        </div>
+                        <div class="ev-field">
+                          <label class="ev-label">Verified Account Role</label>
+                          <div class="ev-input" style="background:var(--ev-cream);color:var(--ev-muted);display:flex;align-items:center;">${esc(roleLabel)} (server-verified)</div>
+                        </div>
+                      </div>
+                      <div class="ev-form-grid-2">
+                        <div class="ev-field">
+                          <label class="ev-label" for="evEditInstitution">Institution / College</label>
+                          <input class="ev-input" id="evEditInstitution" value="${esc(user.institution)}" placeholder="e.g. Pacific Ridge Tech" />
+                        </div>
+                        <div class="ev-field">
+                          <label class="ev-label" for="evEditDepartment">Department / Club</label>
+                          <input class="ev-input" id="evEditDepartment" value="${esc(user.department)}" placeholder="e.g. ACM Student Chapter" />
+                        </div>
+                      </div>
+                      <div class="ev-field">
+                        <label class="ev-label" for="evEditCity">City / Campus Location</label>
+                        <input class="ev-input" id="evEditCity" value="${esc(user.city)}" placeholder="e.g. Bengaluru" />
+                      </div>
+                      <div class="ev-field">
+                        <label class="ev-label" for="evEditBio">Short Bio</label>
+                        <textarea class="ev-textarea" id="evEditBio" rows="2" placeholder="Share interests, technical tracks, or organizing focus...">${esc(user.bio)}</textarea>
+                      </div>
+                      <p style="font-size:0.75rem;color:var(--ev-muted);">
+                        Note: Custom avatar uploads to the <code>eventora-media</code> bucket and normalized profile tables will sync in the backend storage/DB phase.
+                      </p>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.65rem;flex-wrap:wrap;padding-top:0.5rem;">
+                        <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evProfileCancelBtn" ${isSaving ? 'disabled' : ''}>Cancel</button>
+                        <button type="submit" class="ev-btn ev-btn-forest ev-btn-sm" id="evProfileSaveBtn" ${isSaving ? 'disabled' : ''}>
+                          ${isSaving ? 'Saving Changes...' : 'Save Changes'}
+                        </button>
+                      </div>
+                    </form>
+                  ` : `
+                    <div class="ev-review-summary">
+                      <div>
+                        <div class="ev-review-kv-label">Full Name</div>
+                        <div class="ev-review-kv-val">${esc(user.fullName)}</div>
+                      </div>
+                      <div>
+                        <div class="ev-review-kv-label">Email Address</div>
+                        <div class="ev-review-kv-val">${esc(user.email)}</div>
+                      </div>
+                      <div>
+                        <div class="ev-review-kv-label">Verified Account Role</div>
+                        <div class="ev-review-kv-val">${esc(roleLabel)}</div>
+                      </div>
+                      <div>
+                        <div class="ev-review-kv-label">Institution</div>
+                        <div class="ev-review-kv-val">${esc(user.institution || 'Not set yet')}</div>
+                      </div>
+                      <div>
+                        <div class="ev-review-kv-label">Department / Club</div>
+                        <div class="ev-review-kv-val">${esc(user.department || 'Not set yet')}</div>
+                      </div>
+                      <div>
+                        <div class="ev-review-kv-label">City / Campus</div>
+                        <div class="ev-review-kv-val">${esc(user.city || 'Not set yet')}</div>
+                      </div>
+                    </div>
+                    ${user.bio ? `
+                      <div style="margin-top:1rem;padding:0.95rem 1.05rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        <div class="ev-review-kv-label">About</div>
+                        <p style="font-size:0.88rem;color:var(--ev-body);margin-top:0.25rem;">${esc(user.bio)}</p>
+                      </div>
+                    ` : ''}
+                  `}
+                </div>
+
+                ${renderRoleSpecificBodyCards(user, role, esc)}
+              </div>
+
+              <!-- Right Column: Role-Scoped Workspace Card -->
+              <aside style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
+                ${renderRoleSpecificSidebar(role, esc)}
+                <div class="ev-profile-card">
+                  <h3 class="ev-display" style="font-size:1.08rem;font-weight:600;">Account Security</h3>
+                  <p style="font-size:0.8rem;color:var(--ev-muted);margin:0.35rem 0 0.85rem;line-height:1.55;">
+                    Active role <strong>${esc(roleLabel)}</strong> is verified from Supabase auth claims. Full table permissions depend on backend database RLS policies.
+                  </p>
+                  <a href="forgot-password.html" class="ev-btn ev-btn-outline ev-btn-sm" style="width:100%;">Update or Reset Password</a>
+                </div>
+              </aside>
+            </div>
+          </section>
+        `;
+
+        const editBtn = document.getElementById('evEditProfileBtn');
+        const logoutBtn = document.getElementById('evProfileLogoutBtn');
+        const editForm = document.getElementById('evProfileEditForm');
+        const cancelBtn = document.getElementById('evProfileCancelBtn');
+
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            isEditing = true;
+            renderProfileView();
+          });
+        }
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            if (isSigningOut) return;
+            isSigningOut = true;
+            renderProfileView();
+            const res = await EventoraAuth.signOut();
+            isSigningOut = false;
+            isEditing = false;
+            EventoraUI.refreshAuthUI();
+            renderProfileView();
+            EventoraUI.showToast(res.ok ? 'Signed out cleanly.' : (res.error || 'Signed out locally.'));
+          });
+        }
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', () => {
+            if (isSaving) return;
+            isEditing = false;
+            renderProfileView();
+          });
+        }
+        if (editForm) {
+          editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isSaving) return;
+
+            const nameEl = document.getElementById('evEditName');
+            const nameVal = nameEl.value.trim();
+            const errEl = document.getElementById('evProfileEditErr');
+            if (!nameVal || nameVal.length < 2) {
+              if (errEl) {
+                errEl.hidden = false;
+                errEl.textContent = 'Full Name must be at least 2 characters.';
+              }
+              nameEl.classList.add('is-invalid');
+              nameEl.focus();
+              return;
+            }
+
+            isSaving = true;
+            const saveBtn = document.getElementById('evProfileSaveBtn');
+            if (saveBtn) {
+              saveBtn.disabled = true;
+              saveBtn.textContent = 'Saving Changes...';
+            }
+
+            const res = await EventoraAuth.updateProfile({
+              fullName: nameVal,
+              institution: document.getElementById('evEditInstitution').value,
+              department: document.getElementById('evEditDepartment').value,
+              city: document.getElementById('evEditCity').value,
+              bio: document.getElementById('evEditBio').value
+            });
+
+            isSaving = false;
+            if (!res.ok) {
+              if (errEl) {
+                errEl.hidden = false;
+                errEl.textContent = res.error;
+              }
+              if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Changes';
+              }
+              return;
+            }
+
+            isEditing = false;
+            EventoraUI.refreshAuthUI();
+            renderProfileView();
+            EventoraUI.showToast('Account profile updated.');
+          });
+        }
+      }
+
+      window.addEventListener('eventora:authchange', () => {
+        if (!isEditing) {
+          renderProfileView();
+        }
+      });
+
+      renderProfileView();
+      EventoraAuth.ready().then(() => {
+        renderProfileView();
+      });
+    })();
+  </script>
+</body>
+</html>

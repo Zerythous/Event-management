@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Manager Workspace — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evManagerRoot"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/collaborators-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/registrations-api.js"></script>
+  <script src="scripts/teams-api.js"></script>
+  <script src="scripts/round-content-api.js"></script>
+  <script src="scripts/submissions-api.js"></script>
+  <script src="scripts/evaluations-api.js"></script>
+  <script src="scripts/qualification-api.js"></script>
+  <script src="scripts/leaderboard-api.js"></script>
+  <script src="scripts/announcements-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/file-store.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script>
+    (function initManagerDashboard() {
+      const rootEl = document.getElementById('evManagerRoot');
+      const modalsMount = document.getElementById('evModalsMount');
+
+      if (modalsMount && !modalsMount.innerHTML.trim()) {
+        EventoraUI.mountShell('manager');
+        const navM = document.getElementById('evNavMount');
+        const footM = document.getElementById('evFooterMount');
+        if (navM) navM.innerHTML = '';
+        if (footM) footM.innerHTML = '';
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const validSections = new Set(['overview', 'assigned-events', 'round-operations', 'participants']);
+      let activeSection = validSections.has(params.get('section')) ? params.get('section') : 'overview';
+      let shellCtrl = null;
+      let syncHydrating = false;
+      let syncLoadError = '';
+      let hydratedUid = '';
+
+      async function hydrateManagerEvents(user, force) {
+        if (!user || !window.EventoraSync) return;
+        if (!force && hydratedUid === user.id) return;
+        syncHydrating = true;
+        syncLoadError = '';
+        renderSectionContent(user);
+        const res = await window.EventoraSync.hydrateOrganizerWorkspace(user);
+        syncHydrating = false;
+        hydratedUid = user.id;
+        if (res && !res.ok && res.mode === 'supabase') {
+          syncLoadError = res.error || 'Unable to fetch assigned events.';
+        } else if (res && res.ok && res.mode === 'supabase' && window.EventoraRealtime) {
+          window.EventoraRealtime.subscribeOrganizerDashboard({
+            scopeKey: `mgr-dash-${user.id}`,
+            userId: user.id,
+            onChange: async () => {
+              await window.EventoraSync.hydrateOrganizerWorkspace(user);
+              window.EventoraRealtime.notifyImportantChange('Assigned event roster or schedule updated.');
+              renderSectionContent(EventoraAuth.getSession() || user);
+            }
+          });
+        }
+        renderSectionContent(EventoraAuth.getSession() || user);
+      }
+
+      const NAV_GROUPS = [
+        {
+          title: 'Manager Scope',
+          items: [
+            { id: 'overview', label: 'Overview', icon: 'overview' },
+            { id: 'assigned-events', label: 'Assigned Events', icon: 'events' }
+          ]
+        },
+        {
+          title: 'Operations',
+          items: [
+            { id: 'round-operations', label: 'Round Operations', icon: 'rounds' },
+            { id: 'participants', label: 'Roster Check-In', icon: 'participants' }
+          ]
+        }
+      ];
+
+      const SECTION_TITLES = {
+        overview: 'Manager Workspace',
+        'assigned-events': 'Assigned Events',
+        'round-operations': 'Round Operations',
+        participants: 'Assigned Roster Check-In'
+      };
+
+      function getAssignedEventsPreview() {
+        if (window.EventoraSync && window.EventoraSync.getStatus().mode === 'supabase') {
+          return EventoraStore.getAllEvents();
+        }
+        // Scoped subset of active prototype events when database migrations are pending
+        return EventoraStore.getAllEvents().slice(0, 3);
+      }
+
+      function renderSectionContent(user) {
+        if (!shellCtrl || !shellCtrl.bodyMount || !user) return;
+        const esc = EventoraUI.escapeHTML;
+        if (syncHydrating) {
+          shellCtrl.bodyMount.innerHTML = window.EventoraSync.renderLoadingCardHTML('Loading your assigned events from PostgreSQL...');
+          return;
+        }
+        if (syncLoadError) {
+          shellCtrl.bodyMount.innerHTML = window.EventoraSync.renderDatabaseErrorCardHTML({
+            title: 'Assigned Events Load Failed',
+            message: syncLoadError,
+            retryButtonId: 'evMgrRetryBtn'
+          });
+          document.getElementById('evMgrRetryBtn')?.addEventListener('click', () => hydrateManagerEvents(user, true));
+          return;
+        }
+        const assigned = getAssignedEventsPreview();
+        const totalRounds = assigned.reduce((acc, ev) => acc + (Array.isArray(ev.rounds) ? ev.rounds.length : 0), 0);
+        const connPill = window.EventoraSync ? window.EventoraSync.renderConnectionPillHTML() : '';
+
+        if (activeSection === 'overview') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-auth-status is-info" style="margin-bottom:1.35rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;" role="note">
+              <div style="display:flex;gap:0.55rem;align-items:flex-start;">
+                <span style="flex-shrink:0;display:inline-flex;margin-top:2px;">${EventoraUI.icon('alert')}</span>
+                <span><strong>Manager Scope Active:</strong> You can oversee rounds, live moderation, and participant check-ins for assigned events. Creating/deleting events and platform Admin tools remain restricted to Event Owners and Admins.</span>
+              </div>
+              ${connPill}
+            </div>
+
+            <div class="ev-stat-grid">
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Assigned Events</div>
+                <div class="ev-stat-value">${assigned.length}</div>
+                <div class="ev-stat-sub">Scoped coordinator preview</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Monitored Stages</div>
+                <div class="ev-stat-value">${totalRounds}</div>
+                <div class="ev-stat-sub">Rounds across assigned events</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Verified Role</div>
+                <div class="ev-stat-value" style="font-size:1.2rem;padding-top:0.35rem;">Event Manager</div>
+                <div class="ev-stat-sub">Collaborator permissions enforce server-side</div>
+              </div>
+            </div>
+
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <h2 class="ev-display" style="font-size:1.25rem;font-weight:600;">Assigned Event Consoles</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Open scoped round &amp; check-in management for an assigned event.</p>
+                </div>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="assigned-events">View All Assigned &rarr;</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.8rem;">
+                ${assigned.map((ev) => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.9rem 1rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                    <div style="min-width:0;flex:1 1 240px;">
+                      <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+                        <span class="ev-badge ev-badge-open">Assigned Coordinator</span>
+                        <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                      </div>
+                      <div style="font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</div>
+                      <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${(ev.rounds || []).length} Rounds &bull; ${esc(ev.location)}</div>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                      <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&section=rounds&scope=manager" class="ev-btn ev-btn-forest ev-btn-sm">Manage Rounds &rarr;</a>
+                      <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&section=participants&scope=manager" class="ev-btn ev-btn-outline ev-btn-sm">Roster</a>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'assigned-events') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-events-grid">
+              ${assigned.map((ev) => `
+                <article class="ev-ws-event-card">
+                  ${EventoraWorkspace.renderPosterThumbHTML(ev)}
+                  <div class="ev-ws-event-body">
+                    <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+                      <span class="ev-badge ev-badge-open">Manager Scope</span>
+                      <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                    </div>
+                    <h3 class="ev-display" style="font-size:1.05rem;font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</h3>
+                    <p style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.location)}</p>
+                    <p style="font-size:0.8rem;color:var(--ev-body);">${(ev.rounds || []).length} Round(s) &bull; ${esc(ev.teamConfig.label)}</p>
+                    <div class="ev-ws-event-actions">
+                      <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&scope=manager" class="ev-btn ev-btn-forest ev-btn-sm">Open Scoped Workspace &rarr;</a>
+                      <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Public View</a>
+                    </div>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          const targetTab = activeSection === 'round-operations' ? 'rounds' : 'participants';
+          const heading = activeSection === 'round-operations' ? 'Assigned Round Operations' : 'Participant Check-In Roster';
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card">
+              <div class="ev-ws-card-head">
+                <div>
+                  <span class="ev-badge ev-badge-open" style="margin-bottom:0.4rem;">Scoped Access</span>
+                  <h2 class="ev-display" style="font-size:1.3rem;font-weight:600;">${esc(heading)}</h2>
+                  <p style="font-size:0.82rem;color:var(--ev-muted);">Select an assigned event to manage stage transitions or verify check-ins within collaborator scope.</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                ${assigned.map((ev) => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.95rem 1.05rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                    <div>
+                      <div style="font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</div>
+                      <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${(ev.rounds || []).length} configured stage(s)</div>
+                    </div>
+                    <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&section=${encodeURIComponent(targetTab)}&scope=manager" class="ev-btn ev-btn-forest ev-btn-sm">Open ${esc(targetTab)} &rarr;</a>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        document.querySelectorAll('[data-jump-section]').forEach((btn) => {
+          btn.addEventListener('click', () => switchSection(btn.dataset.jumpSection));
+        });
+      }
+
+      function switchSection(nextSection) {
+        if (!validSections.has(nextSection)) return;
+        activeSection = nextSection;
+        const user = EventoraAuth.getSession();
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, SECTION_TITLES[activeSection] || 'Manager Workspace');
+        renderSectionContent(user);
+      }
+
+      function mountPage() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['manager'],
+          rootEl,
+          pageName: 'Event Manager Workspace'
+        });
+        if (!access.allowed) return;
+
+        shellCtrl = EventoraWorkspace.renderWorkspaceShell({
+          rootEl,
+          user: access.user,
+          navGroups: NAV_GROUPS,
+          activeSection,
+          topTitle: SECTION_TITLES[activeSection] || 'Manager Workspace',
+          onSelectSection: switchSection,
+          onSearchSubmit: () => switchSection('assigned-events'),
+          onLogout: async () => {
+            if (window.EventoraRealtime) await window.EventoraRealtime.unsubscribeAll();
+            await EventoraAuth.signOut();
+            window.location.href = 'login.html';
+          }
+        });
+        renderSectionContent(access.user);
+        hydrateManagerEvents(access.user, false);
+      }
+
+      window.addEventListener('eventora:authchange', mountPage);
+      mountPage();
+      EventoraAuth.ready().then(mountPage);
+    })();
+  </script>
+</body>
+</html>

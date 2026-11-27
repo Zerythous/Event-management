@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organizer Dashboard — Eventora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/design-system.css" />
+  <link rel="stylesheet" href="styles/motion-3d.css" />
+</head>
+<body>
+  <div id="evDashboardRoot"></div>
+  <div id="evModalsMount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/events-store.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/profiles-api.js"></script>
+  <script src="scripts/events-api.js"></script>
+  <script src="scripts/collaborators-api.js"></script>
+  <script src="scripts/rounds-api.js"></script>
+  <script src="scripts/registrations-api.js"></script>
+  <script src="scripts/teams-api.js"></script>
+  <script src="scripts/round-content-api.js"></script>
+  <script src="scripts/submissions-api.js"></script>
+  <script src="scripts/evaluations-api.js"></script>
+  <script src="scripts/qualification-api.js"></script>
+  <script src="scripts/leaderboard-api.js"></script>
+  <script src="scripts/announcements-api.js"></script>
+  <script src="scripts/realtime-sync.js"></script>
+  <script src="scripts/supabase-sync.js"></script>
+  <script src="scripts/data-migrator.js"></script>
+  <script src="scripts/auth-store.js"></script>
+  <script src="scripts/role-access.js"></script>
+  <script src="scripts/motion-3d.js"></script>
+  <script src="scripts/components.js"></script>
+  <script src="scripts/workspace-ui.js"></script>
+  <script src="scripts/round-builder.js"></script>
+  <script src="scripts/file-store.js"></script>
+  <script src="scripts/round-content.js"></script>
+  <script src="scripts/participants-teams.js"></script>
+  <script src="scripts/live-control.js"></script>
+  <script src="scripts/evaluation-manager.js"></script>
+  <script>
+    (function initOrganizerDashboard() {
+      const rootEl = document.getElementById('evDashboardRoot');
+      const modalsMount = document.getElementById('evModalsMount');
+
+      // Mount only shared modals + chrome triggers (Create Event Wizard stays reusable!)
+      if (modalsMount && !modalsMount.innerHTML.trim()) {
+        EventoraUI.mountShell('organizer');
+        const navM = document.getElementById('evNavMount');
+        const footM = document.getElementById('evFooterMount');
+        if (navM) navM.innerHTML = '';
+        if (footM) footM.innerHTML = '';
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const validSections = new Set(['overview', 'my-events', 'participants', 'teams', 'rounds', 'content', 'live', 'results', 'collaborators', 'settings']);
+      let activeSection = validSections.has(params.get('section')) ? params.get('section') : 'overview';
+      let filterStatus = 'all';
+      let searchQuery = '';
+      let sortBy = 'recent';
+      let selectedRoundEventSlug = params.get('slug') || '';
+      let shellCtrl = null;
+      let syncHydrating = false;
+      let syncLoadError = '';
+      let hydratedUid = '';
+
+      async function runOrganizerHydration(user, force) {
+        if (!user || !window.EventoraSync) return;
+        if (!force && hydratedUid === user.id) return;
+        syncHydrating = true;
+        syncLoadError = '';
+        renderSectionContent(user);
+        const res = await window.EventoraSync.hydrateOrganizerWorkspace(user);
+        syncHydrating = false;
+        hydratedUid = user.id;
+        if (res && !res.ok && res.mode === 'supabase') {
+          syncLoadError = res.error || 'Failed to load organizer events from PostgreSQL.';
+        } else if (res && res.ok && res.mode === 'supabase' && window.EventoraRealtime) {
+          window.EventoraRealtime.subscribeOrganizerDashboard({
+            scopeKey: `org-dash-${user.id}`,
+            userId: user.id,
+            onChange: async () => {
+              await window.EventoraSync.hydrateOrganizerWorkspace(user);
+              window.EventoraRealtime.notifyImportantChange('Organizer workspace refreshed from live database update.');
+              if (activeSection === 'overview' || activeSection === 'my-events') {
+                renderSectionContent(EventoraAuth.getSession() || user);
+              }
+            }
+          });
+        }
+        renderSectionContent(EventoraAuth.getSession() || user);
+      }
+
+      const NAV_GROUPS = [
+        {
+          title: 'Workspace',
+          items: [
+            { id: 'overview', label: 'Overview', icon: 'overview' },
+            { id: 'my-events', label: 'My Events', icon: 'events' },
+            { id: 'create', label: 'Create Event', icon: 'plus', action: 'create' }
+          ]
+        },
+        {
+          title: 'Operations',
+          items: [
+            { id: 'participants', label: 'Participants', icon: 'participants' },
+            { id: 'teams', label: 'Teams', icon: 'teams' },
+            { id: 'rounds', label: 'Round Builder', icon: 'rounds' },
+            { id: 'content', label: 'Round Content', icon: 'content' },
+            { id: 'live', label: 'Live Control', icon: 'live' },
+            { id: 'results', label: 'Results', icon: 'results' }
+          ]
+        },
+        {
+          title: 'Administration',
+          items: [
+            { id: 'collaborators', label: 'Collaborators', icon: 'collaborators' },
+            { id: 'settings', label: 'Settings', icon: 'settings' }
+          ]
+        }
+      ];
+
+      const SECTION_TITLES = {
+        overview: 'Dashboard Overview',
+        'my-events': 'My Events',
+        participants: 'Participants Workspace',
+        teams: 'Teams Workspace',
+        rounds: 'Round Builder Entry',
+        content: 'Round Content Studio',
+        live: 'Live Control Preview',
+        results: 'Results & Leaderboard',
+        collaborators: 'Event Collaborators',
+        settings: 'Organizer Settings'
+      };
+
+      function getFilteredMyEvents(allEvents) {
+        const q = searchQuery.trim().toLowerCase();
+        const filtered = allEvents.filter((ev) => {
+          if (filterStatus !== 'all' && ev.statusKey !== filterStatus) return false;
+          if (q) {
+            const hay = `${ev.name} ${ev.categoryLabel} ${ev.institution || ''}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+
+        filtered.sort((a, b) => {
+          if (sortBy === 'alpha') return a.name.localeCompare(b.name);
+          if (sortBy === 'date') return new Date(a.startTimeISO || 0) - new Date(b.startTimeISO || 0);
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+        return filtered;
+      }
+
+      function renderEventChooserPlaceholder({ sectionKey, title, subtitle, targetSection, iconName, note }) {
+        const esc = EventoraUI.escapeHTML;
+        const events = EventoraStore.getOrganizerEvents(EventoraAuth.getSession()?.email);
+        if (events.length === 0) {
+          return EventoraWorkspace.renderEmptyState({
+            iconName,
+            title: `No events available for ${title}`,
+            message: 'Create an event draft first using the Eventora creation wizard, then manage it inside an event workspace.',
+            actionHTML: '<button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-open-create="true">+ Create Event</button>'
+          });
+        }
+        return `
+          <div class="ev-ws-card">
+            <div class="ev-ws-card-head">
+              <div>
+                <span class="ev-badge ev-badge-sample" style="margin-bottom:0.45rem;">Event-Scoped Workspace</span>
+                <h2 class="ev-display" style="font-size:1.5rem;font-weight:600;">${esc(title)}</h2>
+                <p style="font-size:0.9rem;color:var(--ev-muted);margin-top:0.25rem;">${esc(subtitle)}</p>
+              </div>
+              <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-open-create="true">+ Create Event</button>
+            </div>
+            <p style="font-size:0.84rem;color:var(--ev-body);margin-bottom:1.15rem;padding:0.85rem 1rem;background:var(--ev-cream);border:1px solid var(--ev-border);border-radius:var(--ev-radius-sm);">
+              ${esc(note)}
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+              ${events.map((ev) => `
+                <div style="padding:1rem;background:var(--ev-cream);border:1px solid var(--ev-border);border-radius:var(--ev-radius-md);display:flex;flex-direction:column;gap:0.55rem;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                    <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                    <span class="ev-badge ${esc(ev.statusBadgeClass)}">${esc(ev.eventStatus)}</span>
+                  </div>
+                  <div style="font-family:var(--ev-font-display);font-weight:600;color:var(--ev-charcoal);">${esc(ev.name)}</div>
+                  <div style="font-size:0.78rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${ev.rounds.length} Round${ev.rounds.length === 1 ? '' : 's'}</div>
+                  <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&section=${encodeURIComponent(targetSection)}" class="ev-btn ev-btn-forest ev-btn-sm" style="margin-top:auto;">
+                    Open ${esc(title)} &rarr;
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSectionContent(user) {
+        if (!shellCtrl || !shellCtrl.bodyMount || !user) return;
+        const esc = EventoraUI.escapeHTML;
+        if (syncHydrating) {
+          shellCtrl.bodyMount.innerHTML = window.EventoraSync
+            ? window.EventoraSync.renderLoadingCardHTML('Syncing your organizer events from Supabase PostgreSQL...')
+            : '<div class="ev-ws-card">Loading...</div>';
+          return;
+        }
+        if (syncLoadError) {
+          shellCtrl.bodyMount.innerHTML = window.EventoraSync.renderDatabaseErrorCardHTML({
+            title: 'Database Synchronization Error',
+            message: syncLoadError,
+            retryButtonId: 'evOrgRetrySyncBtn'
+          });
+          document.getElementById('evOrgRetrySyncBtn')?.addEventListener('click', () => runOrganizerHydration(user, true));
+          return;
+        }
+        const isDbMode = window.EventoraSync && window.EventoraSync.getStatus().mode === 'supabase';
+        const connPill = window.EventoraSync ? window.EventoraSync.renderConnectionPillHTML() : '';
+        const allEvents = EventoraStore.getOrganizerEvents(user.email);
+        const stats = EventoraStore.getDashboardStats(allEvents);
+        const activity = EventoraStore.getRecentActivity();
+
+        if (activeSection === 'overview') {
+          const recent = allEvents.slice(0, 4);
+          const upcoming = [...allEvents]
+            .filter((e) => e.statusKey !== 'cancelled' && e.statusKey !== 'completed')
+            .sort((a, b) => new Date(a.startTimeISO || 0) - new Date(b.startTimeISO || 0))
+            .slice(0, 4);
+
+          shellCtrl.bodyMount.innerHTML = `
+            <!-- Welcome Header -->
+            <div class="ev-ws-card" style="margin-bottom:1.5rem;background:linear-gradient(125deg, #FFFFFF 0%, #F6F5EF 100%);">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1.25rem;flex-wrap:wrap;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                    <span class="ev-badge ev-badge-sample">${isDbMode ? 'Organizer Studio (Supabase PostgreSQL)' : 'Organizer Studio Workspace (Frontend Prototype)'}</span>
+                    ${connPill}
+                  </div>
+                  <h2 class="ev-display" style="font-size:clamp(1.45rem,2.5vw,1.95rem);font-weight:600;">
+                    Welcome back, ${esc(user.fullName)}
+                  </h2>
+                  <p style="font-size:0.92rem;color:var(--ev-muted);margin-top:0.3rem;max-width:42rem;">
+                    Create independent campus events, configure details and cover posters, and inspect each event's dedicated management workspace.
+                  </p>
+                </div>
+                <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+                  <button type="button" class="ev-btn ev-btn-forest" data-open-create="true">+ Create Event</button>
+                  <button type="button" class="ev-btn ev-btn-outline" data-jump-section="my-events">View My Events</button>
+                  <button type="button" class="ev-btn ev-btn-outline" id="evOrgOpenMigratorBtn">Migrate Local Data</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Derived Stats Grid -->
+            <div class="ev-stat-grid" aria-label="Workspace statistics">
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Total Events</div>
+                <div class="ev-stat-value" id="evStatTotal">${stats.total}</div>
+                <div class="ev-stat-sub">Active in workspace</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Published</div>
+                <div class="ev-stat-value" id="evStatPublished">${stats.published}</div>
+                <div class="ev-stat-sub">Public catalog ready</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Draft Events</div>
+                <div class="ev-stat-value" id="evStatDraft">${stats.draft}</div>
+                <div class="ev-stat-sub">In configuration</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Ongoing Events</div>
+                <div class="ev-stat-value" id="evStatOngoing">${stats.ongoing}</div>
+                <div class="ev-stat-sub">Currently running</div>
+              </div>
+              <div class="ev-stat-card">
+                <div class="ev-stat-label">Total Registrations</div>
+                <div class="ev-stat-value" id="evStatRegs">${stats.totalRegistrations}</div>
+                <div class="ev-stat-sub">Across active workspace events</div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="ev-ws-quick-actions" aria-label="Quick actions">
+              <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-open-create="true">Create Event</button>
+              <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="my-events">Manage Events</button>
+              <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="participants">Manage Participants</button>
+              <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="rounds">Configure Rounds</button>
+              <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="results">View Results</button>
+            </div>
+
+            <!-- Split Grid: Recent Events + Upcoming Events / Recent Activity -->
+            <div class="ev-ws-split">
+              <div class="ev-ws-card">
+                <div class="ev-ws-card-head">
+                  <div>
+                    <h3 class="ev-display" style="font-size:1.25rem;font-weight:600;">Recent Events</h3>
+                    <p style="font-size:0.82rem;color:var(--ev-muted);">Manage or preview recent workspace listings.</p>
+                  </div>
+                  <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="my-events">All Events &rarr;</button>
+                </div>
+                ${recent.length > 0 ? `
+                  <div style="display:flex;flex-direction:column;gap:0.9rem;">
+                    ${recent.map((ev) => `
+                      <div style="display:grid;grid-template-columns:108px minmax(0,1fr);gap:0.95rem;align-items:center;padding:0.8rem;border-radius:var(--ev-radius-md);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                        ${EventoraWorkspace.renderPosterThumbHTML(ev, 'border-radius:10px;aspect-ratio:16/10;')}
+                        <div style="min-width:0;">
+                          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.2rem;">
+                            <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                            <span class="ev-badge ${esc(ev.statusBadgeClass)}">${esc(ev.eventStatus)}</span>
+                          </div>
+                          <div style="font-weight:600;color:var(--ev-charcoal);font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ev.name)}</div>
+                          <div style="font-size:0.78rem;color:var(--ev-muted);margin-bottom:0.5rem;">${esc(ev.dateLabel)} &bull; ${ev.registrationCount} Registrations</div>
+                          <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+                            <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">Manage Event</a>
+                            <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Preview</a>
+                          </div>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : EventoraWorkspace.renderEmptyState({
+                  iconName: 'events',
+                  title: 'No events in workspace yet',
+                  message: 'Create a new event draft or restore illustrative samples to explore management views.',
+                  actionHTML: '<div style="display:flex;gap:0.55rem;justify-content:center;flex-wrap:wrap;"><button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-open-create="true">Create Event</button><button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evRestoreSamplesBtn">Restore Samples</button></div>'
+                })}
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
+                <div class="ev-ws-card">
+                  <div class="ev-ws-card-head">
+                    <h3 class="ev-display" style="font-size:1.15rem;font-weight:600;">Upcoming Events</h3>
+                    <span style="font-size:0.76rem;color:var(--ev-muted);">Sorted by date</span>
+                  </div>
+                  ${upcoming.length > 0 ? `
+                    <div style="display:flex;flex-direction:column;gap:0.65rem;">
+                      ${upcoming.map((ev) => `
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.75rem 0.9rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                          <div style="min-width:0;">
+                            <div style="font-weight:600;font-size:0.86rem;color:var(--ev-charcoal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ev.name)}</div>
+                            <div style="font-size:0.75rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.eventStatus)}</div>
+                          </div>
+                          <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-back-link" style="font-size:0.78rem;white-space:nowrap;">Manage &rarr;</a>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : EventoraWorkspace.renderEmptyState({
+                    iconName: 'events',
+                    title: 'No upcoming events',
+                    message: 'Schedule or publish an event to track upcoming dates here.'
+                  })}
+                </div>
+
+                <div class="ev-ws-card">
+                  <div class="ev-ws-card-head">
+                    <h3 class="ev-display" style="font-size:1.15rem;font-weight:600;">Recent Activity</h3>
+                    <span class="ev-badge ev-badge-sample">Session Log</span>
+                  </div>
+                  ${activity.length > 0 ? `
+                    <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                      ${activity.slice(0, 6).map((act) => `
+                        <div style="padding:0.7rem 0.85rem;border-radius:var(--ev-radius-sm);background:var(--ev-cream);border:1px solid var(--ev-border);">
+                          <div style="font-size:0.84rem;font-weight:600;color:var(--ev-charcoal);">${esc(act.title)}</div>
+                          <div style="font-size:0.74rem;color:var(--ev-muted);">${esc(act.detail)}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : EventoraWorkspace.renderEmptyState({
+                    iconName: 'live',
+                    title: 'No organizer activity yet',
+                    message: 'Actions you perform in this session (creating, editing, duplicating, or updating events) will appear here.'
+                  })}
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (activeSection === 'my-events') {
+          const filtered = getFilteredMyEvents(allEvents);
+          const countFor = (k) => k === 'all' ? allEvents.length : allEvents.filter((e) => e.statusKey === k).length;
+          const statuses = [
+            { k: 'all', label: 'All' },
+            { k: 'draft', label: 'Draft' },
+            { k: 'published', label: 'Published' },
+            { k: 'ongoing', label: 'Ongoing' },
+            { k: 'completed', label: 'Completed' },
+            { k: 'cancelled', label: 'Cancelled' }
+          ];
+
+          shellCtrl.bodyMount.innerHTML = `
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+              <div>
+                <h2 class="ev-display" style="font-size:1.65rem;font-weight:600;">My Events</h2>
+                <p style="font-size:0.88rem;color:var(--ev-muted);">Filter, search, duplicate, edit details, or launch each event's workspace.</p>
+              </div>
+              <button type="button" class="ev-btn ev-btn-forest" data-open-create="true">+ Create Event</button>
+            </div>
+
+            <div class="ev-ws-card" style="margin-bottom:1.35rem;padding:1.15rem;">
+              <div class="ev-ws-filter-bar" style="margin-bottom:0.85rem;">
+                <div class="ev-ws-status-pills" role="group" aria-label="Filter events by status">
+                  ${statuses.map((s) => `
+                    <button type="button" class="ev-ws-pill ${filterStatus === s.k ? 'is-active' : ''}" data-status-filter="${s.k}">
+                      ${esc(s.label)} (${countFor(s.k)})
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;">
+                <input type="search" id="evMyEventsSearch" class="ev-input" value="${esc(searchQuery)}" placeholder="Search events by name or category..." aria-label="Search my events" />
+                <select id="evMyEventsSort" class="ev-select" aria-label="Sort my events" style="width:auto;min-width:170px;">
+                  <option value="recent" ${sortBy === 'recent' ? 'selected' : ''}>Recently Created</option>
+                  <option value="date" ${sortBy === 'date' ? 'selected' : ''}>Event Date</option>
+                  <option value="alpha" ${sortBy === 'alpha' ? 'selected' : ''}>Alphabetical (A–Z)</option>
+                </select>
+              </div>
+            </div>
+
+            ${filtered.length > 0 ? `
+              <div class="ev-ws-events-grid">
+                ${filtered.map((ev) => `
+                  <article class="ev-ws-event-card" data-event-slug="${esc(ev.slug)}">
+                    ${EventoraWorkspace.renderPosterThumbHTML(ev)}
+                    <div class="ev-ws-event-body">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.45rem;flex-wrap:wrap;">
+                        <span class="ev-badge ev-badge-category">${esc(ev.categoryLabel)}</span>
+                        <span class="ev-badge ${esc(ev.statusBadgeClass)}">${esc(ev.eventStatus)}</span>
+                      </div>
+                      <h3 class="ev-display" style="font-size:1.15rem;font-weight:600;color:var(--ev-charcoal);line-height:1.25;">${esc(ev.name)}</h3>
+                      <div style="font-size:0.8rem;color:var(--ev-muted);">${esc(ev.dateLabel)} &bull; ${esc(ev.location)}</div>
+                      <div style="display:flex;gap:1rem;font-size:0.78rem;color:var(--ev-body);font-weight:500;">
+                        <span>${ev.registrationCount} Registrations</span>
+                        <span>${ev.rounds.length} Round${ev.rounds.length === 1 ? '' : 's'}</span>
+                      </div>
+                      <div class="ev-ws-event-actions">
+                        <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-forest ev-btn-sm">Manage</a>
+                        <a href="manage-event.html?slug=${encodeURIComponent(ev.slug)}&section=details" class="ev-btn ev-btn-outline ev-btn-sm">Edit</a>
+                        <a href="event.html?slug=${encodeURIComponent(ev.slug)}" class="ev-btn ev-btn-outline ev-btn-sm">Preview</a>
+                        <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-ev-dup="${esc(ev.slug)}">Duplicate</button>
+                        <button type="button" class="ev-btn ev-btn-sm ev-btn-danger-ghost" data-ev-del="${esc(ev.slug)}">Delete</button>
+                      </div>
+                    </div>
+                  </article>
+                `).join('')}
+              </div>
+            ` : (allEvents.length === 0 ? EventoraWorkspace.renderEmptyState({
+              iconName: 'events',
+              title: 'No events created yet',
+              message: 'Your organizer workspace has no events. Create a new custom event or restore the illustrative sample catalog.',
+              actionHTML: '<div style="display:flex;gap:0.65rem;justify-content:center;flex-wrap:wrap;"><button type="button" class="ev-btn ev-btn-forest ev-btn-sm" data-open-create="true">+ Create Event</button><button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evRestoreSamplesBtn">Restore Samples</button></div>'
+            }) : EventoraWorkspace.renderEmptyState({
+              iconName: 'search',
+              title: 'No events match your filter',
+              message: 'Try clearing the status filter or search terms to view all available events.',
+              actionHTML: '<button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evMyEventsResetBtn">Reset Filters</button>'
+            }))}
+          `;
+        } else if (activeSection === 'participants' || activeSection === 'teams' || activeSection === 'rounds' || activeSection === 'content' || activeSection === 'live' || activeSection === 'results') {
+          if (allEvents.length === 0) {
+            shellCtrl.bodyMount.innerHTML = `
+              <div class="ev-ws-card">
+                ${EventoraWorkspace.renderEmptyState({
+                  iconName: activeSection,
+                  title: 'Create an Event First',
+                  message: 'Create an event draft to configure participants, teams, custom rounds, and live operations.',
+                  actionHTML: '<button type="button" class="ev-btn ev-btn-forest" data-open-create="true">+ Create Event</button>'
+                })}
+              </div>
+            `;
+            return;
+          }
+          if (!allEvents.some((item) => item.slug === selectedRoundEventSlug)) {
+            selectedRoundEventSlug = allEvents[0].slug;
+          }
+
+          const secMeta = {
+            participants: {
+              kicker: 'Event-Isolated Participants',
+              heading: 'Choose an event to manage registered participants',
+              mountFn: (el, sSlug, onUpd) => window.EventoraRoster?.mountParticipants(el, {
+                slug: sSlug,
+                manageHref: `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=participants`,
+                onUpdated: onUpd,
+                onJumpSection: (sec) => {
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}`;
+                }
+              }),
+              optCount: (ev) => `${ev.participants.length} participant${ev.participants.length === 1 ? '' : 's'}`
+            },
+            teams: {
+              kicker: 'Event-Isolated Teams',
+              heading: 'Choose an event to manage teams and member rules',
+              mountFn: (el, sSlug, onUpd) => window.EventoraRoster?.mountTeams(el, {
+                slug: sSlug,
+                manageHref: `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=teams`,
+                onUpdated: onUpd,
+                onJumpSection: (sec) => {
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}`;
+                }
+              }),
+              optCount: (ev) => `${ev.teams.length} team${ev.teams.length === 1 ? '' : 's'}`
+            },
+            rounds: {
+              kicker: 'Event-Isolated Round Builder',
+              heading: 'Choose an event to configure its independent rounds',
+              mountFn: (el, sSlug, onUpd) => window.EventoraRoundBuilder?.mount(el, {
+                slug: sSlug,
+                onSaved: onUpd,
+                onJumpSection: (sec, rndId) => {
+                  const rPart = rndId ? `&roundId=${encodeURIComponent(rndId)}` : '';
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}${rPart}`;
+                }
+              }),
+              optCount: (ev) => `${ev.rounds.length} round${ev.rounds.length === 1 ? '' : 's'}`
+            },
+            content: {
+              kicker: 'Event-Isolated Round Content Studio',
+              heading: 'Choose an event to manage PDF question papers, MCQs & challenge tasks',
+              mountFn: (el, sSlug, onUpd) => window.EventoraRoundContent?.mount(el, {
+                slug: sSlug,
+                onUpdated: onUpd,
+                onJumpSection: (sec, rndId) => {
+                  const rPart = rndId ? `&roundId=${encodeURIComponent(rndId)}` : '';
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}${rPart}`;
+                }
+              }),
+              optCount: (ev) => {
+                const pkgs = ev.roundContentById ? Object.values(ev.roundContentById).filter((c) => c && c.contentStatus !== 'No Content').length : 0;
+                return `${pkgs}/${ev.rounds.length} round packages`;
+              }
+            },
+            live: {
+              kicker: 'Event-Isolated Live Operations',
+              heading: 'Choose an event to operate live rounds, timers, and roster status',
+              mountFn: (el, sSlug, onUpd) => window.EventoraLiveControl?.mount(el, {
+                slug: sSlug,
+                isManager: false,
+                onUpdated: onUpd,
+                onJumpSection: (sec) => {
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}`;
+                }
+              }),
+              optCount: (ev) => `${ev.liveOps ? ev.liveOps.operationalStatus : 'Upcoming'} • ${ev.rounds.length} round${ev.rounds.length === 1 ? '' : 's'}`
+            },
+            results: {
+              kicker: 'Event-Isolated Evaluation & Results',
+              heading: 'Choose an event to score rounds, manage qualifications, and publish leaderboards',
+              mountFn: (el, sSlug, onUpd) => window.EventoraEvaluation?.mount(el, {
+                slug: sSlug,
+                onUpdated: onUpd,
+                onJumpSection: (sec, rndId) => {
+                  const rPart = rndId ? `&roundId=${encodeURIComponent(rndId)}` : '';
+                  window.location.href = `manage-event.html?slug=${encodeURIComponent(sSlug)}&section=${encodeURIComponent(sec)}${rPart}`;
+                }
+              }),
+              optCount: (ev) => `${ev.evaluationState && ev.evaluationState.overallConfig && ev.evaluationState.overallConfig.published ? 'Published' : 'Draft Results'} • ${ev.rounds.length} round${ev.rounds.length === 1 ? '' : 's'}`
+            }
+          }[activeSection];
+
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card" style="margin-bottom:1.25rem;padding:1.1rem 1.35rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                <div style="min-width:0;">
+                  <div style="font-size:0.74rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ev-primary);">${secMeta.kicker}</div>
+                  <div style="font-family:var(--ev-font-display);font-size:1.1rem;font-weight:600;color:var(--ev-charcoal);">${secMeta.heading}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;flex:1;justify-content:flex-end;min-width:0;width:100%;">
+                  <select class="ev-select" id="evOrgEventToolSelect" aria-label="Select event" style="width:min(100%, 360px);max-width:100%;min-width:0;">
+                    ${allEvents.map((item) => `
+                      <option value="${esc(item.slug)}" ${item.slug === selectedRoundEventSlug ? 'selected' : ''}>
+                        ${esc(item.name)} (${secMeta.optCount(item)})
+                      </option>
+                    `).join('')}
+                  </select>
+                  <a href="manage-event.html?slug=${encodeURIComponent(selectedRoundEventSlug)}&section=${encodeURIComponent(activeSection)}" id="evOrgOpenManageSecBtn" class="ev-btn ev-btn-outline ev-btn-sm">
+                    Open in Manage Event &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div id="evOrgToolMount"></div>
+          `;
+
+          const toolSelect = document.getElementById('evOrgEventToolSelect');
+          const toolMount = document.getElementById('evOrgToolMount');
+          const manageLink = document.getElementById('evOrgOpenManageSecBtn');
+
+          function mountSelectedTool(targetSlug) {
+            if (!toolMount) return;
+            if (manageLink) {
+              manageLink.href = `manage-event.html?slug=${encodeURIComponent(targetSlug)}&section=${encodeURIComponent(activeSection)}`;
+            }
+            secMeta.mountFn(toolMount, targetSlug, (updatedEv) => {
+              if (toolSelect && updatedEv) {
+                const opt = toolSelect.querySelector(`option[value="${CSS.escape(updatedEv.slug)}"]`);
+                if (opt) opt.textContent = `${updatedEv.name} (${secMeta.optCount(updatedEv)})`;
+              }
+            });
+          }
+
+          if (toolSelect) {
+            toolSelect.addEventListener('change', () => {
+              selectedRoundEventSlug = toolSelect.value;
+              mountSelectedTool(selectedRoundEventSlug);
+            });
+          }
+          mountSelectedTool(selectedRoundEventSlug);
+        } else if (activeSection === 'collaborators') {
+          shellCtrl.bodyMount.innerHTML = renderEventChooserPlaceholder({
+            sectionKey: 'collaborators',
+            title: 'Event Collaborators',
+            subtitle: 'Assign UI-preview event owners, managers, evaluators, or volunteers scoped to each event.',
+            targetSection: 'collaborators',
+            iconName: 'collaborators',
+            note: 'Collaborator roles are managed per-event inside each event workspace.'
+          });
+        } else if (activeSection === 'settings') {
+          shellCtrl.bodyMount.innerHTML = `
+            <div class="ev-ws-card" style="margin-bottom:1.25rem;">
+              <div class="ev-ws-card-head">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.45rem;">
+                    <span class="ev-badge ev-badge-sample">Organizer Preferences</span>
+                    ${connPill}
+                  </div>
+                  <h2 class="ev-display" style="font-size:1.5rem;font-weight:600;">Workspace Settings &amp; Data Migration</h2>
+                  <p style="font-size:0.88rem;color:var(--ev-muted);">Manage your organizer profile, review database connectivity, or safely migrate local browser prototype drafts into Supabase PostgreSQL.</p>
+                </div>
+                <a href="profile.html" class="ev-btn ev-btn-forest ev-btn-sm">Edit Account Profile &rarr;</a>
+              </div>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button type="button" class="ev-btn ev-btn-forest ev-btn-sm" id="evSettingsOpenMigratorBtn">Migrate Local Prototype Data to PostgreSQL</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" id="evRestoreAllSamplesBtn">Restore Any Deleted Sample Events</button>
+                <button type="button" class="ev-btn ev-btn-outline ev-btn-sm" data-jump-section="my-events">Go to My Events</button>
+              </div>
+            </div>
+          `;
+        }
+
+        bindSectionInteractions();
+      }
+
+      function bindSectionInteractions() {
+        const openMigrator = () => {
+          if (window.EventoraMigrator && typeof window.EventoraMigrator.openMigrationModal === 'function') {
+            window.EventoraMigrator.openMigrationModal({
+              onComplete: async () => {
+                await runOrganizerHydration(EventoraAuth.getSession(), true);
+              }
+            });
+          } else {
+            EventoraUI.showToast('Migration module unavailable.');
+          }
+        };
+        document.getElementById('evOrgOpenMigratorBtn')?.addEventListener('click', openMigrator);
+        document.getElementById('evSettingsOpenMigratorBtn')?.addEventListener('click', openMigrator);
+
+        document.querySelectorAll('[data-jump-section]').forEach((btn) => {
+          btn.addEventListener('click', () => switchSection(btn.dataset.jumpSection));
+        });
+
+        const searchEl = document.getElementById('evMyEventsSearch');
+        const sortEl = document.getElementById('evMyEventsSort');
+        if (searchEl) {
+          searchEl.addEventListener('input', () => {
+            searchQuery = searchEl.value;
+            renderSectionContent(EventoraAuth.getSession());
+            const ref = document.getElementById('evMyEventsSearch');
+            if (ref) { ref.focus(); ref.setSelectionRange(ref.value.length, ref.value.length); }
+          });
+        }
+        if (sortEl) {
+          sortEl.addEventListener('change', () => {
+            sortBy = sortEl.value;
+            renderSectionContent(EventoraAuth.getSession());
+          });
+        }
+
+        document.querySelectorAll('[data-status-filter]').forEach((pill) => {
+          pill.addEventListener('click', () => {
+            filterStatus = pill.dataset.statusFilter;
+            renderSectionContent(EventoraAuth.getSession());
+          });
+        });
+
+        document.getElementById('evMyEventsResetBtn')?.addEventListener('click', () => {
+          filterStatus = 'all';
+          searchQuery = '';
+          renderSectionContent(EventoraAuth.getSession());
+        });
+
+        const restoreAction = () => {
+          EventoraStore.restoreSampleEvents();
+          EventoraUI.showToast('Sample workspace events restored.');
+          renderSectionContent(EventoraAuth.getSession());
+        };
+        document.getElementById('evRestoreSamplesBtn')?.addEventListener('click', restoreAction);
+        document.getElementById('evRestoreAllSamplesBtn')?.addEventListener('click', restoreAction);
+
+        document.querySelectorAll('[data-ev-dup]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const copy = EventoraStore.duplicateEvent(btn.dataset.evDup);
+            if (copy) {
+              EventoraUI.showToast(`Duplicated as draft "${copy.name}".`);
+              renderSectionContent(EventoraAuth.getSession());
+            }
+          });
+        });
+
+        document.querySelectorAll('[data-ev-del]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const slug = btn.dataset.evDel;
+            const target = EventoraStore.getEventBySlug(slug);
+            EventoraWorkspace.openConfirm({
+              title: 'Delete Event Draft',
+              body: `Remove "${target ? target.name : slug}" from your local Eventora workspace? This action cannot be undone in this session.`,
+              confirmLabel: 'Delete Event',
+              danger: true,
+              onConfirm: () => {
+                EventoraStore.deleteEvent(slug);
+                EventoraUI.showToast('Event removed from local workspace.');
+                renderSectionContent(EventoraAuth.getSession());
+              }
+            });
+          });
+        });
+      }
+
+      function switchSection(sectionId) {
+        if (!validSections.has(sectionId)) return;
+        window.EventoraLiveControl?.stopActiveTicker?.();
+        activeSection = sectionId;
+        try {
+          const slugPart = (activeSection === 'participants' || activeSection === 'teams' || activeSection === 'rounds' || activeSection === 'content' || activeSection === 'live' || activeSection === 'results') && selectedRoundEventSlug
+            ? `&slug=${encodeURIComponent(selectedRoundEventSlug)}`
+            : '';
+          window.history.replaceState({}, document.title, `organizer-dashboard.html?section=${encodeURIComponent(sectionId)}${slugPart}`);
+        } catch (_) {}
+        if (shellCtrl) shellCtrl.setActiveNav(activeSection, SECTION_TITLES[activeSection] || 'Organizer Dashboard');
+        renderSectionContent(EventoraAuth.getSession());
+      }
+
+      function mountPage() {
+        const access = EventoraAccess.evaluatePageAccess({
+          requiredRoles: ['organizer'],
+          rootEl,
+          pageName: 'Organizer Dashboard'
+        });
+        if (!access.allowed) return;
+
+        shellCtrl = EventoraWorkspace.renderWorkspaceShell({
+          rootEl,
+          user: access.user,
+          navGroups: NAV_GROUPS,
+          activeSection,
+          topTitle: SECTION_TITLES[activeSection] || 'Organizer Dashboard',
+          onSelectSection: switchSection,
+          onSearchSubmit: (q) => {
+            searchQuery = q;
+            switchSection('my-events');
+          },
+          onLogout: async () => {
+            if (window.EventoraRealtime) await window.EventoraRealtime.unsubscribeAll();
+            await EventoraAuth.signOut();
+            window.location.href = 'login.html';
+          }
+        });
+        renderSectionContent(access.user);
+        runOrganizerHydration(access.user, false);
+      }
+
+      window.addEventListener('eventora:authchange', mountPage);
+      mountPage();
+      EventoraAuth.ready().then(mountPage);
+    })();
+  </script>
+</body>
+</html>
